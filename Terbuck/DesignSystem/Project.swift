@@ -1,18 +1,21 @@
 import ProjectDescription
 
 let project = Project(
-    name: "Shared",
+    name: "DesignSystem",
     targets: [
         .target(
-            name: "Shared",
+            name: "DesignSystem",
             destinations: .iOS,
             product: .staticFramework,
-            bundleId: "com.Fouryears.Shared",
+            bundleId: "com.Fouryears.Resource",
             deploymentTargets: .iOS("17.0"),
             infoPlist: .default,
             sources: ["Sources/**"],
             resources: [],
-            dependencies: []
+            dependencies: [
+                .project(target: "Resource", path: "../Resource"),
+                .project(target: "Shared", path: "../Shared")
+            ]
         )
     ]
 )

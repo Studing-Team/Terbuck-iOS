@@ -12,7 +12,6 @@ import PackageDescription
             "KakaoSDKCommon": .framework,
             "KakaoSDKAuth": .framework,
             "KakaoSDKUser": .framework,
-            "FirebaseMessaging": .framework
         ]
     )
 #endif
@@ -26,7 +25,6 @@ let package = Package(
         
         .package(url: "https://github.com/SnapKit/SnapKit.git", from: "5.7.1"),
         .package(url: "https://github.com/devxoul/Then.git", from: "3.0.0"),
-        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.10.2"),
         .package(url: "https://github.com/navermaps/SPM-NMapsMap", from: "3.12.0"),
         .package(url: "https://github.com/kakao/kakao-ios-sdk", from: "2.24.0"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "10.21.0")
