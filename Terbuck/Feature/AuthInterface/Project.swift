@@ -1,19 +1,18 @@
 import ProjectDescription
 
 let project = Project(
-    name: "Login",
+    name: "AuthInterface",
     targets: [
         .target(
-            name: "Login",
+            name: "AuthInterface",
             destinations: .iOS,
-            product: .framework,
-            bundleId: "com.Fouryears.login",
+            product: .staticFramework,
+            bundleId: "com.Fouryears.Terbuck",
             deploymentTargets: .iOS("17.0"),
             infoPlist: .default,
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
-                .project(target: "Resource", path: "../../Resource"),
                 .project(target: "Shared", path: "../../Shared")
             ]
         )
