@@ -1,5 +1,5 @@
 //
-//  AppCoordinatorImpl.swift
+//  AppCoordinator.swift
 //  Terbuck
 //
 //  Created by ParkJunHyuk on 4/15/25.
@@ -7,15 +7,22 @@
 //
 
 import UIKit
-import AuthFeature
+
+import AuthInterface
 import Shared
 
 final class AppCoordinator: Coordinator {
     var childCoordinators: [any Shared.Coordinator] = []
-    var navigationController: UINavigationController
     
-    init(navigationController: UINavigationController) {
+    private var navigationController: UINavigationController
+    private let authFactory: AuthFactory
+    
+    init(
+        navigationController: UINavigationController,
+        authFactory: AuthFactory
+    ) {
         self.navigationController = navigationController
+        self.authFactory = authFactory
     }
     
     func start() {
@@ -23,7 +30,8 @@ final class AppCoordinator: Coordinator {
     }
     
     func showLoginFlow() {
-        let authCoordinator = AuthCoordinatorImpl(navigationController: navigationController)
+        let authCoordinator = authFactory.makeAuthCoordinator(navigationController: navigationController)
+        
         childCoordinators.append(authCoordinator)
         authCoordinator.start()
     }
