@@ -16,7 +16,8 @@ public final class LoginViewController: UIViewController {
     
     // MARK: - Properties
     
-    
+    private var viewModel: LoginViewModel
+    weak var coordinator: AuthCoordinator?
     
     // MARK: - UI Properties
     
@@ -24,6 +25,21 @@ public final class LoginViewController: UIViewController {
     private let terbuckLogoLabel = TerbuckLogoLabel(type: .max)
     private let appleLoginButton = SocialLoginButton(type: .apple)
     private let kakaoLoginButton = SocialLoginButton(type: .kakao)
+    
+    // MARK: - Init
+    
+    init(
+        viewModel: LoginViewModel,
+        coordinator: AuthCoordinator
+    ) {
+        self.viewModel = viewModel
+        self.coordinator = coordinator
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Life Cycle
     
@@ -83,13 +99,13 @@ private extension LoginViewController {
     }
 }
 
-// MARK: - Show Preview
-
-#if canImport(SwiftUI) && DEBUG
-import SwiftUI
-
-#Preview("LoginViewController") {
-    LoginViewController()
-        .showPreview()
-}
-#endif
+//// MARK: - Show Preview
+//
+//#if canImport(SwiftUI) && DEBUG
+//import SwiftUI
+//
+//#Preview("LoginViewController") {
+//    LoginViewController()
+//        .showPreview()
+//}
+//#endif

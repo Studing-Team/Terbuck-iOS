@@ -7,7 +7,8 @@
 //
 
 import UIKit
-import Login
+
+import AuthInterface
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -21,7 +22,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         let navigationController = UINavigationController()
-        appCoordinator = AppCoordinator(navigationController: navigationController)
+        let authFactory = AppDIContainer().makeAuthFactory()
+        
+        appCoordinator = AppCoordinator(navigationController: navigationController, authFactory: authFactory)
         
         self.window = UIWindow(windowScene: windowScene)
         self.window?.overrideUserInterfaceStyle = .light
