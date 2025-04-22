@@ -37,6 +37,8 @@ let project = Project(
                 .project(target: "DesignSystem", path: "DesignSystem"),
                 .project(target: "AuthFeature", path: "Feature/AuthFeature"),
                 .project(target: "AuthInterface", path: "Feature/AuthInterface"),
+                .project(target: "MypageFeature", path: "Feature/MypageFeature"),
+                .project(target: "MypageInterface", path: "Feature/MypageInterface"),
             ]
         ),
         .target(
