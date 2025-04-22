@@ -47,7 +47,7 @@ public final class TermsListView: UIView {
     private let titleLabel = UILabel()
     private let subTitleLabel = UILabel()
     private let checkButton = AuthCheckButton()
-    private let arrowImageView = UIImageView()
+    private let arrowImageView = ChevronImageView(type: .size20, tintColor: .terbuckBlack30)
     
     // MARK: - Init
     
@@ -74,11 +74,6 @@ private extension TermsListView {
             $0.text = type.title
             $0.font = .textRegular14
             $0.textColor = .terbuckBlack50
-        }
-        
-        arrowImageView.do {
-            $0.image = UIImage(systemName: "chevron.right")
-            $0.tintColor = .terbuckBlack30
         }
     }
     
