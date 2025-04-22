@@ -24,4 +24,8 @@ public extension UIImage {
     static var selectedCheck: UIImage {
         return ResourceAsset.Image.selectedCheck.image
     }
+    
+    static var writeIcon: UIImage {
+        return ResourceAsset.Image.writeIcon.image
+    }
 }
