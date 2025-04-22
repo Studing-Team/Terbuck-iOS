@@ -9,6 +9,7 @@
 import UIKit
 
 import AuthInterface
+import MypageFeature
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -23,8 +24,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let navigationController = UINavigationController()
         let authFactory = AppDIContainer().makeAuthFactory()
+        let mypageFactory = AppDIContainer().makeMypageFactory()
         
-        appCoordinator = AppCoordinator(navigationController: navigationController, authFactory: authFactory)
+        appCoordinator = AppCoordinator(
+            navigationController: navigationController,
+            authFactory: authFactory,
+            mypageTabFactory: mypageFactory
+        )
         
         self.window = UIWindow(windowScene: windowScene)
         self.window?.overrideUserInterfaceStyle = .light
