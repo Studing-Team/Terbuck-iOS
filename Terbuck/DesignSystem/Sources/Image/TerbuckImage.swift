@@ -28,4 +28,20 @@ public extension UIImage {
     static var writeIcon: UIImage {
         return ResourceAsset.Image.writeIcon.image
     }
+    
+    static var notAuthIdCard: UIImage {
+        return ResourceAsset.Image.notAuthIdCard.image
+    }
+    
+    static var authIdCard: UIImage {
+        return ResourceAsset.Image.authIdCard.image
+    }
+    
+    static var benefitBackground: UIImage {
+        return ResourceAsset.Image.benefitList.image
+    }
+    
+    static var checked: UIImage {
+        return ResourceAsset.Image.checked.image
+    }
 }

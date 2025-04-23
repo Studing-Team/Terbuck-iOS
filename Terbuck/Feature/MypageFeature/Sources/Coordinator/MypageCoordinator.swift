@@ -29,6 +29,8 @@ public class MypageCoordinator: MypageCoordinating {
         self.alarmFactory = alarmFactory
     }
     
+    // MARK: - Method
+    
     public func start() {
         startMypage()
     }

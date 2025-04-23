@@ -17,6 +17,7 @@ public enum TerbuckButtonType {
     case cancel
     case draw
     case save
+    case close
     
     var title: String {
         switch self {
@@ -27,6 +28,7 @@ public enum TerbuckButtonType {
         case .cancel: return "취소"
         case .draw: return "탈퇴할게요"
         case .save: return "저장하기"
+        case .close: return "닫기"
         }
     }
     
@@ -50,7 +52,7 @@ public enum TerbuckButtonType {
     
     var backgroundColor: UIColor {
         switch self {
-        case .cancel:
+        case .cancel, .close:
             return .terbuckBlack5
         default:
             return .terbuckGreen50

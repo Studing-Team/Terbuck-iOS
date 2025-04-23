@@ -24,11 +24,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let navigationController = UINavigationController()
         let authFactory = AppDIContainer().makeAuthFactory()
+        let homeFactory = AppDIContainer().makeHomeFactory()
         let mypageFactory = AppDIContainer().makeMypageFactory()
         
         appCoordinator = AppCoordinator(
             navigationController: navigationController,
             authFactory: authFactory,
+            homeTabFactory: homeFactory,
             mypageTabFactory: mypageFactory
         )
         
