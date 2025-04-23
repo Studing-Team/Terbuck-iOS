@@ -28,4 +28,15 @@ public extension UIViewController {
         customAlertViewController.modalPresentationStyle = .overFullScreen
         present(customAlertViewController, animated: false)
     }
+    
+    func showStoreBenefitAlert(storeName: String, address: String, benefitData: [String]) {
+        let customStoreBenefitAlertViewController = CustomBenefitAlertViewController(
+            name: storeName,
+            address: address,
+            benefitData: benefitData
+        )
+
+        customStoreBenefitAlertViewController.modalPresentationStyle = .overFullScreen
+        present(customStoreBenefitAlertViewController, animated: false)
+    }
 }
