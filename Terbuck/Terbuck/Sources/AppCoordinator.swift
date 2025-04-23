@@ -9,6 +9,7 @@
 import UIKit
 
 import AuthInterface
+import HomeInterface
 import MypageInterface
 import Shared
 
@@ -17,20 +18,24 @@ final class AppCoordinator: Coordinator {
     
     private var navigationController: UINavigationController
     private let authFactory: AuthFactory
+    private let homeTabFactory: HomeTabFactory
     private let mypageTabFactory: MypageTabFactory
     
     init(
         navigationController: UINavigationController,
         authFactory: AuthFactory,
+        homeTabFactory: HomeTabFactory,
         mypageTabFactory: MypageTabFactory
     ) {
         self.navigationController = navigationController
         self.authFactory = authFactory
+        self.homeTabFactory = homeTabFactory
         self.mypageTabFactory = mypageTabFactory
     }
     
     func start() {
-        showLoginFlow()
+//        showLoginFlow()
+        showMainFlow()
     }
     
     func showLoginFlow() {
@@ -56,6 +61,7 @@ final class AppCoordinator: Coordinator {
         // 2. 새로운 NavigationController (or 각 탭의 Nav 구성)
         let mainCoordinator = MainCoordinator(
             tabBarController: tabBarController,
+            homeTabFactory: homeTabFactory,
             mypageTabFactory: mypageTabFactory
         )
 

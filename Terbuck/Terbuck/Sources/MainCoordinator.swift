@@ -8,6 +8,7 @@
 
 import UIKit
 
+import HomeInterface
 import MypageInterface
 import Shared
 
@@ -15,26 +16,34 @@ final class MainCoordinator: Coordinator {
     var childCoordinators: [any Shared.Coordinator] = []
     
     private var tabBarController: UITabBarController
+    private let homeTabFactory: HomeTabFactory
     private let mypageTabFactory: MypageTabFactory
     
     init(
         tabBarController: UITabBarController,
+        homeTabFactory: HomeTabFactory,
         mypageTabFactory: MypageTabFactory
     ) {
         self.tabBarController = tabBarController
+        self.homeTabFactory = homeTabFactory
         self.mypageTabFactory = mypageTabFactory
     }
     
     func start() {
+        let homeNav = UINavigationController()
         let myPageNav = UINavigationController()
         
+        homeNav.setNavigationBarHidden(true, animated: false)
         myPageNav.setNavigationBarHidden(true, animated: false)
         
+        let homeCoordinator = homeTabFactory.makeHomeCoordinator(navigationController: homeNav)
         let mypageCoordinator = mypageTabFactory.makeMypageCoordinator(navigationController: myPageNav)
         
+        childCoordinators.append(homeCoordinator)
         childCoordinators.append(mypageCoordinator)
         
+        homeCoordinator.start()
         mypageCoordinator.start()
-        tabBarController.viewControllers = [myPageNav]
+        tabBarController.viewControllers = [homeNav, myPageNav]
     }
 }
