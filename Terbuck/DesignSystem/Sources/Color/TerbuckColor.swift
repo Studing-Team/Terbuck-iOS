@@ -22,4 +22,5 @@ public extension UIColor {
     static let terbuckWhite3 = UIColor(asset: ResourceAsset.Color.terbuckWhite3)!
     static let terbuckWhite5 = UIColor(asset: ResourceAsset.Color.terbuckWhite5)!
     static let terbuckAlertBackground = UIColor(asset: ResourceAsset.Color.terbuckAlertBack)!
+    static let terbuckToastBackground = UIColor(asset: ResourceAsset.Color.terbuckToast)!
 }
