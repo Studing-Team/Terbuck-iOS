@@ -18,6 +18,7 @@ public final class CustomBenefitAlertViewController: UIViewController {
     
     private let name: String
     private let address: String
+    private let category: CategoryType
     private let benefitData: [String]
     
     // MARK: - UI Properties
@@ -32,10 +33,12 @@ public final class CustomBenefitAlertViewController: UIViewController {
     public init(
         name: String,
         address: String,
+        category: CategoryType,
         benefitData: [String]
     ) {
         self.name = name
         self.address = address
+        self.category = category
         self.benefitData = benefitData
         super.init(nibName: nil, bundle: nil)
     }
@@ -121,7 +124,7 @@ private extension CustomBenefitAlertViewController {
             moreBeneiftStackView.addArrangedSubview(benefitStackView)
         }
         
-        storeInfoTitleView.configureData(name: self.name, address: self.address)
+        storeInfoTitleView.configureData(name: self.name, address: self.address, category: self.category)
     }
     
     func createBenefitList(benefits: String) -> UIStackView {
@@ -162,6 +165,7 @@ import SwiftUI
 #Preview("CustomBenefitAlertViewController") {
     CustomBenefitAlertViewController(name: "터벅터벅 공릉점",
                                      address: "서울 노원구 동일로190길 49 지층",
+                                     category: .restaurant,
                                      benefitData: ["18시 이전 방문 고객 소주 1병 제공", "25,000원 이상 주문 시, 빙수 또는 감자튀김 제공", "메이게츠에서의 영수증(결제일로부터 최대 3일) 보여줄 시 꼬치네에서 소주 1병 제공", "소주 볼링핀(10병) 인스타그램 스토리 총학과 꼬치네 계정 태그와 함께 업로드 시 치즈스틱 제공"])
         .showPreview()
 }

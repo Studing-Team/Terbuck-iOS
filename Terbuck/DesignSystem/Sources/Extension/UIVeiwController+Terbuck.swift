@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Shared
 
 public extension UIViewController {
     func showConfirmCancelAlert(
@@ -29,10 +30,11 @@ public extension UIViewController {
         present(customAlertViewController, animated: false)
     }
     
-    func showStoreBenefitAlert(storeName: String, address: String, benefitData: [String]) {
+    func showStoreBenefitAlert(storeName: String, address: String, category: CategoryType, benefitData: [String]) {
         let customStoreBenefitAlertViewController = CustomBenefitAlertViewController(
             name: storeName,
             address: address,
+            category: category,
             benefitData: benefitData
         )
 

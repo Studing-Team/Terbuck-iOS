@@ -134,12 +134,12 @@ private extension MypageViewController {
     
     func setupLayout() {
         titleLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(25)
-            $0.horizontalEdges.equalToSuperview().offset(25)
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(20)
+            $0.horizontalEdges.equalToSuperview().inset(25)
         }
         
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(25)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(15)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(10)
         }
@@ -160,9 +160,10 @@ private extension MypageViewController {
 
 private extension MypageViewController {
     func setupCollectionView() {
+        collectionView.isScrollEnabled = false
+        
         // Cell 등록
         collectionView.register(MyInfoCollectionViewCell.self, forCellWithReuseIdentifier: MyInfoCollectionViewCell.className)
-        
         collectionView.register(MypageCollectionViewCell.self, forCellWithReuseIdentifier: MypageCollectionViewCell.className)
     }
     
@@ -211,7 +212,7 @@ private extension MypageViewController {
         let section = NSCollectionLayoutSection(group: group)
         
         // 섹션에 패딩 추가
-        section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 20, bottom: 18, trailing: 20)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 20, bottom: 12, trailing: 20)
 
         // 스크롤 비활성화 (단일 셀이므로)
         section.orthogonalScrollingBehavior = .none
@@ -227,20 +228,21 @@ private extension MypageViewController {
         )
         
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-
+        
         // Group 정의
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .estimated(height)
         )
         
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+        
         // Section 정의
         let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = 30
         
         // 섹션에 패딩 추가
-        section.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 25, leading: 20, bottom: 25, trailing: 20)
         
         // 배경 추가
         let backgroundDecoration = NSCollectionLayoutDecorationItem.background(

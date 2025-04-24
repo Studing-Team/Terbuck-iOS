@@ -12,6 +12,7 @@ import AuthInterface
 import HomeInterface
 import MypageInterface
 import Shared
+import DesignSystem
 
 final class AppCoordinator: Coordinator {
     var childCoordinators: [any Shared.Coordinator] = []
@@ -51,7 +52,7 @@ final class AppCoordinator: Coordinator {
         navigationController.viewControllers.removeAll()
         
         // 2. TabBarController 생성
-        let tabBarController = UITabBarController()
+        let tabBarController = CustomTabBarController()
         
         // 3. 현재 window의 rootViewController를 TabBarController로 변경
         if let window = UIApplication.shared.windows.first {
