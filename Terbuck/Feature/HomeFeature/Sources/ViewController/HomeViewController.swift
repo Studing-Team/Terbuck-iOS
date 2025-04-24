@@ -165,8 +165,7 @@ extension HomeViewController: UICollectionViewDataSource {
         cell.configureCell(forModel: data)
         
         cell.onMoreBenefitTapped { [weak self] in
-            print("혜택 눌림")
-            self?.showStoreBenefitAlert(storeName: data.storeName, address: data.address, benefitData: data.subBenefit ?? [])
+            self?.showStoreBenefitAlert(storeName: data.storeName, address: data.address, category: data.cateotry, benefitData: data.subBenefit ?? [])
         }
         
         return cell

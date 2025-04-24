@@ -37,9 +37,10 @@ public final class StoreInfoTitleView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func configureData(name: String, address: String) {
+    public func configureData(name: String, address: String, category: CategoryType) {
         storeNameLabel.text = name
         storeAddressLabel.text = address
+        setupStoreCategoryImage(category)
     }
 }
 
@@ -50,13 +51,14 @@ private extension StoreInfoTitleView {
         storeInfoStackView.do {
             $0.axis = .vertical
             $0.spacing = 6
+            $0.alignment = .leading
             $0.addArrangedSubviews(storeNameInfoStackView, storeAddressLabel)
         }
         
         storeNameInfoStackView.do {
             $0.axis = .horizontal
             $0.spacing = 4
-            $0.addArrangedSubviews(storeCategoryImage, storeNameLabel)
+            $0.addArrangedSubviews(storeNameLabel, storeCategoryImage)
         }
         
         storeNameLabel.do {
@@ -82,5 +84,28 @@ private extension StoreInfoTitleView {
         storeCategoryImage.snp.makeConstraints {
             $0.size.equalTo(24)
         }
+    }
+    
+    func setupStoreCategoryImage(_ type: CategoryType) {
+        let image: UIImage
+        
+        switch type {
+        case .bar:
+            image = .barColorIcon
+        case .cafe:
+            image = .cafeColorIcon
+        case .culture:
+            image = .cultureColorIcon
+        case .gym:
+            image = .gymColorIcon
+        case .hospital:
+            image = .hospitalColorIcon
+        case .restaurant:
+            image = .restaurantColorIcon
+        case .study:
+            image = .studyColorIcon
+        }
+        
+        storeCategoryImage.image = image
     }
 }

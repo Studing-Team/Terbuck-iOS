@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import Shared
 
-public struct NearStoreModel: Decodable {
+public struct NearStoreModel {
     var storeName: String
+    var cateotry: CategoryType
     var address: String
     var mainBenefit: String
     var subBenefit: [String]? = nil

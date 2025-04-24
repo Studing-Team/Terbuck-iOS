@@ -58,12 +58,12 @@ private extension MypageCollectionViewCell {
     
     func setupLayout() {
         titleLabel.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(20)
+            $0.verticalEdges.equalToSuperview()
             $0.leading.equalToSuperview().offset(20)
         }
         
         chevronImageView.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(21.5)
+            $0.verticalEdges.equalToSuperview()
             $0.trailing.equalToSuperview().inset(20)
         }
     }

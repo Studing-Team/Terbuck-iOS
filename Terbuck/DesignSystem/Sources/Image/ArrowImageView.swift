@@ -52,7 +52,8 @@ public final class ChevronImageView: UIImageView {
 
 private extension ChevronImageView {
     func setupStyle(_ color: UIColor) {
-        self.image = UIImage(systemName: "chevron.right")
+        let config = UIImage.SymbolConfiguration(pointSize: type == .size14 ? 14 : 20, weight: .regular)
+        self.image = UIImage(systemName: "chevron.right", withConfiguration: config)
         self.tintColor = color
         self.contentMode = .scaleAspectFit
         self.clipsToBounds = true
@@ -61,7 +62,6 @@ private extension ChevronImageView {
     func setupLayout() {
         self.snp.makeConstraints {
             $0.width.equalTo(type.size.width)
-            $0.height.equalTo(type.size.height)
         }
     }
 }
