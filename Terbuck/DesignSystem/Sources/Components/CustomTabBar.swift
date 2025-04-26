@@ -43,6 +43,18 @@ public final class CustomTabBar: UITabBar {
     public override func draw(_ rect: CGRect) {
         // 아무것도 그리지 않음 → 기본 라인 제거
     }
+    
+    public func updateSelectedIndex(to index: Int) {
+        selectedIndex = index
+        
+        buttons.forEach { button in
+            guard let type = TabBarType(rawValue: button.tag) else { return }
+            
+            let isSelected = button.tag == selectedIndex
+            button.configuration?.image = isSelected ? type.selectedImage : type.image
+            button.configuration?.baseForegroundColor = isSelected ? .terbuckDarkGray50 : .terbuckDarkGray10
+        }
+    }
 }
 
 // MARK: - Private Extensions
@@ -77,44 +89,33 @@ private extension CustomTabBar {
         }
     }
     
-    private func setupButtons() {
-        TabBarType.allCases.enumerated().forEach { index, type in
-            let button = makeTabButton(index: index, type: type, isSelected: index == 0)
-            button.addTarget(self, action: #selector(tabButtonTapped(_:)), for: .touchUpInside)
-            stackView.addArrangedSubview(button)
+    func setupButtons() {
+        TabBarType.allCases.forEach { type in
+            let button = makeTabButton(for: type)
             buttons.append(button)
+            stackView.addArrangedSubview(button)
         }
+        
+        // 초기 선택 상태 설정 (0번째 인덱스)
+        updateSelectedIndex(to: 0)
     }
     
-    private func makeTabButton(index: Int, type: TabBarType, isSelected: Bool) -> UIButton {
+    func makeTabButton(for type: TabBarType) -> UIButton {
         var config = UIButton.Configuration.plain()
-        config.image = isSelected ? type.selectedImage : type.image
-        config.baseForegroundColor = isSelected ? .terbuckDarkGray50 : .terbuckDarkGray10
         
+        config.image = type.image
         config.title = type.title
+        config.baseForegroundColor = .terbuckDarkGray10
+        config.imagePlacement = .top
+        config.imagePadding = 4
         config.attributedTitle = AttributedString(type.title, attributes: AttributeContainer([
             .font: UIFont.captionMedium12
         ]))
-        
-        config.imagePlacement = .top
-        config.imagePadding = 4
         config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0)
-
+        
         let button = UIButton(configuration: config)
-        button.tag = index
+        button.tag = type.rawValue
+
         return button
-    }
-    
-    @objc private func tabButtonTapped(_ sender: UIButton) {
-        let index = sender.tag
-        selectedIndex = index
-        
-        buttons.enumerated().forEach { i, btn in
-            let type = TabBarType.allCases[i]
-            btn.configuration?.image = i == index ? type.selectedImage : type.image
-            btn.configuration?.baseForegroundColor = i == index ? .terbuckDarkGray50 : .terbuckDarkGray10
-        }
-        
-        onTabSelected?(TabBarType.allCases[index])
     }
 }

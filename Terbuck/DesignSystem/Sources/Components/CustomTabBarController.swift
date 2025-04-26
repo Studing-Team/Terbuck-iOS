@@ -16,10 +16,9 @@ public final class CustomTabBarController: UITabBarController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        delegate = self
         
         setupStyle()
-        setupHierarchy()
-        setupLayout()
     }
 }
 
@@ -27,17 +26,13 @@ public final class CustomTabBarController: UITabBarController {
 
 private extension CustomTabBarController {
     func setupStyle() {
-        
+        setValue(customTabBarView, forKey: "tabBar")
     }
-    
-    func setupHierarchy() {
-        view.addSubview(customTabBarView)
-    }
-    
-    func setupLayout() {
-        customTabBarView.snp.makeConstraints {
-            $0.leading.trailing.bottom.equalToSuperview()
-            $0.height.equalTo(80)
-        }
+}
+
+// UITabBarControllerDelegate 구현
+extension CustomTabBarController: UITabBarControllerDelegate {
+    public func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        self.customTabBarView.updateSelectedIndex(to: selectedIndex)
     }
 }

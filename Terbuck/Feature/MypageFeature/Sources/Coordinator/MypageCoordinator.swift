@@ -42,6 +42,7 @@ public class MypageCoordinator: MypageCoordinating {
     
     public func startAlarmSetting() {
         let alarmSettingVC = alarmFactory.makeAlarmSettingViewController(coordinator: self)
+        alarmSettingVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(alarmSettingVC, animated: true)
     }
 }

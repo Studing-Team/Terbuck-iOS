@@ -21,9 +21,11 @@ final class HomeViewController: UIViewController {
     
     private let homeViewModel: HomeViewModel
     weak var coordinator: HomeCoordinator?
+    private var holeLocation: CGRect?
     
     // MARK: - Combine Properties
     
+    private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -54,13 +56,23 @@ final class HomeViewController: UIViewController {
         super.viewDidLoad()
         
         self.view.backgroundColor = .terbuckWhite3
+        navigationItem.backButtonTitle = ""
         
-        setupStyle()
+        viewLifeCycleSubject.send(.viewDidLoad)
+        
+        setupStyle(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
         setupHierarchy()
         setupLayout()
         setupDelegate()
         bindViewModel()
         setupCollectionView()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // 버튼의 frame을 전체 화면 기준으로 변환 (ex. window 좌표계 기준)
+        holeLocation = studentIDCardButton.convert(studentIDCardButton.bounds, to: view)
     }
 }
 
@@ -68,7 +80,26 @@ final class HomeViewController: UIViewController {
 
 private extension HomeViewController {
     func bindViewModel() {
-        let output = homeViewModel.transform(input: HomeViewModel.Input())
+        let input = HomeViewModel.Input(
+            viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher(),
+            studentIDCardButtonTap: studentIDCardButton.tapPublisher.eraseToAnyPublisher()
+        )
+        
+        let output = homeViewModel.transform(input: input)
+        
+        output.studentIDCardButtonResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] authResult in
+                self?.setupStyle(authResult)
+                
+                if authResult == true {
+                    self?.coordinator?.showAuthStudentID()
+                } else {
+                    guard let holeLocation = self?.holeLocation else { return }
+                    self?.coordinator?.showOnboardiing(location: holeLocation)
+                }
+            }
+            .store(in: &cancellables)
         
         output.filterResult
             .receive(on: DispatchQueue.main)
@@ -90,9 +121,9 @@ private extension HomeViewController {
 // MARK: - Private Extensions
 
 private extension HomeViewController {
-    func setupStyle() {
+    func setupStyle(_ isAuth: Bool) {
         studentIDCardButton.do {
-            $0.setImage(.authIdCard, for: .normal)
+            $0.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
             $0.adjustsImageWhenHighlighted = false
         }
     }

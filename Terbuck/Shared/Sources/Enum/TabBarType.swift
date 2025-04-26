@@ -8,10 +8,10 @@
 import UIKit
 import Resource
 
-public enum TabBarType: CaseIterable {
-    case home
-    case store
-    case mypage
+public enum TabBarType: Int, CaseIterable {
+    case home = 0
+    case store = 1
+    case mypage = 2
     
     public var title: String {
         switch self {

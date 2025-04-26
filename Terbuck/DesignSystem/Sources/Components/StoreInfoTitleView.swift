@@ -62,7 +62,7 @@ private extension StoreInfoTitleView {
         }
         
         storeNameLabel.do {
-            $0.font = .titleSemi20
+            $0.font = .textSemi18
             $0.textColor = .terbuckBlack50
         }
         

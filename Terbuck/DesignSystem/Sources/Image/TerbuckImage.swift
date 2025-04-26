@@ -44,6 +44,14 @@ public extension UIImage {
     static var checked: UIImage {
         return ResourceAsset.Image.checked.image
     }
+    
+    static var onboardingArrow: UIImage {
+        return ResourceAsset.Image.onboardingArrow.image
+    }
+    
+    static var person: UIImage {
+        return ResourceAsset.Image.person.image
+    }
 }
 
 // MARK: - TabBar Image

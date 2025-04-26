@@ -8,6 +8,7 @@
 import UIKit
 
 import SnapKit
+import Then
 
 public enum TerbuckButtonType {
     case next
@@ -70,7 +71,7 @@ public enum TerbuckButtonType {
     
     func resolvedBackgroundColor(isEnabled: Bool) -> UIColor {
         switch self {
-        case .enter:
+        case .enter, .register:
             return isEnabled ? .terbuckGreen50 : .terbuckGreen10
         default:
             return backgroundColor
@@ -80,40 +81,41 @@ public enum TerbuckButtonType {
 
 public final class TerbuckBottomButton: AnimatedButton {
     
-    // MARK: - Enum Properties
+    // MARK: - Properties
     
-    // MARK: - Init
+    private var type: TerbuckButtonType
 
+    // MARK: - Init
+    
     public init(type: TerbuckButtonType, isEnabled: Bool = true) {
+        self.type = type
         super.init(frame: .zero)
-        setupButton(type: type, isEnabled: isEnabled)
+        
+        self.isEnabled = isEnabled
+        setupButton(type: type)
     }
     
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    public func setEnabled(_ enabled: Bool) {
-        self.isEnabled = enabled
-        updateColor()
     }
 }
 
 // MARK: - Private Extensions
 
 private extension TerbuckBottomButton {
-    func setupButton(type: TerbuckButtonType, isEnabled: Bool) {
+    func setupButton(type: TerbuckButtonType) {
         var config = UIButton.Configuration.filled()
         
         let titleString = AttributedString(type.title, attributes: .init(
-            [.font: type.font]
+            [.font: type.font,
+             .foregroundColor: UIColor.white
+            ]
         ))
         config.attributedTitle = titleString
         
-        // ✅ 상태 상관없이 항상 같은 색 유지
-        config.background.backgroundColorTransformer = UIConfigurationColorTransformer { _ in
-            return type.resolvedBackgroundColor(isEnabled: isEnabled)
-        }
+        self.tintColor = type.backgroundColor
+
+        config.baseBackgroundColor = self.isEnabled == true ? type.backgroundColor : type.resolvedBackgroundColor(isEnabled: false)
         
         config.baseForegroundColor = .white
         configuration = config
@@ -129,6 +131,7 @@ private extension TerbuckBottomButton {
     func updateColor() {
         guard var config = configuration else { return }
         config.baseBackgroundColor = isEnabled ? .terbuckGreen50 : .terbuckGreen10
+        config.baseForegroundColor = .white
         configuration = config
     }
 }
