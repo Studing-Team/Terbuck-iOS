@@ -29,6 +29,10 @@ public extension UIFont {
         return UIFont(font: ResourceFontFamily.Pretendard.bold, size: 24)!
     }
     
+    static var titleSemi26: UIFont {
+        return UIFont(font: ResourceFontFamily.Pretendard.semiBold, size: 26)!
+    }
+    
     static var titleSemi20: UIFont {
         return UIFont(font: ResourceFontFamily.Pretendard.semiBold, size: 20)!
     }
@@ -43,6 +47,10 @@ public extension UIFont {
     
     static var textSemi16: UIFont {
         return UIFont(font: ResourceFontFamily.Pretendard.semiBold, size: 16)!
+    }
+    
+    static var textRegular20: UIFont {
+        return UIFont(font: ResourceFontFamily.Pretendard.regular, size: 20)!
     }
     
     static var textRegular16: UIFont {
