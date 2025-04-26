@@ -68,4 +68,13 @@ public enum ToastType {
     var fontColor: UIColor {
         return .terbuckWhite
     }
+    
+    var padding: CGFloat {
+        switch self {
+        case .noticeStudentCard, .alarmStudentCard:
+            return 68
+        default:
+            return 16
+        }
+    }
 }

@@ -64,11 +64,6 @@ public final class MypageViewController: UIViewController {
         setupCollectionView()
         bindViewModel()
     }
-    
-    public override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false)
-    }
 }
 
 // MARK: - Private Bind Extensions

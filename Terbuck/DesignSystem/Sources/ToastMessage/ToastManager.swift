@@ -29,7 +29,7 @@ public final class ToastManager {
         toastView.snp.makeConstraints {
             $0.height.equalTo(52)
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(viewController.view.safeAreaLayoutGuide).inset(16)
+            $0.bottom.equalTo(viewController.view.safeAreaLayoutGuide).inset(type.padding)
             $0.horizontalEdges.equalToSuperview().inset(20)
         }
         
