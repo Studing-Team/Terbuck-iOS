@@ -5,6 +5,7 @@
 //  Created by ParkJunHyuk on 4/22/25.
 //
 
+import Foundation
 import Combine
 
 import Shared
@@ -13,6 +14,7 @@ public final class HomeViewModel {
     
     // MARK: - Combine Publishers Properties
     
+    private(set) var isAuthStudentSubject = CurrentValueSubject<Bool, Never>(false)
     private(set) var selectedFilterSubject = CurrentValueSubject<StoreFilterType, Never>(.restaurent)
     public let storeDataSubject = CurrentValueSubject<[NearStoreModel], Never>([])
     
@@ -21,18 +23,36 @@ public final class HomeViewModel {
     // MARK: - Input
     
     struct Input {
-//        let viewLifeCycleEventAction: AnyPublisher<ViewLifeCycleEvent, Never>
+        let viewLifeCycleEventAction: AnyPublisher<ViewLifeCycleEvent, Never>
+        let studentIDCardButtonTap: AnyPublisher<Void, Never>
     }
     
     // MARK: - Output
     
     struct Output {
+        let studentIDCardButtonResult: AnyPublisher<Bool, Never>
         let filterResult: AnyPublisher<[NearStoreModel], Never>
     }
     
     // MARK: - Public methods
     
     func transform(input: Input) -> Output {
+        
+        input.viewLifeCycleEventAction
+            .sink { [weak self] _ in
+                self?.isAuthStudentSubject.send(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
+            }
+            .store(in: &cancellables)
+        
+        let studentIDCardButtonResult = input.studentIDCardButtonTap
+            .map { [weak self] _ -> Bool in
+                guard let self else { return false }
+
+                // 여기서 로직 처리 예: 인증 여부 확인, 조건 분기 등
+               
+                return false
+            }
+            .eraseToAnyPublisher()
         
         selectedFilterSubject
             .flatMap { [weak self] filter in
@@ -56,6 +76,7 @@ public final class HomeViewModel {
             .store(in: &cancellables)
         
         return Output(
+            studentIDCardButtonResult: studentIDCardButtonResult,
             filterResult: storeDataSubject.eraseToAnyPublisher()
         )
     }

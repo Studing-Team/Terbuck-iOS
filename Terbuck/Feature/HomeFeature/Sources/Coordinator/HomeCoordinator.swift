@@ -8,6 +8,7 @@
 import UIKit
 
 import HomeInterface
+import DesignSystem
 import Shared
 
 public class HomeCoordinator: HomeCoordinating {
@@ -35,5 +36,41 @@ public class HomeCoordinator: HomeCoordinating {
     public func startHome() {
         let homeVC = homeFactory.makeHomeViewController(coordinator: self)
         navigationController.pushViewController(homeVC, animated: true)
+    }
+}
+
+extension HomeCoordinator: StudentIDCardFlowDelegate {
+    public func showOnboardiing(location: CGRect) {
+        let studentIdCardVC = StudentIDCardViewController(
+            authType: .onboarding,
+            location: location,
+            coordinator: self
+        )
+        studentIdCardVC.modalPresentationStyle = .overFullScreen
+        navigationController.present(studentIdCardVC, animated: false)
+    }
+    
+    public func showAuthStudentID() {
+        let studentIdCardVC = StudentIDCardViewController(
+            authType: .auth,
+            coordinator: self
+        )
+        
+        studentIdCardVC.modalPresentationStyle = .overFullScreen
+        navigationController.present(studentIdCardVC, animated: false)
+    }
+    
+    public func dismissAuthStudentID() {
+        navigationController.dismiss(animated: false) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                self.registerStudentID()
+            }
+        }
+    }
+    
+    public func registerStudentID() {
+        let registerStudentIDCardVC = RegisterStudentCardViewController()
+        registerStudentIDCardVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(registerStudentIDCardVC, animated: true)
     }
 }
