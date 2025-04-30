@@ -8,7 +8,11 @@
 import Foundation
 import Shared
 
-public struct NearStoreModel {
+public struct NearStoreModel: Identifiable, Hashable {
+    public var id: String {
+        return "\(storeName)-\(address)"
+    }
+
     var storeName: String
     var cateotry: CategoryType
     var address: String

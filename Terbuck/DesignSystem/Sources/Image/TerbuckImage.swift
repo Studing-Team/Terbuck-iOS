@@ -52,6 +52,10 @@ public extension UIImage {
     static var person: UIImage {
         return ResourceAsset.Image.person.image
     }
+    
+    static var selectedPartnership: UIImage {
+        return ResourceAsset.Image.selectedPartnership.image
+    }
 }
 
 // MARK: - TabBar Image
