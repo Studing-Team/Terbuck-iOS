@@ -17,7 +17,7 @@ import UIKit
 ///   - setupHierarchy(): 뷰의 계층 구조를 설정하고 `insetView`를 추가합니다.
 ///   - setupStyle(): `insetView`의 스타일을 설정합니다.
 ///   - setupLayout(): `insetView`의 오토레이아웃을 설정합니다,
-final class SectionBackgroundView: UICollectionReusableView {
+public final class SectionBackgroundView: UICollectionReusableView {
 
     private let insetView = UIView()
     
