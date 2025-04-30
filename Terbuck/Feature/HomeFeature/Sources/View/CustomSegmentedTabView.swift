@@ -89,22 +89,56 @@ private extension SegmentedTabView {
         }
     }
     
-    private func configureButtons() {
-        buttons = []
-
+    func configureButtons() {
         StoreFilterType.allCases.enumerated().forEach { index, type in
-            let button = UIButton(type: .system)
-            button.setTitle(type.title, for: .normal)
-            button.setTitleColor(.terbuckBlack30, for: .normal)
-            button.titleLabel?.font = .textSemi14
+            let button = createButton(type: type)
             button.tag = index
             button.addTarget(self, action: #selector(segmentTapped(_:)), for: .touchUpInside)
+            
+            button.configurationUpdateHandler = { button in
+                
+                var updatedConfig = button.configuration
+                
+                // 선택 상태에 따라 다른 색상 적용
+                let textColor = button.isSelected ? UIColor.terbuckBlack30 : UIColor.terbuckBlack10
+                
+                updatedConfig?.attributedTitle = AttributedString(type.title, attributes: AttributeContainer([
+                    .font: UIFont.textSemi14,
+                    .foregroundColor: textColor
+                ]))
+                
+                if type == .partnership && button.isSelected == true {
+                    updatedConfig?.image = .selectedPartnership
+                    updatedConfig?.imagePlacement = .trailing
+                    updatedConfig?.imagePadding = 1.5
+                } else {
+                    updatedConfig?.image = nil
+                }
+                
+                button.configuration = updatedConfig
+            }
             
             stackView.addArrangedSubview(button)
             buttons.append(button)
         }
+    }
+    
+    // 기본 버튼 생성 함수 (초기 설정만 포함)
+    func createButton(type: StoreFilterType) -> UIButton {
+        let button = UIButton()
+        var config = UIButton.Configuration.plain()
+        config.title = type.title
+        config.baseBackgroundColor = .clear
+        
+        config.attributedTitle = AttributedString(type.title, attributes: AttributeContainer([
+            .font: UIFont.textSemi14,
+            .foregroundColor: UIColor.terbuckBlack10
+        ]))
 
-        layoutIfNeeded()
+        button.configuration = config
+        button.isSelected = type == selectedType // 초기 선택 상태 설정
+        
+        return button
     }
     
     @objc private func segmentTapped(_ sender: UIButton) {
@@ -126,7 +160,8 @@ private extension SegmentedTabView {
         }
 
         for (i, btn) in buttons.enumerated() {
-            btn.setTitleColor(i == index ? .terbuckBlack30 : .terbuckBlack10, for: .normal)
+            let isSelected = i == index
+            btn.isSelected = isSelected
         }
     }
 }
