@@ -35,6 +35,7 @@ final class HomeViewController: UIViewController {
     private let titleLogo = TerbuckLogoLabel(type: .medium)
     private let studentIDCardButton = UIButton()
     private let segmentedTabView = SegmentedTabView()
+    private let refreshControl = UIRefreshControl()
     
     private lazy var collectionView: UICollectionView = {
         return UICollectionView(frame: .zero, collectionViewLayout: createLayout())
@@ -169,8 +170,20 @@ private extension HomeViewController {
 // MARK: - CollectionView Extension
 
 private extension HomeViewController {
+    @objc private func refreshData() {
+        // 🔄 데이터 갱신 로직 실행
+        self.homeViewModel.selectedFilterSubject.send(.restaurent)
+
+        // 📉 애니메이션 종료
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.refreshControl.endRefreshing()
+        }
+    }
+    
     func setupCollectionView() {
         collectionView.backgroundColor = .clear
+        collectionView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         
         // Cell 등록
         collectionView.register(StoreCollectionViewCell.self, forCellWithReuseIdentifier: StoreCollectionViewCell.className)
