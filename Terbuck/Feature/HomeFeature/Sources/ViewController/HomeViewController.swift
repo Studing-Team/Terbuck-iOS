@@ -11,6 +11,7 @@ import Combine
 
 import DesignSystem
 import Shared
+import Resource
 
 import SnapKit
 import Then
@@ -60,9 +61,6 @@ final class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.view.backgroundColor = .terbuckWhite3
-        navigationItem.backButtonTitle = ""
         
         viewLifeCycleSubject.send(.viewDidLoad)
         
@@ -129,6 +127,9 @@ private extension HomeViewController {
 
 private extension HomeViewController {
     func setupStyle(_ isAuth: Bool) {
+        self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
+        navigationItem.backButtonTitle = ""
+        
         studentIDCardButton.do {
             $0.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
             $0.adjustsImageWhenHighlighted = false
@@ -163,7 +164,7 @@ private extension HomeViewController {
     }
     
     func setupDelegate() {
-        
+        collectionView.delegate = self
     }
 }
 
@@ -230,6 +231,7 @@ private extension HomeViewController {
         
         // 배경 뷰 등록
         layout.register(SectionBackgroundView.self, forDecorationViewOfKind: "background")
+        layout.register(SectionBackgroundView.self, forDecorationViewOfKind: "newPartnerBackground")
         
         return layout
     }
@@ -292,7 +294,7 @@ private extension HomeViewController {
         
         // 배경 추가
         let backgroundDecoration = NSCollectionLayoutDecorationItem.background(
-            elementKind: "background")
+            elementKind: "newPartnerBackground")
         backgroundDecoration.contentInsets = NSDirectionalEdgeInsets(top: 34, leading: 0, bottom: 0, trailing: 0)
         section.decorationItems = [backgroundDecoration]
 
@@ -333,6 +335,21 @@ private extension HomeViewController {
         section.orthogonalScrollingBehavior = .none
 
         return section
+    }
+}
+
+// MARK: - CollectionView Delegate Extension
+
+extension HomeViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
+        
+        switch item {
+        case .partnership:
+            self.coordinator?.showPartnership()
+        default:
+            break
+        }
     }
 }
 
