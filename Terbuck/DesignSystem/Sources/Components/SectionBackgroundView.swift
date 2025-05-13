@@ -32,13 +32,29 @@ public final class SectionBackgroundView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    public override func apply(_ layoutAttributes: UICollectionViewLayoutAttributes) {
+        super.apply(layoutAttributes)
+
+        if let kind = layoutAttributes.value(forKey: "representedElementKind") as? String {
+            switch kind {
+            case "background":
+                layer.borderWidth = 0
+            case "newPartnerBackground":
+                insetView.layer.borderWidth = 0.5
+                insetView.layer.borderColor = DesignSystem.Color.uiColor(.terbuckGreen10).cgColor
+            default:
+                break
+            }
+        }
+    }
+    
     func setupHierarchy() {
         self.addSubviews(insetView)
     }
     
     func setupStyle() {
         insetView.do {
-            $0.backgroundColor = .terbuckWhite
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
             $0.layer.cornerRadius = 16
         }
     }

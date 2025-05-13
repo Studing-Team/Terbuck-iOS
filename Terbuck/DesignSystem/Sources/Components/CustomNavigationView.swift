@@ -12,10 +12,16 @@ import Shared
 import SnapKit
 import Then
 
+public enum CustomNavigationType {
+    case nomal
+    case previewImage
+}
+
 public final class CustomNavigationView: UIView {
     
     // MARK: - Properties
     
+    private var type: CustomNavigationType
     private var backAction: (() -> Void)?
     
     // MARK: - UI Components
@@ -26,11 +32,15 @@ public final class CustomNavigationView: UIView {
     
     // MARK: - Init
     
-    public init(title: String) {
+    public init(
+        type: CustomNavigationType,
+        title: String
+    ) {
+        self.type = type
         self.titleLabel.text = title
         super.init(frame: .zero)
         
-        setupStyle()
+        setupStyle(type)
         setupHierarchy()
         setupLayout()
     }
@@ -51,23 +61,23 @@ public final class CustomNavigationView: UIView {
 // MARK: - Private Extensions
 
 private extension CustomNavigationView {
-    func setupStyle() {
+    func setupStyle(_ type: CustomNavigationType) {
         titleLabel.do {
-            $0.font = .textSemi18
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textSemi18)
+            $0.textColor = DesignSystem.Color.uiColor(type == .nomal ? .terbuckBlack50 : .terbuckWhite)
             $0.textAlignment = .center
         }
         
         backButton.do {
             let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
-            let image = UIImage(systemName: "chevron.left", withConfiguration: config)
+            let image = UIImage(systemName: type == .nomal ? "chevron.left" : "xmark", withConfiguration: config)
             $0.setImage(image, for: .normal)
-            $0.tintColor = .black
+            $0.tintColor = type == .nomal ? .black : .white
             $0.addTarget(self, action: #selector(didTapBack), for: .touchUpInside)
         }
         
         separator.do {
-            $0.backgroundColor = .terbuckWhite5
+            $0.backgroundColor = type == .nomal ? DesignSystem.Color.uiColor(.terbuckWhite5) : .black
         }
     }
     
