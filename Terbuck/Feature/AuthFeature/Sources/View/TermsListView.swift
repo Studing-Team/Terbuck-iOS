@@ -47,7 +47,7 @@ public final class TermsListView: UIView {
     private let titleLabel = UILabel()
     private let subTitleLabel = UILabel()
     private let checkButton = AuthCheckButton()
-    private let arrowImageView = ChevronImageView(type: .size20, tintColor: .terbuckBlack30)
+    private let arrowImageView = ChevronImageView(type: .size20, tintColor: DesignSystem.Color.uiColor(.terbuckBlack30))
     
     // MARK: - Init
     
@@ -72,8 +72,8 @@ private extension TermsListView {
     func setupStyle(_ type: TermsType) {
         titleLabel.do {
             $0.text = type.title
-            $0.font = .textRegular14
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textRegular14)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
     }
     

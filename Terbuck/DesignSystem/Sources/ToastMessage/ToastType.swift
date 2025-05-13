@@ -62,11 +62,11 @@ public enum ToastType {
     }
     
     var font: UIFont {
-        return .textRegular14
+        return DesignSystem.Font.uiFont(.textRegular14)
     }
     
     var fontColor: UIColor {
-        return .terbuckWhite
+        return DesignSystem.Color.uiColor(.terbuckWhite)
     }
     
     var padding: CGFloat {

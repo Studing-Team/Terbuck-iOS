@@ -50,6 +50,19 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
         navigationController.present(studentIdCardVC, animated: false)
     }
     
+    /// 파트너십 혜택 VC
+    public func showPartnership() {
+        let partnershipVM = PartnershipViewModel()
+        
+        let partnershipVC = PartnershipViewController(
+            partnershipViewModel: partnershipVM,
+            coordinator: self
+        )
+        
+        partnershipVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(partnershipVC, animated: true)
+    }
+    
     public func showAuthStudentID() {
         let studentIdCardVC = StudentIDCardViewController(
             authType: .auth,
@@ -58,6 +71,15 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
         
         studentIdCardVC.modalPresentationStyle = .overFullScreen
         navigationController.present(studentIdCardVC, animated: false)
+    }
+    
+    public func showPreviewImage(vm: PartnershipViewModel) {
+        let previewImageVC = PreviewImageViewController(
+            partnershipViewModel: vm,
+            coordinator: self
+        )
+        previewImageVC.modalPresentationStyle = .overFullScreen
+        navigationController.present(previewImageVC, animated: false)
     }
     
     public func dismissAuthStudentID() {

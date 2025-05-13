@@ -61,8 +61,8 @@ private extension LoginViewController {
     func setupStyle() {
         terbuckTitleLabel.do {
             $0.text = "한 걸음마다 있는 우리 학교 제휴 혜택"
-            $0.font = .textRegular16
-            $0.textColor = .terbuckDarkGray50
+            $0.font = DesignSystem.Font.uiFont(.textRegular16)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckDarkGray50)
         }
     }
     

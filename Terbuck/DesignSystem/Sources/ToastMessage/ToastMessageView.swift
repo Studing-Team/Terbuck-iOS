@@ -38,7 +38,7 @@ final class ToastMessageView: UIView {
 
 private extension ToastMessageView {
     func setupStyle(_ type: ToastType) {
-        backgroundColor = .terbuckToastBackground
+        backgroundColor = DesignSystem.Color.uiColor(.terbuckToastBackground)
         layer.cornerRadius = 16
         clipsToBounds = true
         
@@ -63,8 +63,8 @@ private extension ToastMessageView {
         
         actionLabel.do {
             $0.text = type.buttonTitle
-            $0.font = .captionMedium12
-            $0.addBottomBorderWithAttributedString(underlineColor: .terbuckGreen10, textColor: .terbuckGreen10)
+            $0.font = DesignSystem.Font.uiFont(.captionMedium12)
+            $0.addBottomBorderWithAttributedString(underlineColor: DesignSystem.Color.uiColor(.terbuckGreen10), textColor: DesignSystem.Color.uiColor(.terbuckGreen10))
             $0.isHidden = type.buttonTitle == "" ? true: false
         }
     }

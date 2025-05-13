@@ -33,8 +33,6 @@ public final class ExampleStudentIDView: UIView {
     public init() {
         super.init(frame: .zero)
         
-        self.backgroundColor = .terbuckWhite3
-        
         setupStyle()
         setupHierarchy()
         setupLayout()
@@ -49,6 +47,7 @@ public final class ExampleStudentIDView: UIView {
 
 private extension ExampleStudentIDView {
     func setupStyle() {
+        self.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         
         userUniversityInfoStackView.do {
             $0.axis = .vertical
@@ -58,14 +57,14 @@ private extension ExampleStudentIDView {
         
         userKoreaNameLabel.do {
             $0.text = "김터벅"
-            $0.font = .headBold30
-            $0.textColor = .terbuckBlack30
+            $0.font = DesignSystem.Font.uiFont(.headBold30)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack30)
         }
         
         userEnglishNameLabel.do {
             $0.text = "Kim Terbuck"
-            $0.font = .textRegular20
-            $0.textColor = .terbuckBlack10
+            $0.font = DesignSystem.Font.uiFont(.textRegular20)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
         }
         
         personImageView.do {
@@ -74,8 +73,8 @@ private extension ExampleStudentIDView {
         }
         
         [collegeLabel, majorLabel, studentNumberLabel].forEach {
-            $0.textColor = .terbuckBlack30
-            $0.font = .textMedium18
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack30)
+            $0.font = DesignSystem.Font.uiFont(.textMedium18)
         }
         
         collegeLabel.text = "OO대학"
@@ -84,14 +83,14 @@ private extension ExampleStudentIDView {
         
         universityEnglishLabel.do {
             $0.text = "Terbuck Universuty"
-            $0.textColor = .terbuckBlack10
-            $0.font = .textRegular20
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
+            $0.font = DesignSystem.Font.uiFont(.textRegular20)
         }
         
         universityKoreaLabel.do {
             $0.text = "터벅대학교"
-            $0.textColor = .terbuckBlack30
-            $0.font = .titleSemi26
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack30)
+            $0.font = DesignSystem.Font.uiFont(.titleSemi26)
         }
         
         self.transform = CGAffineTransform(rotationAngle: .pi / 2)

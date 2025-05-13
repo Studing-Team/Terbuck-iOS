@@ -52,7 +52,7 @@ public final class CustomTabBar: UITabBar {
             
             let isSelected = button.tag == selectedIndex
             button.configuration?.image = isSelected ? type.selectedImage : type.image
-            button.configuration?.baseForegroundColor = isSelected ? .terbuckDarkGray50 : .terbuckDarkGray10
+            button.configuration?.baseForegroundColor = isSelected ? DesignSystem.Color.uiColor(.terbuckDarkGray50) : DesignSystem.Color.uiColor(.terbuckDarkGray10)
         }
     }
 }
@@ -61,7 +61,7 @@ public final class CustomTabBar: UITabBar {
 
 private extension CustomTabBar {
     func setupStyle() {
-        self.backgroundColor = .terbuckWhite
+        self.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
         
         stackView.do {
             $0.axis = .horizontal
@@ -69,7 +69,7 @@ private extension CustomTabBar {
             $0.spacing = 75
         }
         
-        topSeparator.backgroundColor = .terbuckWhite3
+        topSeparator.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
     }
     
     func setupHierarchy() {
@@ -105,11 +105,11 @@ private extension CustomTabBar {
         
         config.image = type.image
         config.title = type.title
-        config.baseForegroundColor = .terbuckDarkGray10
+        config.baseForegroundColor = DesignSystem.Color.uiColor(.terbuckDarkGray10)
         config.imagePlacement = .top
         config.imagePadding = 4
         config.attributedTitle = AttributedString(type.title, attributes: AttributeContainer([
-            .font: UIFont.captionMedium12
+            .font: DesignSystem.Font.uiFont(.captionMedium12)
         ]))
         config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0)
         

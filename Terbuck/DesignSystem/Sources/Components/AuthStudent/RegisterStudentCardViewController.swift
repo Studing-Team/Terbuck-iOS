@@ -5,13 +5,6 @@
 //  Created by ParkJunHyuk on 4/25/25.
 //
 
-//
-//  RegisterStudentIDCardViewController.swift
-//  DesignSystem
-//
-//  Created by ParkJunHyuk on 4/25/25.
-//
-
 import UIKit
 
 import Shared
@@ -27,7 +20,7 @@ public final class RegisterStudentCardViewController: UIViewController {
     
     // MARK: - UI Properties
     
-    private let customNavBar = CustomNavigationView(title: "학생증 등록")
+    private let customNavBar = CustomNavigationView(type: .nomal, title: "학생증 등록")
     private let registerStudentIDCardButton = UIButton()
     private let titleLabel = UILabel()
     private let subTitleLabel = UILabel()
@@ -42,7 +35,6 @@ public final class RegisterStudentCardViewController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .terbuckWhite
         hideKeyboard()
         setupStyle()
         setupHierarchy()
@@ -71,28 +63,30 @@ public final class RegisterStudentCardViewController: UIViewController {
 
 private extension RegisterStudentCardViewController {
     func setupStyle() {
+        self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
+        
         customNavBar.setupBackButtonAction { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
         
         titleLabel.do {
             $0.text = "혜택을 받기 위해\n학생증을 등록해주세요"
-            $0.font = .titleSemi20
+            $0.font = DesignSystem.Font.uiFont(.titleSemi20)
             $0.numberOfLines = 2
-            $0.textColor = .terbuckBlack50
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
         
         subTitleLabel.do {
             $0.text = "학생증 등록은 24시간 안에 마무리 할게요 :)"
-            $0.font = .textRegular14
-            $0.textColor = .terbuckBlack30
+            $0.font = DesignSystem.Font.uiFont(.textRegular14)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack30)
         }
         
         registerStudentIDCardButton.do {
             $0.setTitle("학생증 이미지 넣기", for: .normal)
-            $0.setTitleColor(.terbuckBlack10, for: .normal)
-            $0.titleLabel?.font = .captionMedium12
-            $0.backgroundColor = .terbuckWhite5
+            $0.setTitleColor(DesignSystem.Color.uiColor(.terbuckBlack10), for: .normal)
+            $0.titleLabel?.font = DesignSystem.Font.uiFont(.captionMedium12)
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite5)
             $0.layer.cornerRadius = 16
         }
         
@@ -104,9 +98,6 @@ private extension RegisterStudentCardViewController {
         }
         
         bottomButton.isEnabled = true
-//        bottomButton.do {
-//            $0.resolvedBackgroundColor(isEnabled: false)
-//        }
     }
     
     func setupHierarchy() {

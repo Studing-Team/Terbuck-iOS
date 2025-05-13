@@ -39,8 +39,8 @@ private extension CustomHeaderCollectionReusableView {
     func setupStyle() {
         titleLabel.do {
             $0.text = "NEW"
-            $0.font = .textSemi18
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textSemi18)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
     }
     
@@ -52,7 +52,6 @@ private extension CustomHeaderCollectionReusableView {
         titleLabel.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview()
             $0.leading.equalToSuperview().offset(5)
-//            $0.centerY.equalToSuperview()
         }
     }
 }

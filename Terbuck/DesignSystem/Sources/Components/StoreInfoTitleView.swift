@@ -62,13 +62,13 @@ private extension StoreInfoTitleView {
         }
         
         storeNameLabel.do {
-            $0.font = .textSemi18
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textSemi18)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
         
         storeAddressLabel.do {
-            $0.font = .captionMedium12
-            $0.textColor = .terbuckBlack10
+            $0.font = DesignSystem.Font.uiFont(.captionMedium12)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
         }
     }
     

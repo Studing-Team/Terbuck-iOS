@@ -38,8 +38,6 @@ final class TermsOfServiceViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .terbuckWhite
-        
         setupStyle()
         setupHierarchy()
         setupLayout()
@@ -51,17 +49,19 @@ final class TermsOfServiceViewController: UIViewController {
 
 private extension TermsOfServiceViewController {
     func setupStyle() {
+        view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
+        
         allTermsTitleLabel.do {
             $0.text = "선택약관 모두 동의하기"
-            $0.font = .textSemi16
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textSemi16)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
         
         allTermsStackView.do {
             $0.axis = .horizontal
             $0.spacing = 6
             $0.addArrangedSubviews(allTermsCheckButton, allTermsTitleLabel)
-            $0.backgroundColor = .terbuckWhite5
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite5)
             $0.layer.cornerRadius = 8
             $0.isLayoutMarginsRelativeArrangement = true
             $0.layoutMargins = UIEdgeInsets(top: 15.17, left: 18.17, bottom: 15.17, right: 18.17)

@@ -13,7 +13,7 @@ public final class GuideOverlayView: UIView {
     
     init(holeRect: CGRect, cornerRadius: CGFloat) {
         super.init(frame: UIScreen.main.bounds)
-        backgroundColor = .terbuckStudentBackground
+        backgroundColor = DesignSystem.Color.uiColor(.terbuckStudentBackground)
         isUserInteractionEnabled = false
         
         let path = UIBezierPath(rect: bounds)

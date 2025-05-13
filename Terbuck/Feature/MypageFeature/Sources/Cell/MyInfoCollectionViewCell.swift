@@ -71,13 +71,13 @@ private extension MyInfoCollectionViewCell {
         }
         
         universityLabel.do {
-            $0.font = .textSemi18
-            $0.textColor = .terbuckWhite
+            $0.font = DesignSystem.Font.uiFont(.textSemi18)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckWhite)
         }
         
         [studentIdLabel, nameLabel].forEach {
-            $0.font = .textRegular14
-            $0.textColor = .terbuckWhite3
+            $0.font = DesignSystem.Font.uiFont(.textRegular14)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         }
         
         authStudentButton.do {
@@ -104,7 +104,7 @@ private extension MyInfoCollectionViewCell {
     }
     
     func updateStyle(isAuth: Bool) {
-        contentView.backgroundColor = isAuth ? .terbuckGreen50 : .terbuckBlack10
+        contentView.backgroundColor = DesignSystem.Color.uiColor(isAuth ? .terbuckGreen50 : .terbuckBlack10)
         self.userInfoStackView.isHidden = !isAuth
     }
 }

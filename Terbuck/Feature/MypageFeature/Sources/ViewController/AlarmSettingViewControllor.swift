@@ -30,7 +30,7 @@ final class AlarmSettingViewControllor: UIViewController {
     // MARK: - UI Properties
     
     private let alarmInfomationView = AlarmInfomationView()
-    private let customNavBar = CustomNavigationView(title: "알림 설정")
+    private let customNavBar = CustomNavigationView(type: .nomal, title: "알림 설정")
     
     // MARK: - Init
     

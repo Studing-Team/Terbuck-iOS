@@ -33,8 +33,6 @@ final class UniversityInfoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .terbuckWhite
-        
         setupStyle()
         setupHierarchy()
         setupLayout()
@@ -46,6 +44,8 @@ final class UniversityInfoViewController: UIViewController {
 
 private extension UniversityInfoViewController {
     func setupStyle() {
+        view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
+        
         universityListStackView.do {
             $0.axis = .vertical
             $0.spacing = 8

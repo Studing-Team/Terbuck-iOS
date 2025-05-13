@@ -68,23 +68,23 @@ private extension PartnershipCollectionViewCell {
         }
         
         partnerNameLabel.do {
-            $0.font = .textSemi16
-            $0.textColor = .terbuckBlack30
+            $0.font = DesignSystem.Font.uiFont(.textSemi16)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckPartnerBlack)
             $0.lineBreakMode = .byTruncatingTail
             $0.numberOfLines = 1
         }
         
         partnerCategoryLabel.do {
-            $0.font = .captionMedium12
-            $0.textColor = .terbuckBlack10
+            $0.font = DesignSystem.Font.uiFont(.captionMedium12)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
         }
         
         categoryLabel.do {
             $0.textAlignment = .center
-            $0.font = .textSemi14
-            $0.textColor = .terbuckBlack30
+            $0.font = DesignSystem.Font.uiFont(.textSemi14)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckPartnerBlack)
             $0.layer.cornerRadius = 8
-            $0.backgroundColor = .terbuckWhite5
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite5)
             $0.clipsToBounds = true
         }
         

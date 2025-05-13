@@ -61,15 +61,15 @@ private extension StoreCollectionViewCell {
         contentView.backgroundColor = .white
         contentView.layer.cornerRadius = 16
         contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.terbuckBlack5.cgColor
+        contentView.layer.borderColor = DesignSystem.Color.uiColor(.terbuckBlack5).cgColor
         
         contentView.snp.makeConstraints {
             $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20))
         }
         
         mainBenefitLabel.do {
-            $0.font = .textSemi16
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textSemi16)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
             $0.numberOfLines = 2
             $0.textAlignment = .center
             $0.lineBreakMode = .byCharWrapping
@@ -77,8 +77,8 @@ private extension StoreCollectionViewCell {
         
         moreBenefitButton.do {
             $0.text = "혜택 전체보기"
-            $0.font = .textSemi14
-            $0.textColor = .terbuckGreen50
+            $0.font = DesignSystem.Font.uiFont(.textSemi14)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckGreen50)
             $0.isUserInteractionEnabled = true
         }
         

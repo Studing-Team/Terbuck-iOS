@@ -64,7 +64,7 @@ public final class SegmentedTabView: UIView {
 
 private extension SegmentedTabView {
     func setupStyle() {
-        self.backgroundColor = .terbuckWhite5
+        self.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite5)
         self.layer.cornerRadius = 16
         self.clipsToBounds = true
         
@@ -100,10 +100,10 @@ private extension SegmentedTabView {
                 var updatedConfig = button.configuration
                 
                 // 선택 상태에 따라 다른 색상 적용
-                let textColor = button.isSelected ? UIColor.terbuckBlack30 : UIColor.terbuckBlack10
+                let textColor = button.isSelected ? DesignSystem.Color.uiColor(.terbuckBlack30) : DesignSystem.Color.uiColor(.terbuckBlack10)
                 
                 updatedConfig?.attributedTitle = AttributedString(type.title, attributes: AttributeContainer([
-                    .font: UIFont.textSemi14,
+                    .font: DesignSystem.Font.uiFont(.textSemi14),
                     .foregroundColor: textColor
                 ]))
                 
@@ -131,8 +131,8 @@ private extension SegmentedTabView {
         config.baseBackgroundColor = .clear
         
         config.attributedTitle = AttributedString(type.title, attributes: AttributeContainer([
-            .font: UIFont.textSemi14,
-            .foregroundColor: UIColor.terbuckBlack10
+            .font: DesignSystem.Font.uiFont(.textSemi14),
+            .foregroundColor: DesignSystem.Color.uiColor(.terbuckBlack10)
         ]))
 
         button.configuration = config

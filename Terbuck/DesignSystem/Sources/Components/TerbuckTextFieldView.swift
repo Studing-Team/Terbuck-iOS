@@ -40,10 +40,10 @@ public final class TerbuckTextFieldView: UITextField {
     }
 
     private func configure(type: TerbuckTextFieldType) {
-        backgroundColor = .terbuckWhite5
-        font = .textRegular14
-        textColor = .terbuckBlack50
-        tintColor = .terbuckBlack10
+        backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite5)
+        font =  DesignSystem.Font.uiFont(.textRegular14)
+        textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
+        tintColor = DesignSystem.Color.uiColor(.terbuckBlack10)
         placeholder = type.placeholder
         borderStyle = .none
         layer.cornerRadius = 10
@@ -56,9 +56,9 @@ public final class TerbuckTextFieldView: UITextField {
 
     @objc private func editingChanged() {
         if let text = self.text, !text.isEmpty {
-            self.textColor = .terbuckBlack50
+            self.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         } else {
-            self.textColor = .terbuckBlack10
+            self.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
         }
     }
 

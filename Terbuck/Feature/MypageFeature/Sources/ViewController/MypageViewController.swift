@@ -54,9 +54,6 @@ public final class MypageViewController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .terbuckWhite3
-        navigationItem.backButtonTitle = ""
-        
         setupStyle()
         setupHierarchy()
         setupLayout()
@@ -108,18 +105,21 @@ private extension MypageViewController {
 
 private extension MypageViewController {
     func setupStyle() {
+        self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
+        navigationItem.backButtonTitle = ""
+        
         collectionView.backgroundColor = .clear
         
         titleLabel.do {
             $0.text = "마이페이지"
-            $0.textColor = .terbuckBlack50
-            $0.font = .titleSemi20
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
+            $0.font = DesignSystem.Font.uiFont(.titleSemi20)
         }
         
         versionLabel.do {
             $0.text = "앱 버전  V.1.0.0"
-            $0.textColor = .terbuckBlack10
-            $0.font = .textRegular14
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
+            $0.font = DesignSystem.Font.uiFont(.textRegular14)
         }
     }
     
