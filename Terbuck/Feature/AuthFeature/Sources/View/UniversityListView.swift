@@ -45,7 +45,7 @@ public final class UniversityListView: UIView {
     public init(type: University) {
         super.init(frame: .zero)
         
-        self.backgroundColor  = .terbuckWhite5
+        self.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite5)
         self.layer.cornerRadius = 6
         setupStyle(type)
         setupHierarchy()
@@ -63,8 +63,8 @@ private extension UniversityListView {
     func setupStyle(_ type: University) {
         titleLabel.do {
             $0.text = type.title
-            $0.font = .textRegular14
-            $0.textColor = .terbuckBlack30
+            $0.font = DesignSystem.Font.uiFont(.textRegular14)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack30)
         }
     }
     

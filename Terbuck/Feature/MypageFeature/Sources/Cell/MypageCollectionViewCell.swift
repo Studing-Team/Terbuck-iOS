@@ -17,7 +17,7 @@ public final class MypageCollectionViewCell: UICollectionViewCell {
     // MARK: - UI Properties
     
     private let titleLabel = UILabel()
-    private let chevronImageView = ChevronImageView(type: .size14, tintColor: .terbuckBlack10)
+    private let chevronImageView = ChevronImageView(type: .size14, tintColor: DesignSystem.Color.uiColor(.terbuckBlack10))
     
     // MARK: - Init
     
@@ -47,8 +47,8 @@ public extension MypageCollectionViewCell {
 private extension MypageCollectionViewCell {
     func setupStyle() {
         titleLabel.do {
-            $0.font = .textRegular14
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textRegular14)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
     }
     

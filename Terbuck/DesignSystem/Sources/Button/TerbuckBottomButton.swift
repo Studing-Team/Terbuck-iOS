@@ -36,9 +36,9 @@ public enum TerbuckButtonType {
     var font: UIFont {
         switch self {
         case .cancel, .logout, .draw:
-            return UIFont.textSemi16
+            return DesignSystem.Font.uiFont(.textSemi16)
         default:
-            return UIFont.textSemi18
+            return DesignSystem.Font.uiFont(.textSemi18)
         }
     }
     
@@ -54,9 +54,9 @@ public enum TerbuckButtonType {
     var backgroundColor: UIColor {
         switch self {
         case .cancel, .close:
-            return .terbuckBlack5
+            return DesignSystem.Color.uiColor(.terbuckBlack5)
         default:
-            return .terbuckGreen50
+            return DesignSystem.Color.uiColor(.terbuckGreen50)
         }
     }
     
@@ -72,7 +72,7 @@ public enum TerbuckButtonType {
     func resolvedBackgroundColor(isEnabled: Bool) -> UIColor {
         switch self {
         case .enter, .register:
-            return isEnabled ? .terbuckGreen50 : .terbuckGreen10
+            return DesignSystem.Color.uiColor(isEnabled ? .terbuckGreen50 : .terbuckGreen10)
         default:
             return backgroundColor
         }
@@ -130,7 +130,7 @@ private extension TerbuckBottomButton {
     
     func updateColor() {
         guard var config = configuration else { return }
-        config.baseBackgroundColor = isEnabled ? .terbuckGreen50 : .terbuckGreen10
+        config.baseBackgroundColor = isEnabled ? DesignSystem.Color.uiColor(.terbuckGreen50) : DesignSystem.Color.uiColor(.terbuckGreen10)
         config.baseForegroundColor = .white
         configuration = config
     }

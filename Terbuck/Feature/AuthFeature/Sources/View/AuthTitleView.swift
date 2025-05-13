@@ -72,14 +72,14 @@ private extension AuthTitleView {
     func setupStyle(_ type: AuthViewType) {
         titleLabel.do {
             $0.text = type.title
-            $0.font = .titleBold24
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.titleBold24)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
         
         subTitleLabel.do {
             $0.text = type.subTitle
-            $0.font = .textRegular16
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textRegular16)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
     }
     

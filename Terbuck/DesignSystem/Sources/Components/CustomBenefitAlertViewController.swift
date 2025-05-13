@@ -58,7 +58,7 @@ public final class CustomBenefitAlertViewController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .terbuckAlertBackground
+        self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckAlertBackground)
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(cancelBackgroundAction)))
         
         setupStyle()
@@ -75,7 +75,7 @@ public final class CustomBenefitAlertViewController: UIViewController {
 private extension CustomBenefitAlertViewController {
     func setupStyle() {
         alertBackgroundView.do {
-            $0.backgroundColor = .terbuckWhite
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
             $0.layer.cornerRadius = 24
         }
         
@@ -133,8 +133,8 @@ private extension CustomBenefitAlertViewController {
         
         let benefitLabel = UILabel()
         benefitLabel.text = benefits
-        benefitLabel.textColor = .terbuckBlack50
-        benefitLabel.font = .textRegular14
+        benefitLabel.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
+        benefitLabel.font = DesignSystem.Font.uiFont(.textRegular14)
         benefitLabel.numberOfLines = 2
         
         let stackView = UIStackView()

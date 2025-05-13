@@ -89,7 +89,7 @@ public final class CustomAlertViewController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         print("viewDidLoad")
-        view.backgroundColor = .terbuckAlertBackground
+        view.backgroundColor = DesignSystem.Color.uiColor(.terbuckAlertBackground)
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(cancelBackgroundAction)))
         
         setupStyle()
@@ -104,7 +104,7 @@ public final class CustomAlertViewController: UIViewController {
 private extension CustomAlertViewController {
      func setupStyle() {
          alertBackgroundView.do {
-             $0.backgroundColor = .terbuckWhite
+             $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
              $0.layer.cornerRadius = 16
          }
          
@@ -122,8 +122,8 @@ private extension CustomAlertViewController {
          
          mainTitleLabel.do {
              $0.text = mainTitle
-             $0.textColor = .terbuckBlack50
-             $0.font = .textSemi16
+             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
+             $0.font = DesignSystem.Font.uiFont(.textSemi16)
              $0.textAlignment = .center
              $0.numberOfLines = 0
          }
@@ -139,8 +139,8 @@ private extension CustomAlertViewController {
              let attrText = NSAttributedString(
                 string: subTitle ?? "",
                  attributes: [
-                     .font: UIFont.textRegular14,
-                     .foregroundColor: UIColor.terbuckBlack40,
+                     .font: DesignSystem.Font.uiFont(.textRegular14),
+                     .foregroundColor: DesignSystem.Color.uiColor(.terbuckBlack40),
                      .paragraphStyle: paragraph
                  ]
              )

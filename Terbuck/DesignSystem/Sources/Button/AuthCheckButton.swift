@@ -70,13 +70,13 @@ private extension AuthCheckButton {
         switch buttonState {
         case .activate:
             config = .filled()
-            config.baseBackgroundColor = .terbuckDarkGray10
+            config.baseBackgroundColor = DesignSystem.Color.uiColor(.terbuckDarkGray10)
             config.image = .selectedCheck
 
         case .deactivate:
             config = .bordered()
-            config.baseBackgroundColor = .terbuckWhite
-            config.background.strokeColor = .terbuckBlack5
+            config.baseBackgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
+            config.background.strokeColor = DesignSystem.Color.uiColor(.terbuckBlack5)
             config.background.strokeWidth = 1
             config.image = .notSelectedCheck
         }

@@ -71,7 +71,7 @@ private extension StudentIDCardViewController {
         studentIdSection.do {
             $0.layer.cornerRadius = 16
             $0.layer.borderWidth = 1
-            $0.layer.borderColor = UIColor.terbuckBlack10.cgColor
+            $0.layer.borderColor = DesignSystem.Color.uiColor(.terbuckBlack10).cgColor
         }
         
         switch authType {
@@ -80,22 +80,22 @@ private extension StudentIDCardViewController {
                 var config = UIButton.Configuration.filled()
                 
                 let attributedString = AttributedString("닫기", attributes: .init([
-                        .font: UIFont.textSemi14,
-                        .foregroundColor: UIColor.terbuckBlack30
+                        .font: DesignSystem.Font.uiFont(.textSemi14),
+                        .foregroundColor: DesignSystem.Color.uiColor(.terbuckBlack30)
                     ]
                 ))
                 
                 config.attributedTitle = attributedString
-                config.baseBackgroundColor = .terbuckBlack10
+                config.baseBackgroundColor = DesignSystem.Color.uiColor(.terbuckBlack10)
                 config.cornerStyle = .capsule
                 $0.configuration = config
             }
             
             underlineLabel.do {
                 $0.text = "학생증 재등록"
-                $0.textColor = .terbuckBlack10
-                $0.font = .captionRegular11
-                $0.underlineColor = .terbuckBlack10
+                $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
+                $0.font = DesignSystem.Font.uiFont(.captionRegular11)
+                $0.underlineColor = DesignSystem.Color.uiColor(.terbuckBlack10)
                 $0.isUserInteractionEnabled = true
             }
             
@@ -110,13 +110,13 @@ private extension StudentIDCardViewController {
                 let highlightText = "학생증을 등록"
 
                 let attributedString = NSMutableAttributedString(string: fullText, attributes: [
-                    .font: UIFont.textRegular14,
-                    .foregroundColor: UIColor.terbuckWhite
+                    .font: DesignSystem.Font.uiFont(.textRegular14),
+                    .foregroundColor: DesignSystem.Color.uiColor(.terbuckWhite)
                 ])
 
                 if let range = fullText.range(of: highlightText) {
                     let nsRange = NSRange(range, in: fullText)
-                    attributedString.addAttribute(.foregroundColor, value: UIColor.terbuckGreen50, range: nsRange)
+                    attributedString.addAttribute(.foregroundColor, value: DesignSystem.Color.uiColor(.terbuckGreen50), range: nsRange)
                 }
 
                 $0.attributedText = attributedString
@@ -125,8 +125,8 @@ private extension StudentIDCardViewController {
             
             nextTimeButton.do {
                 $0.setTitle("다음에", for: .normal)
-                $0.setTitleColor(.terbuckBlack5, for: .normal)
-                $0.titleLabel?.font = .textMedium18
+                $0.setTitleColor(DesignSystem.Color.uiColor(.terbuckBlack5), for: .normal)
+                $0.titleLabel?.font = DesignSystem.Font.uiFont(.textMedium18)
             }
         }
     }
@@ -134,7 +134,7 @@ private extension StudentIDCardViewController {
     func setupBackground() {
         switch authType {
         case .auth:
-            view.backgroundColor = .terbuckStudentBackground
+            view.backgroundColor = DesignSystem.Color.uiColor(.terbuckStudentBackground)
             
         case .onboarding:
             guard let frame = holeLocation?.insetBy(dx: -8, dy: -8) else { return }

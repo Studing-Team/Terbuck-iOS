@@ -29,7 +29,7 @@ public final class SocialLoginButton: UIButton {
 
         var backgroundColor: UIColor {
             switch self {
-            case .apple: return .terbuckWhite
+            case .apple: return DesignSystem.Color.uiColor(.terbuckWhite)
             case .kakao: return UIColor(red: 254/255, green: 229/255, blue: 0/255, alpha: 1)
             }
         }
@@ -70,7 +70,7 @@ public final class SocialLoginButton: UIButton {
 private extension SocialLoginButton {
     func setupStyle(type: SocialButtonType) {
         if type.hasBorder {
-            self.layer.borderColor = UIColor.terbuckBlack50.cgColor
+            self.layer.borderColor =  DesignSystem.Color.uiColor(.terbuckBlack50).cgColor
             self.layer.borderWidth = 0.5
         }
         
@@ -85,8 +85,8 @@ private extension SocialLoginButton {
         
         titleLabelView.do {
             $0.text = type.title
-            $0.font = .textRegular14
-            $0.textColor = .terbuckBlack50
+            $0.font = DesignSystem.Font.uiFont(.textRegular14)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }
     }
     

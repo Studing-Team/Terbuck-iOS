@@ -48,11 +48,11 @@ public final class AlarmInfomationView: UIView {
         
         // 텍스트 설정
         let titleString = AttributedString(isAlarm ? "알림 끄기" : "알림 켜기", attributes: .init(
-            [.font: UIFont.captionMedium12]
+            [.font: DesignSystem.Font.uiFont(.captionMedium12)]
         ))
         
         config.attributedTitle = titleString
-        config.baseBackgroundColor = isAlarm ? .terbuckBlack5 : .terbuckGreen50
+        config.baseBackgroundColor = DesignSystem.Color.uiColor(isAlarm ? .terbuckBlack5 : .terbuckGreen50)
         config.baseForegroundColor = .white
         
         alarmSettingButton.layer.cornerRadius = 10
@@ -78,20 +78,20 @@ public final class AlarmInfomationView: UIView {
 private extension AlarmInfomationView {
     func setupStyle() {
         backgroundView.do {
-            $0.backgroundColor = .terbuckWhite3
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
             $0.layer.cornerRadius = 20
         }
         
         titleLabel.do {
             $0.text = "알림을 켜주세요"
-            $0.textColor = .terbuckBlack50
-            $0.font = .textSemi14
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
+            $0.font = DesignSystem.Font.uiFont(.textSemi14)
         }
         
         subTitleLabel.do {
             $0.text = "제휴 업체 업데이트 소식을 받아보세요"
-            $0.textColor = .terbuckBlack30
-            $0.font =  .captionMedium12
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack30)
+            $0.font = DesignSystem.Font.uiFont(.captionMedium12)
             $0.numberOfLines = 0
         }
     }

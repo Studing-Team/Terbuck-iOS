@@ -28,7 +28,7 @@ public final class TerbuckLogoLabel: UILabel {
 
 private extension TerbuckLogoLabel {
     func setupLabel(type: LogoType) {
-        let font: UIFont = type == .medium ? .logoBold25 : .logoBold28
+        let font = DesignSystem.Font.uiFont(type == .medium ? .logoBold25 : .logoBold28)
         let fullText = "터벅."
         let attributedText = NSMutableAttributedString(string: fullText)
 
@@ -38,10 +38,10 @@ private extension TerbuckLogoLabel {
         
         // 색상 적용
         let greenRange = (fullText as NSString).range(of: "터벅")
-        attributedText.addAttribute(.foregroundColor, value: UIColor.terbuckGreen50, range: greenRange)
+        attributedText.addAttribute(.foregroundColor, value: DesignSystem.Color.uiColor(.terbuckGreen50), range: greenRange)
         
         let grayRange = (fullText as NSString).range(of: ".")
-        attributedText.addAttribute(.foregroundColor, value: UIColor.terbuckDarkGray50, range: grayRange)
+        attributedText.addAttribute(.foregroundColor, value: DesignSystem.Color.uiColor(.terbuckDarkGray50), range: grayRange)
 
         self.attributedText = attributedText
     }
