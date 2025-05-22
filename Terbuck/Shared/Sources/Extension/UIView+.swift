@@ -18,6 +18,46 @@ public extension UIView {
     }
 }
 
+public extension UIView {
+    // MARK: - 그라데이션
+    
+    enum GradientDirection {
+        case topRightToBottomLeft
+        case leftToRight
+        case topToBottom
+        
+        var startPoint: CGPoint {
+            switch self {
+            case .topRightToBottomLeft: return CGPoint(x: 0.7, y: 0)
+            case .leftToRight: return CGPoint(x: 0, y: 0.5)
+            case .topToBottom: return CGPoint(x: 0.5, y: 0)
+            }
+        }
+        
+        var endPoint: CGPoint {
+            switch self {
+            case .topRightToBottomLeft: return CGPoint(x: 0, y: 1)
+            case .leftToRight: return CGPoint(x: 1, y: 0.5)
+            case .topToBottom: return CGPoint(x: 0.5, y: 1)
+            }
+        }
+    }
+    
+    func applyGradient(colors: [UIColor], direction: GradientDirection, locations: [NSNumber]? = nil) {
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.frame = bounds
+        gradientLayer.colors = colors.map { $0.cgColor }
+        gradientLayer.startPoint = direction.startPoint
+        gradientLayer.endPoint = direction.endPoint
+        gradientLayer.locations = locations
+        
+        // 기존의 그라데이션 레이어가 있다면 제거
+        layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
+        
+        layer.insertSublayer(gradientLayer, at: 0)
+    }
+}
+
 // MARK: - 기기 대응
 
 public extension UIView {
