@@ -18,6 +18,7 @@ extension DesignSystem {
             case headBold30
             case titleBold26
             case titleBold24
+            case titleBold20
             case titleSemi26
             case titleSemi20
             case textSemi18
@@ -47,6 +48,9 @@ extension DesignSystem {
                     
                 case .titleBold24:
                     return UIFont(font: ResourceFontFamily.Pretendard.bold, size: 24)!
+                    
+                case .titleBold20:
+                    return UIFont(font: ResourceFontFamily.Pretendard.bold, size: 20)!
                     
                 case .titleSemi26:
                     return UIFont(font: ResourceFontFamily.Pretendard.semiBold, size: 26)!
