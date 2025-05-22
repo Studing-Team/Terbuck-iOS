@@ -9,6 +9,7 @@
 import UIKit
 
 import AuthInterface
+import StoreInterface
 import MypageFeature
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -24,21 +25,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let navigationController = UINavigationController()
         let authFactory = AppDIContainer().makeAuthFactory()
-        let homeFactory = AppDIContainer().makeHomeFactory()
-        let mypageFactory = AppDIContainer().makeMypageFactory()
+        let homeTabFactory = AppDIContainer().makeHomeFactory()
+        let storeTabFactory = AppDIContainer().makeStoreFactory()
+        let mypageTabFactory = AppDIContainer().makeMypageFactory()
         
         appCoordinator = AppCoordinator(
             navigationController: navigationController,
             authFactory: authFactory,
-            homeTabFactory: homeFactory,
-            mypageTabFactory: mypageFactory
+            homeTabFactory: homeTabFactory,
+            storeTabFactory: storeTabFactory,
+            mypageTabFactory: mypageTabFactory
         )
         
         self.window = UIWindow(windowScene: windowScene)
         self.window?.overrideUserInterfaceStyle = .light
         self.window?.rootViewController = navigationController
         self.window?.makeKeyAndVisible()
-        
+//        print("Setting Naver Map Client ID: \(Config.naverIdKey)")
         appCoordinator?.start()
     }
 

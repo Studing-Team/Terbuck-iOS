@@ -12,6 +12,8 @@ import AuthInterface
 import AuthFeature
 import HomeInterface
 import HomeFeature
+import StoreInterface
+import StoreFeature
 import MypageInterface
 import MypageFeature
 
@@ -22,6 +24,10 @@ public final class AppDIContainer {
     
     func makeHomeFactory() -> HomeTabFactory {
         return HomeTabFactoryImpl()
+    }
+    
+    func makeStoreFactory() -> StoreTabFactory {
+        return StoreTabFactoryImpl()
     }
     
     func makeMypageFactory() -> MypageTabFactory {
