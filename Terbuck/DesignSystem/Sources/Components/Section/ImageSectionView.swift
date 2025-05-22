@@ -1,28 +1,48 @@
 //
 //  ImageSectionView.swift
-//  HomeFeature
+//  DesignSystem
 //
-//  Created by ParkJunHyuk on 5/12/25.
+//  Created by ParkJunHyuk on 5/14/25.
 //
 
 import SwiftUI
 
-struct ImageSectionView: View {
+import Shared
+
+public struct ImageSectionView<T: ImageSectionDisplayable>: View {
     
     // MARK: - Properties
     
-    let models: [DetailPartnerImageModel]
+    let type: SectionType
+    let models: [T]
     let onImageTapped: (Int) -> Void
     
-    private let imageWidth: CGFloat = 335
-    private let imageHeight: CGFloat = 335
+    private let imageWidth: CGFloat
+    private let imageHeight: CGFloat
+    private let horizontalSpacing : CGFloat
+    
+    // MARK: - Init
+    
+    public init(
+        type: SectionType,
+        models: [ImageSectionDisplayable],
+        onImageTapped: @escaping (Int) -> Void
+    ) {
+        self.type = type
+        self.models = models as! [T]
+        self.onImageTapped = onImageTapped
+        
+        self.imageWidth = type == .detailPartner ? 335 : 203
+        self.imageHeight = type == .detailPartner ? 335 : 203
+        self.horizontalSpacing = type == .detailPartner ? 10 : 8
+    }
     
     // MARK: - Body
     
-    var body: some View {
+    public var body: some View {
         GeometryReader { geometry in
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: horizontalSpacing) {
                     ForEach(models.indices, id: \.self) { index in
                         AsyncImageViewRepresentable(
                             imageData: models[index].images,
