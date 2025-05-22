@@ -1,27 +1,26 @@
 //
 //  PreviewImageViewController.swift
-//  HomeFeature
+//  DesignSystem
 //
-//  Created by ParkJunHyuk on 5/12/25.
+//  Created by ParkJunHyuk on 5/16/25.
 //
 
 import UIKit
 import SwiftUI
 import Combine
 
-import DesignSystem
 import Shared
 import Resource
 
 import SnapKit
 import Then
 
-final class PreviewImageViewController: UIViewController {
+public final class PreviewImageViewController: UIViewController {
     
     // MARK: - Properties
     
-    private let partnershipViewModel: PartnershipViewModel
-    weak var coordinator: HomeCoordinator?
+    private let viewModel: PreviewImageDisplayable
+    weak var coordinator: ImagePreviewCoordinating?
     
     // MARK: - UI Properties
     
@@ -29,13 +28,13 @@ final class PreviewImageViewController: UIViewController {
     
     // MARK: - Init
     
-    init(
-        partnershipViewModel: PartnershipViewModel,
-        coordinator: HomeCoordinator
+    public init(
+        viewModel: PreviewImageDisplayable,
+        coordinator: ImagePreviewCoordinating
     ) {
-        self.partnershipViewModel = partnershipViewModel
+        self.viewModel = viewModel
         self.coordinator = coordinator
-        self.customNavBar = CustomNavigationView(type: .previewImage, title: partnershipViewModel.selectImageData?.title ?? "")
+        self.customNavBar = CustomNavigationView(type: .previewImage, title: viewModel.selectImageData?.title ?? "")
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -45,7 +44,7 @@ final class PreviewImageViewController: UIViewController {
     
     // MARK: - Life Cycle
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         
         setupStyle()
@@ -67,7 +66,7 @@ private extension PreviewImageViewController {
     func setupHierarchy() {
         let hostingController = UIHostingController(
             rootView: PreviewImageView(
-                viewModel: partnershipViewModel
+                type: .detailPartner, viewModel: viewModel
             )
         )
         addChild(hostingController)

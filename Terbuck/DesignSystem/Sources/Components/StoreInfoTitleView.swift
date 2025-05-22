@@ -87,25 +87,6 @@ private extension StoreInfoTitleView {
     }
     
     func setupStoreCategoryImage(_ type: CategoryType) {
-        let image: UIImage
-        
-        switch type {
-        case .bar:
-            image = .barColorIcon
-        case .cafe:
-            image = .cafeColorIcon
-        case .culture:
-            image = .cultureColorIcon
-        case .gym:
-            image = .gymColorIcon
-        case .hospital:
-            image = .hospitalColorIcon
-        case .restaurant:
-            image = .restaurantColorIcon
-        case .study:
-            image = .studyColorIcon
-        }
-        
-        storeCategoryImage.image = image
+        storeCategoryImage.image = type.icon
     }
 }

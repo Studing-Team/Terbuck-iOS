@@ -19,6 +19,7 @@ public enum TerbuckButtonType {
     case draw
     case save
     case close
+    case moveNaver
     
     var title: String {
         switch self {
@@ -30,6 +31,7 @@ public enum TerbuckButtonType {
         case .draw: return "탈퇴할게요"
         case .save: return "저장하기"
         case .close: return "닫기"
+        case .moveNaver: return "네이버 플레이스로 이동"
         }
     }
     
