@@ -22,11 +22,12 @@ struct PartnershipView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 0) {
                     if let titleItem = viewModel.sectionData[.title], case .partnerTitleHeader(let model) = titleItem {
-                        TitleSectionView(model: model)
+                        TitleSectionView<DetailPartnershipModel>(type: .detailPartner, model: model)
                     }
                     
                     if let imageItem = viewModel.sectionData[.image], case .partnerImage(let models) = imageItem, let models = models {
-                        ImageSectionView(
+                        ImageSectionView<DetailPartnerImageModel>(
+                            type: .detailPartner,
                             models: models,
                             onImageTapped: onImageTapped
                         )

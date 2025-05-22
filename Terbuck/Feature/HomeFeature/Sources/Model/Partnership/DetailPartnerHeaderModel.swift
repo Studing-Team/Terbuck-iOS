@@ -16,3 +16,13 @@ public struct DetailPartnershipModel: Identifiable, Hashable {
     var partnershipName: String
     var partnerCategoryType: PartnerCategoryType
 }
+
+extension DetailPartnershipModel: TitleSectionDisplayable {
+    public var titleText: String {
+        partnershipName
+    }
+
+    public var subtitleText: String {
+        partnerCategoryType.title
+    }
+}

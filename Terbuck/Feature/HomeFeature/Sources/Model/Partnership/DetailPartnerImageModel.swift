@@ -6,7 +6,14 @@
 //
 
 import Foundation
+import Shared
 
 public struct DetailPartnerImageModel: Hashable {
-    let images: Data
+    let DetailPartnerimages: Data
+}
+
+extension DetailPartnerImageModel: ImageSectionDisplayable {
+    public var images: Data {
+        DetailPartnerimages
+    }
 }

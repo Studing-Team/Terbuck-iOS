@@ -73,15 +73,6 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
         navigationController.present(studentIdCardVC, animated: false)
     }
     
-    public func showPreviewImage(vm: PartnershipViewModel) {
-        let previewImageVC = PreviewImageViewController(
-            partnershipViewModel: vm,
-            coordinator: self
-        )
-        previewImageVC.modalPresentationStyle = .overFullScreen
-        navigationController.present(previewImageVC, animated: false)
-    }
-    
     public func dismissAuthStudentID() {
         navigationController.dismiss(animated: false) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
@@ -94,5 +85,16 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
         let registerStudentIDCardVC = RegisterStudentCardViewController()
         registerStudentIDCardVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(registerStudentIDCardVC, animated: true)
+    }
+}
+
+extension HomeCoordinator: ImagePreviewCoordinating {
+    public func showPreviewImage(vm: PreviewImageDisplayable) {
+        let previewImageVC = PreviewImageViewController(
+            viewModel: vm,
+            coordinator: self
+        )
+        previewImageVC.modalPresentationStyle = .overFullScreen
+        navigationController.present(previewImageVC, animated: false)
     }
 }

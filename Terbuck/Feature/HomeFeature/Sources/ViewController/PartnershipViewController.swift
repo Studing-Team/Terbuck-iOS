@@ -100,21 +100,3 @@ private extension PartnershipViewController {
         }
     }
 }
-
-// AsyncImageView를 SwiftUI에서 사용하기 위한 UIViewRepresentable
-struct AsyncImageViewRepresentable: UIViewRepresentable {
-    let imageData: Data
-    let type: ImageType
-    
-    func makeUIView(context: Context) -> AsyncImageView {
-        let imageView = AsyncImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.setImageData(imageData, type: type)
-        imageView.isUserInteractionEnabled = true
-        return imageView
-    }
-    
-    func updateUIView(_ uiView: AsyncImageView, context: Context) {
-        uiView.setImageData(imageData, type: type)
-    }
-}
