@@ -9,6 +9,7 @@
 import UIKit
 
 import HomeInterface
+import StoreInterface
 import MypageInterface
 import DesignSystem
 import Shared
@@ -18,15 +19,18 @@ final class MainCoordinator: Coordinator {
     
     private var tabBarController: UITabBarController
     private let homeTabFactory: HomeTabFactory
+    private let storeTabFactory: StoreTabFactory
     private let mypageTabFactory: MypageTabFactory
     
     init(
         tabBarController: UITabBarController,
         homeTabFactory: HomeTabFactory,
+        storeTabFactory: StoreTabFactory,
         mypageTabFactory: MypageTabFactory
     ) {
         self.tabBarController = tabBarController
         self.homeTabFactory = homeTabFactory
+        self.storeTabFactory = storeTabFactory
         self.mypageTabFactory = mypageTabFactory
     }
     
@@ -40,12 +44,15 @@ final class MainCoordinator: Coordinator {
         myPageNav.setNavigationBarHidden(true, animated: false)
         
         let homeCoordinator = homeTabFactory.makeHomeCoordinator(navigationController: homeNav)
+        let storeCoordinator = storeTabFactory.makeStoreCoordinator(navigationController: storeNav)
         let mypageCoordinator = mypageTabFactory.makeMypageCoordinator(navigationController: myPageNav)
         
         childCoordinators.append(homeCoordinator)
+        childCoordinators.append(storeCoordinator)
         childCoordinators.append(mypageCoordinator)
         
         homeCoordinator.start()
+        storeCoordinator.start()
         mypageCoordinator.start()
         tabBarController.viewControllers = [homeNav, storeNav, myPageNav]
         

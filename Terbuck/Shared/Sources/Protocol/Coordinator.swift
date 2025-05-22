@@ -11,3 +11,7 @@ public protocol Coordinator: AnyObject {
     var childCoordinators: [Coordinator] { get set }
     func start()
 }
+
+public protocol ImagePreviewCoordinating: AnyObject {
+    func showPreviewImage(vm: PreviewImageDisplayable)
+}

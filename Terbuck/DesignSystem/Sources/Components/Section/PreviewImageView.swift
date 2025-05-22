@@ -1,21 +1,28 @@
 //
 //  PreviewImageView.swift
-//  HomeFeature
+//  DesignSystem
 //
-//  Created by ParkJunHyuk on 5/12/25.
+//  Created by ParkJunHyuk on 5/14/25.
 //
 
 import SwiftUI
+
+import Shared
 
 public struct PreviewImageView: View {
     
     // MARK: - Properties
     
-    @State var viewModel: PartnershipViewModel
+    let type: SectionType
+    @State var viewModel: PreviewImageDisplayable
+    
+    // MARK: - Init
     
     public init(
-        viewModel: PartnershipViewModel
+        type: SectionType,
+        viewModel: PreviewImageDisplayable
     ) {
+        self.type = type
         self.viewModel = viewModel
     }
 

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Shared
+import DesignSystem
 
 public struct NearStoreModel: Identifiable, Hashable {
     public var id: String {

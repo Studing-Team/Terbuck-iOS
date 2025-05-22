@@ -69,7 +69,9 @@ private extension CustomTabBar {
             $0.spacing = 75
         }
         
-        topSeparator.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
+        topSeparator.do {
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
+        }
     }
     
     func setupHierarchy() {

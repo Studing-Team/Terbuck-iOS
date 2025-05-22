@@ -1,11 +1,20 @@
 import ProjectDescription
 
+//let infoPlist: [String: Plist.Value] = [
+//    "NAVER_MAP_KEY": "$(NAVER_MAP_KEY)",
+//    "NAVER_MAP_ClientId": "$(NAVER_MAP_ClientId)",
+//    "NSLocationWhenInUseUsageDescription": "현재 위치를 사용하려면 허용해주세요."
+//]
+
 let project = Project(
     name: "Terbuck",
     organizationName: "Fouryears",
     settings: .settings(
         base: [
             "DEVELOPMENT_TEAM": "9KHXTZ4SZ9"
+        ],
+        configurations: [
+            .debug(name: "Debug", xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig"))
         ]
     ),
     targets: [
@@ -15,12 +24,16 @@ let project = Project(
             product: .app,
             bundleId: "com.Fouryears.Terbuck",
             deploymentTargets: .iOS("17.0"),
+//            infoPlist: .extendingDefault(with: infoPlist),
             infoPlist: .extendingDefault(
                 with: [
                     "UILaunchScreen": [
                         "UIColorName": "",
                         "UIImageName": "",
                     ],
+                    "NAVER_MAP_KEY": "$(NAVER_MAP_KEY)",
+                    "NMFClientId": "$(NMFClientId)",
+                    "NSLocationWhenInUseUsageDescription": "현재 위치를 사용하려면 허용해주세요."
                 ]
             ),
             sources: ["Terbuck/Sources/**"],
@@ -39,6 +52,8 @@ let project = Project(
                 .project(target: "AuthInterface", path: "Feature/AuthInterface"),
                 .project(target: "HomeFeature", path: "Feature/HomeFeature"),
                 .project(target: "HomeInterface", path: "Feature/HomeInterface"),
+                .project(target: "StoreFeature", path: "Feature/StoreFeature"),
+                .project(target: "StoreInterface", path: "Feature/StoreInterface"),
                 .project(target: "MypageFeature", path: "Feature/MypageFeature"),
                 .project(target: "MypageInterface", path: "Feature/MypageInterface"),
             ]

@@ -34,7 +34,7 @@ final class HomeViewController: UIViewController {
     // MARK: - UI Properties
     
     private let titleLogo = TerbuckLogoLabel(type: .medium)
-    private let studentIDCardButton = UIButton()
+    private let studentIDCardButton = DesignSystem.Button.studentIDCardButton()
     private let segmentedTabView = SegmentedTabView()
     private let refreshControl = UIRefreshControl()
     
@@ -130,10 +130,7 @@ private extension HomeViewController {
         self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         navigationItem.backButtonTitle = ""
         
-        studentIDCardButton.do {
-            $0.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
-            $0.adjustsImageWhenHighlighted = false
-        }
+        studentIDCardButton.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
     }
     
     func setupHierarchy() {

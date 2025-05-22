@@ -12,7 +12,8 @@ import Observation
 import Shared
 
 @Observable
-public final class PartnershipViewModel {
+public final class PartnershipViewModel: PreviewImageDisplayable {
+    
     typealias PartnershipBenefitResult = (DetailPartnershipModel, [DetailPartnerImageModel]?, DetailPartnerBenefitModel)
     
     public var sectionData: [PartnershipSection: PartnerBenefitItem] = [:]
@@ -55,9 +56,9 @@ private extension PartnershipViewModel {
             partnerCategoryType: .studentAssociation
         )
         let imageData: [DetailPartnerImageModel] = [
-            DetailPartnerImageModel(images: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!),
-            DetailPartnerImageModel(images: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!),
-            DetailPartnerImageModel(images: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!)
+            DetailPartnerImageModel(DetailPartnerimages: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!),
+            DetailPartnerImageModel(DetailPartnerimages: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!),
+            DetailPartnerImageModel(DetailPartnerimages: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!)
         ]
         
         let contentModel = DetailPartnerBenefitModel(

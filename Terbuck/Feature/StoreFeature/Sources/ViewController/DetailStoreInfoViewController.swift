@@ -1,0 +1,147 @@
+//
+//  DetailStoreInfoViewController.swift
+//  StoreFeature
+//
+//  Created by ParkJunHyuk on 5/14/25.
+//
+
+import UIKit
+import SwiftUI
+
+import DesignSystem
+
+import SnapKit
+import Then
+
+public final class DetailStoreInfoViewController: UIViewController {
+    
+    // MARK: - Properties
+    
+    private let detailStoreViewModel: DetailStoreInfoViewModel
+    weak var coordinator: StoreCoordinator?
+    
+    // MARK: - UI Properties
+    
+    private let customNavBar = CustomNavigationView(type: .benefitStore, title: "제휴 혜택")
+    private let naverMovementButton = DesignSystem.Button.naverMovementButton()
+    private var hostingController: UIHostingController<DetailStoreInfoView>!
+    
+    private let backgroundView = UIView()
+    
+    // MARK: - Init
+    
+    init(
+        detailStoreViewModel: DetailStoreInfoViewModel,
+        coordinator: StoreCoordinator
+    ) {
+        self.detailStoreViewModel = detailStoreViewModel
+        self.coordinator = coordinator
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Life Cycle
+    
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setupStyle()
+        setupHierarchy()
+        setupLayout()
+        setupDelegate()
+    }
+    
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        ToastManager.shared.showToast(from: self, type: .moreBenefit)
+    }
+    
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        backgroundView.applyGradient(
+            colors: [DesignSystem.Color.uiColor(.terbuckWhite), DesignSystem.Color.uiColor(.terbuckGreen50).withAlphaComponent(0.8)],
+            direction: .topToBottom
+        )
+    }
+}
+
+// MARK: - Private Extensions
+
+private extension DetailStoreInfoViewController {
+    func setupStyle() {
+        view.backgroundColor = .white
+        
+        customNavBar.setupBackButtonAction { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+        
+        backgroundView.do {
+            $0.backgroundColor = .clear
+        }
+    }
+    
+    func setupHierarchy() {
+        hostingController = UIHostingController(
+            rootView: DetailStoreInfoView(
+                viewModel: detailStoreViewModel,
+                type: .benefitStore,
+                onImageTapped: { [weak self] index in
+                    guard let self else { return }
+                    
+                    detailStoreViewModel.tappendImageSection(index: index)
+                    self.coordinator?.showPreviewImage(vm: self.detailStoreViewModel)
+                }
+            )
+        )
+        
+        addChild(hostingController)
+
+        view.addSubviews(customNavBar, hostingController.view, backgroundView, naverMovementButton)
+
+        hostingController.didMove(toParent: self)
+    }
+    
+    func setupLayout() {
+        customNavBar.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(56)
+        }
+        
+        hostingController.view.snp.makeConstraints {
+            $0.top.equalTo(customNavBar.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+        
+        backgroundView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+            $0.height.equalTo(80)
+        }
+
+        naverMovementButton.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(view.convertByHeightRatio(8))
+        }
+    }
+    
+    func setupDelegate() {
+        
+    }
+}
+
+// MARK: - Show Preview
+
+//#if canImport(SwiftUI) && DEBUG
+//import SwiftUI
+//
+//#Preview("DetailStoreInfoViewController") {
+//    DetailStoreInfoViewController()
+//        .showPreview()
+//}
+//#endif

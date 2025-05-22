@@ -12,6 +12,7 @@ public enum ToastType {
     case noticeStudentCard
     case alarmStudentCard
     case changeUniversity
+    case moreBenefit
     
     var image: UIImage {
         switch self {
@@ -26,6 +27,9 @@ public enum ToastType {
             
         case .changeUniversity:
             return .toastEdit
+            
+        case .moreBenefit:
+            return .moreBenefitIcon
         }
     }
     
@@ -42,6 +46,9 @@ public enum ToastType {
             
         case .changeUniversity:
             return "학교가 변경되었어요"
+            
+        case .moreBenefit:
+            return "더 자세한 정보와 후기를 볼 수 있어요"
         }
     }
     
@@ -71,7 +78,7 @@ public enum ToastType {
     
     var padding: CGFloat {
         switch self {
-        case .noticeStudentCard, .alarmStudentCard:
+        case .noticeStudentCard, .alarmStudentCard, .moreBenefit:
             return 68
         default:
             return 16

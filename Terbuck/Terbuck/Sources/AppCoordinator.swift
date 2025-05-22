@@ -10,6 +10,7 @@ import UIKit
 
 import AuthInterface
 import HomeInterface
+import StoreInterface
 import MypageInterface
 import Shared
 import DesignSystem
@@ -20,17 +21,20 @@ final class AppCoordinator: Coordinator {
     private var navigationController: UINavigationController
     private let authFactory: AuthFactory
     private let homeTabFactory: HomeTabFactory
+    private let storeTabFactory: StoreTabFactory
     private let mypageTabFactory: MypageTabFactory
     
     init(
         navigationController: UINavigationController,
         authFactory: AuthFactory,
         homeTabFactory: HomeTabFactory,
+        storeTabFactory: StoreTabFactory,
         mypageTabFactory: MypageTabFactory
     ) {
         self.navigationController = navigationController
         self.authFactory = authFactory
         self.homeTabFactory = homeTabFactory
+        self.storeTabFactory = storeTabFactory
         self.mypageTabFactory = mypageTabFactory
     }
     
@@ -63,6 +67,7 @@ final class AppCoordinator: Coordinator {
         let mainCoordinator = MainCoordinator(
             tabBarController: tabBarController,
             homeTabFactory: homeTabFactory,
+            storeTabFactory: storeTabFactory,
             mypageTabFactory: mypageTabFactory
         )
 
