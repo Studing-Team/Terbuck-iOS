@@ -64,12 +64,16 @@ private extension StoreInfoTitleView {
         storeNameLabel.do {
             $0.font = DesignSystem.Font.uiFont(.textSemi18)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
+            $0.numberOfLines = 2
         }
         
         storeAddressLabel.do {
             $0.font = DesignSystem.Font.uiFont(.captionMedium12)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
         }
+        
+        storeNameLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        storeNameLabel.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
     }
     
     func setupHierarchy() {
@@ -87,6 +91,6 @@ private extension StoreInfoTitleView {
     }
     
     func setupStoreCategoryImage(_ type: CategoryType) {
-        storeCategoryImage.image = type.icon
+        storeCategoryImage.image = type.colorIcon
     }
 }

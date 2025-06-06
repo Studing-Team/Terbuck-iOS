@@ -10,6 +10,7 @@ import UIKit
 import Combine
 
 import DesignSystem
+import Shared
 
 import SnapKit
 import Then
@@ -24,6 +25,7 @@ public final class MypageViewController: UIViewController {
     // MARK: - Combine Publishers Properties
     
     private let selectedCellSubject = PassthroughSubject<(section: MyPageType, index: Int), Never>()
+    private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -60,6 +62,8 @@ public final class MypageViewController: UIViewController {
         setupDelegate()
         setupCollectionView()
         bindViewModel()
+        
+        viewLifeCycleSubject.send(.viewDidLoad)
     }
 }
 
@@ -68,10 +72,18 @@ public final class MypageViewController: UIViewController {
 private extension MypageViewController {
     func bindViewModel() {
         let input = MypageViewModel.Input(
+            viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher(),
             selectedCell: selectedCellSubject.eraseToAnyPublisher()
         )
         
         let output = mypageViewModel.transform(input: input)
+        
+        output.searchStudentInfoResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.collectionView.reloadSections(IndexSet(integer: MyPageType.userInfo.rawValue))
+            }
+            .store(in: &cancellables)
         
         output.navigationEvent
             .sink { [weak self] event in
@@ -93,6 +105,18 @@ private extension MypageViewController {
                         rightButton: TerbuckBottomButton(type: .draw),
                         rightButtonHandler: {}
                     )
+                default:
+                    break
+                }
+            }
+            .store(in: &cancellables)
+        
+        output.searchStudentInfoError
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] error in
+                switch error {
+                case .studentInfoFailed:
+                    self?.collectionView.reloadSections(IndexSet(integer: MyPageType.userInfo.rawValue))
                 default:
                     break
                 }
@@ -198,7 +222,7 @@ private extension MypageViewController {
         // Group 정의
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(86)
+            heightDimension: .estimated(61) //86
         )
         
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
@@ -269,8 +293,18 @@ extension MypageViewController: UICollectionViewDataSource, UICollectionViewDele
         case .userInfo:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MyInfoCollectionViewCell.className, for: indexPath) as! MyInfoCollectionViewCell
             
-            cell.configureCell(forModel: UserInfoModel(userName: "이민지", studentId: "20100890", university: "서울과학기술대학교", isAuthenticated: true))
+            let model = mypageViewModel.userInfoModelSubject.value
             
+            cell.configureCell(forModel: model )
+            
+            cell.bindingAction(action: { [weak self] in
+                if model == nil {
+                    self?.coordinator?.registerStudentID()
+                } else {
+                    self?.coordinator?.startChangeUniversity()
+                }
+            })
+
             return cell
         
         default:
@@ -287,14 +321,3 @@ extension MypageViewController: UICollectionViewDataSource, UICollectionViewDele
         selectedCellSubject.send((section: section, index: indexPath.row))
     }
 }
-
-// MARK: - Show Preview
-
-//#if canImport(SwiftUI) && DEBUG
-//import SwiftUI
-//
-//#Preview("MypageViewController") {
-//    MypageViewController()
-//        .showPreview()
-//}
-//#endif

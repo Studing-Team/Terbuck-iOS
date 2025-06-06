@@ -25,9 +25,9 @@ import Foundation
 ///     }
 /// }
 /// ```
-enum MyPageType: CaseIterable {
+enum MyPageType: Int, CaseIterable {
     /// 유저 정보를 표시하는 섹션
-    case userInfo
+    case userInfo = 0
     
     /// 알림 관련한 옵션을 표시하는 섹션
     case alarmSetting

@@ -15,7 +15,12 @@ public final class LoginFactoryImpl: LoginFactory {
     public init() {}
 
     public func makeLoginViewController(coordinator: AuthCoordinator) -> UIViewController {
-        let viewModel = LoginViewModel()
+        let repository = AuthRepositoryImpl()
+        let viewModel = LoginViewModel(
+            loginUseCase: SocialLoginUseCaseImpl(repository: repository),
+            appleServiceLoginUseCase: AppleServiceLoginUseCaseImpl(repository: repository),
+            kakaoServiceLoginUseCase: KakaoServiceLoginUseCaseImpl(repository: repository)
+        )
         
         return LoginViewController(viewModel: viewModel, coordinator: coordinator)
     }

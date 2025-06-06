@@ -21,7 +21,7 @@ public final class StoreListModelCollectionViewCell: UICollectionViewCell {
     
     // MARK: - UI Properties
 
-    private let storeAsyncImageView = AsyncImageView()
+    private let storeAsyncImageView = AsyncImageView(frame: .zero)
     
     private let storeInfoStackView = UIStackView()
     private let storeTitleStackView = UIStackView()
@@ -55,7 +55,7 @@ public extension StoreListModelCollectionViewCell {
         storeNameLabel.text = model.storeName
         storeAddressLabel.text = model.storeAddress
         benefitCountView.configureCount(count: model.benefitCount)
-        storeAsyncImageView.setImageData(model.image, type: .storelist)
+        storeAsyncImageView.setImage(model.imageURL, type: .storeListImage)
         
         setupStoreCategoryImage(model.category)
     }
@@ -72,7 +72,7 @@ private extension StoreListModelCollectionViewCell {
         
         storeAsyncImageView.do {
             $0.layer.cornerRadius = 10
-            $0.contentMode = .scaleAspectFit
+            $0.contentMode = .scaleAspectFill
             $0.clipsToBounds = true
             $0.backgroundColor = .green
         }
@@ -92,6 +92,7 @@ private extension StoreListModelCollectionViewCell {
         storeAddressLabel.do {
             $0.font = DesignSystem.Font.uiFont(.captionMedium12)
             $0.textColor =  DesignSystem.Color.uiColor(.terbuckBlack10)
+            $0.numberOfLines = 2
         }
         
         rightArrowImageView.do {

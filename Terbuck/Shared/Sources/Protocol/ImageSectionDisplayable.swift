@@ -8,5 +8,5 @@
 import Foundation
 
 public protocol ImageSectionDisplayable {
-    var images: Data { get }
+    var imageURL: String { get }
 }

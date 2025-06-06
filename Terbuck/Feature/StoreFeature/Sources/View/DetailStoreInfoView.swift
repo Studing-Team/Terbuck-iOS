@@ -35,9 +35,6 @@ struct DetailStoreInfoView: View {
                 }
             }
         }
-        .onAppear {
-            viewModel.fetchStoreBenefitData()
-        }
     }
 }
 

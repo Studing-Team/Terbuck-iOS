@@ -17,12 +17,16 @@ public final class ToastManager {
     
     private var isPresenting = false
     
-    public func showToast(from viewController: UIViewController, type: ToastType) {
+    public func showToast(from viewController: UIViewController, type: ToastType, action: (() -> Void)? = nil) {
         guard !isPresenting else { return }
 
         isPresenting = true
 
         let toastView = ToastMessageView(type: type)
+        
+        toastView.setAction {
+            action?()
+        }
         
         viewController.view.addSubview(toastView)
         
@@ -41,7 +45,7 @@ public final class ToastManager {
             toastView.transform = .identity
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             UIView.animate(withDuration: 0.3, animations: {
                 toastView.alpha = 0
                 toastView.transform = CGAffineTransform(translationX: 0, y: 20)

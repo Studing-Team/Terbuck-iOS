@@ -38,11 +38,12 @@ public struct PreviewImageView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 0) {
                                 ForEach(data.images.indices, id: \.self) { index in
-                                    Image(uiImage: UIImage(data: data.images[index])!)
-                                        .resizable()
-                                        .frame(width: geometry.size.width, height: geometry.size.width)
-                                        .clipped()
-                                        .id(index) // ID 설정
+                                    
+                                    AsyncImageViewRepresentable(
+                                        imageURL: data.images[index],
+                                        type: .partnershipImage
+                                    )
+                                    .frame(width: geometry.size.width, height: geometry.size.width)
                                 }
                             }
                         }

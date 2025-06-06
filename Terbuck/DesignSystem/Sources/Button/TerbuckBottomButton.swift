@@ -11,6 +11,7 @@ import SnapKit
 import Then
 
 public enum TerbuckButtonType {
+    case confirm
     case next
     case enter
     case register
@@ -20,9 +21,11 @@ public enum TerbuckButtonType {
     case save
     case close
     case moveNaver
+    case moveInstar
     
     var title: String {
         switch self {
+        case .confirm: return "확인"
         case .next: return "다음"
         case .enter: return "터벅 들어가기"
         case .register: return "등록하기"
@@ -32,6 +35,7 @@ public enum TerbuckButtonType {
         case .save: return "저장하기"
         case .close: return "닫기"
         case .moveNaver: return "네이버 플레이스로 이동"
+        case .moveInstar: return "인스타그램 게시물 보기"
         }
     }
     
@@ -73,7 +77,7 @@ public enum TerbuckButtonType {
     
     func resolvedBackgroundColor(isEnabled: Bool) -> UIColor {
         switch self {
-        case .enter, .register:
+        case .enter, .register, .save:
             return DesignSystem.Color.uiColor(isEnabled ? .terbuckGreen50 : .terbuckGreen10)
         default:
             return backgroundColor
@@ -86,14 +90,19 @@ public final class TerbuckBottomButton: AnimatedButton {
     // MARK: - Properties
     
     private var type: TerbuckButtonType
+    
+    public override var isUserInteractionEnabled: Bool {
+        didSet {
+            updateColor()
+        }
+    }
 
     // MARK: - Init
     
     public init(type: TerbuckButtonType, isEnabled: Bool = true) {
         self.type = type
         super.init(frame: .zero)
-        
-        self.isEnabled = isEnabled
+        self.isUserInteractionEnabled = isEnabled
         setupButton(type: type)
     }
     
@@ -117,7 +126,7 @@ private extension TerbuckBottomButton {
         
         self.tintColor = type.backgroundColor
 
-        config.baseBackgroundColor = self.isEnabled == true ? type.backgroundColor : type.resolvedBackgroundColor(isEnabled: false)
+        config.baseBackgroundColor = self.isUserInteractionEnabled == true ? type.backgroundColor : type.resolvedBackgroundColor(isEnabled: false)
         
         config.baseForegroundColor = .white
         configuration = config
@@ -132,7 +141,7 @@ private extension TerbuckBottomButton {
     
     func updateColor() {
         guard var config = configuration else { return }
-        config.baseBackgroundColor = isEnabled ? DesignSystem.Color.uiColor(.terbuckGreen50) : DesignSystem.Color.uiColor(.terbuckGreen10)
+        config.baseBackgroundColor = self.isUserInteractionEnabled ? DesignSystem.Color.uiColor(.terbuckGreen50) : DesignSystem.Color.uiColor(.terbuckGreen10)
         config.baseForegroundColor = .white
         configuration = config
     }

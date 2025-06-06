@@ -11,18 +11,18 @@ import Shared
 
 // AsyncImageView를 SwiftUI에서 사용하기 위한 UIViewRepresentable
 public struct AsyncImageViewRepresentable: UIViewRepresentable {
-    let imageData: Data
+    let imageURL: String
     let type: ImageType
     
     public func makeUIView(context: Context) -> AsyncImageView {
-        let imageView = AsyncImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.setImageData(imageData, type: type)
+        let imageView = AsyncImageView(frame: .zero)
+        imageView.setImage(imageURL, type: type)
         imageView.isUserInteractionEnabled = true
+
         return imageView
     }
     
     public func updateUIView(_ uiView: AsyncImageView, context: Context) {
-        uiView.setImageData(imageData, type: type)
+        uiView.setImage(imageURL, type: type)
     }
 }

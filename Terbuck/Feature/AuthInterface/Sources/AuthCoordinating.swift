@@ -8,6 +8,8 @@
 import Shared
 
 public protocol AuthCoordinating: Coordinator {
+    var delegate: AuthCoordinatorDelegate? { get set }
+    
     func startLogin()
     func startTermsOfService()
     func startUniversity()

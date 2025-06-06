@@ -9,17 +9,22 @@ import UIKit
 import StoreInterface
 
 public protocol DetailStoreFactory {
-    func makeDetailStoreViewController(coordinator: StoreCoordinator) -> UIViewController
+    func makeDetailStoreViewController(coordinator: StoreCoordinator, storeId: Int) -> UIViewController
 }
 
 public final class DetailStoreFactoryImpl: DetailStoreFactory {
 
     public init() {}
 
-    public func makeDetailStoreViewController(coordinator: StoreCoordinator) -> UIViewController {
+    public func makeDetailStoreViewController(coordinator: StoreCoordinator, storeId: Int) -> UIViewController {
         
         return DetailStoreInfoViewController(
-            detailStoreViewModel: DetailStoreInfoViewModel(),
+            detailStoreViewModel: DetailStoreInfoViewModel(
+                storeId: storeId,
+                searchDetailStoreUseCase: SearchDetailStoreUseCaseImpl(
+                    repository: StoreRepositoryImpl()
+                )
+            ),
             coordinator: coordinator
         )
     }

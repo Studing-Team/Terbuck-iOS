@@ -9,10 +9,7 @@ import Foundation
 import Shared
 
 public struct PartnershipModel: Identifiable, Hashable {
-    public var id: String {
-        return "\(partnershipName) - \(partnerCategoryType)"
-    }
-    
+    public var id: Int
     var partnershipName: String
     var partnerCategoryType: PartnerCategoryType
     var storeType: PartnerStoreType

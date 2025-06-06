@@ -120,14 +120,3 @@ private extension AlarmSettingViewControllor {
         
     }
 }
-
-// MARK: - Show Preview
-
-//#if canImport(SwiftUI) && DEBUG
-//import SwiftUI
-//
-//#Preview("AlarmSettingViewControllor") {
-//    AlarmSettingViewControllor()
-//        .showPreview()
-//}
-//#endif

@@ -9,6 +9,5 @@ import Shared
 
 public protocol StoreCoordinating: Coordinator {
     func startStoreMap()
-    func presentStoreModal()
-    func showDetailStoreInfo()
+    func showDetailStoreInfo(storeId: Int)
 }

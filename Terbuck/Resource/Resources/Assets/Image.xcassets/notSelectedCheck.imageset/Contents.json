@@ -1,19 +1,8 @@
 {
   "images" : [
     {
-      "filename" : "notSelectedCheck.png",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "filename" : "notSelectedCheck@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "filename" : "notSelectedCheck@3x.png",
-      "idiom" : "universal",
-      "scale" : "3x"
+      "filename" : "notSelectedCheck.svg",
+      "idiom" : "universal"
     }
   ],
   "info" : {

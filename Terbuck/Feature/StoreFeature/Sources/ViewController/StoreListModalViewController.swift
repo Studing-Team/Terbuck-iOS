@@ -242,13 +242,9 @@ public final class StoreListModalViewController: UIViewController {
 
 private extension StoreListModalViewController {
     func bindViewModel() {
-        let input = StoreMapViewModel.Input(
-             viewLifeCycleEventAction: Empty().eraseToAnyPublisher()
-        )
+        storeMapViewModel.viewLifeCycleSubject.send(.viewDidLoad)
         
-        let output = storeMapViewModel.transform(input: input)
-        
-        output.storeListData
+        storeMapViewModel.storeListSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] items in
                 print("💡 store list count: \(items.count)")
@@ -256,10 +252,29 @@ private extension StoreListModalViewController {
             }
             .store(in: &cancellables)
         
-        output.categoryData
+        storeMapViewModel.categoryItemsSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] items in
                 self?.applyCategorySnapshot(items: items)
+            }
+            .store(in: &cancellables)
+        
+        storeMapViewModel.markerTappedSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] tappedStore in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    if let data = self?.storeMapViewModel.storeListSubject.value {
+                        print("데이터 있음")
+                        if let index = data.firstIndex(where: { $0.id == tappedStore.id }) {
+                            print("인덱스 있음", index)
+                            self?.storeCollectionView.scrollToItem(
+                                at: IndexPath(item: index, section: 0),
+                                at: .centeredHorizontally,
+                                animated: true
+                            )
+                        }
+                    }
+                }
             }
             .store(in: &cancellables)
     }
@@ -370,14 +385,7 @@ extension StoreListModalViewController: UICollectionViewDelegate {
             // 일반 collectionView 관련 처리
             print("categoryCollectionView 눌림:", indexPath.row)
             
-            var category = storeMapViewModel.storeCategoryPublisher.value
-            
-            guard let index = category.firstIndex(where: { $0.isSelected == true }) else { return }
-            
-            category[index].isSelected = false
-            category[indexPath.row].isSelected = true
-            
-            storeMapViewModel.storeCategoryPublisher.send(category)
+            storeMapViewModel.storeCategoryPublisher.send(indexPath.row)
         }
     }
 }
@@ -392,7 +400,7 @@ extension StoreListModalViewController {
             
             let item = self?.storeMapViewModel.item(forId: itemId)
             
-            cell.configureCell(forModel: item ?? StoreListModel(image: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!, storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 49 지층", category: .restaurant, benefitCount: 2, latitude: 37.52015323931828, longitude: 126.67337768520443))
+            cell.configureCell(forModel: item ?? StoreListModel(id: 0, imageURL: "", storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 49 지층", category: .restaurant, benefitCount: 2, latitude: 37.52015323931828, longitude: 126.67337768520443))
             return cell
         }
     }

@@ -20,7 +20,7 @@ public class StoreCoordinator: StoreCoordinating {
     private let detailStoreFactory: DetailStoreFactory
     private let searchStoreFactory: SearchStoreFactory
     
-    private var storeMapViewModel = StoreMapViewModel()
+    private var storeMapViewModel = StoreMapViewModel(searchStoreMapUseCase: SearchStoreMapUseCaseImpl(repository: StoreRepositoryImpl()))
     
     // MARK: - Init
     
@@ -49,50 +49,8 @@ public class StoreCoordinator: StoreCoordinating {
         navigationController.pushViewController(storeMapVC, animated: true)
     }
     
-    public func presentStoreModal() {
-//        let modalVC = storeModalFactory.makeStoreModalViewController(storeMapViewModel: storeMapViewModel, coordinator: self)
-//        
-//        modalVC.modalPresentationStyle = .pageSheet // 또는 .automatic
-//
-//        if let sheet = modalVC.sheetPresentationController {
-//            let screenHeight = UIScreen.main.bounds.height
-//            
-//            sheet.detents = [
-//                .custom { _ in 120 },
-//                .medium(),
-//                .custom(identifier: .init("customDetent")) { _ in
-//                            return screenHeight - 168
-//                        }
-//            ]
-//            
-//            sheet.largestUndimmedDetentIdentifier = .init("customDetent")
-//            sheet.prefersGrabberVisible = true
-//            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
-//            
-//            // 여기가 핵심! 특정 Detent까진 어둡지 않게
-//            sheet.largestUndimmedDetentIdentifier = .medium
-//        }
-//        
-////        if let sheet = modalVC.sheetPresentationController {
-////            sheet.detents = [
-////                .custom { _ in 40 }, // 작음
-////                .medium(),            // 중간
-////                .large()              // 큼
-////            ]
-////            
-////            sheet.prefersGrabberVisible = true
-////            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
-////            sheet.largestUndimmedDetentIdentifier = .none // 배경 어둡게 처리 조정
-////        }
-////        
-////        // 모달 고정
-//        modalVC.isModalInPresentation = true
-////        modalVC.modalPresentationStyle = .overFullScreen
-//        navigationController.present(modalVC, animated: true)
-    }
-    
-    public func showDetailStoreInfo() {
-        let detailStoreVC = detailStoreFactory.makeDetailStoreViewController(coordinator: self)
+    public func showDetailStoreInfo(storeId: Int) {
+        let detailStoreVC = detailStoreFactory.makeDetailStoreViewController(coordinator: self, storeId: storeId)
         detailStoreVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(detailStoreVC, animated: true)
     }

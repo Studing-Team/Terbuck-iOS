@@ -10,9 +10,9 @@ import Foundation
 public struct PreviewImageModel {
     public let imageIndex: Int
     public let title: String
-    public let images: [Data]
+    public let images: [String]
     
-    public init(imageIndex: Int, title: String, images: [Data]) {
+    public init(imageIndex: Int, title: String, images: [String]) {
         self.imageIndex = imageIndex
         self.title = title
         self.images = images

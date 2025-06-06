@@ -8,13 +8,14 @@
 import UIKit
 
 public protocol UniversityFactory {
-    func makeUniversityViewController(coordinator: AuthCoordinator) -> UIViewController
+    func makeUniversityViewController(coordinator: AuthCoordinator, viewModel: UniversityViewModel) -> UIViewController
 }
 
 public final class UniversityFactoryImpl: UniversityFactory {
     public init() {}
 
-    public func makeUniversityViewController(coordinator: AuthCoordinator) -> UIViewController {
-        return UniversityInfoViewController()
+    public func makeUniversityViewController(coordinator: AuthCoordinator, viewModel: UniversityViewModel) -> UIViewController {
+      
+        return UniversityInfoViewController(viewModel: viewModel, coordinator: coordinator)
     }
 }

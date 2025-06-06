@@ -7,6 +7,10 @@
 //
 
 import UIKit
+import KakaoSDKAuth
+import KakaoSDKCommon
+
+import CoreKeyChain
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,8 +18,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        // MARK: - 카카오 로그인 설정
+        
+        print("설정", Config.kakaoNativeAppKey)
+        KakaoSDK.initSDK(appKey: Config.kakaoNativeAppKey)
+        
+        if isFirstLaunchAfterInstall() {
+            KeychainManager.shared.clearTokens()
+        }
         // Override point for customization after application launch.
         return true
+    }
+    
+    func isFirstLaunchAfterInstall() -> Bool {
+        let key = "hasLaunchedBefore"
+        let launched = UserDefaults.standard.bool(forKey: key)
+        if !launched {
+            UserDefaults.standard.set(true, forKey: key)
+        }
+        return !launched
     }
 
     // MARK: UISceneSession Lifecycle

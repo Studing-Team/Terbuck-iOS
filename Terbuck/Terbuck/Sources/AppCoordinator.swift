@@ -14,6 +14,7 @@ import StoreInterface
 import MypageInterface
 import Shared
 import DesignSystem
+import CoreKeyChain
 
 final class AppCoordinator: Coordinator {
     var childCoordinators: [any Shared.Coordinator] = []
@@ -39,13 +40,16 @@ final class AppCoordinator: Coordinator {
     }
     
     func start() {
-//        showLoginFlow()
-        showMainFlow()
+        if let token = KeychainManager.shared.load(key: .accessToken), !token.isEmpty {
+            showMainFlow()
+        } else {
+            showLoginFlow()
+        }
     }
     
     func showLoginFlow() {
         let authCoordinator = authFactory.makeAuthCoordinator(navigationController: navigationController)
-        
+        authCoordinator.delegate = self
         childCoordinators.append(authCoordinator)
         authCoordinator.start()
     }
@@ -75,5 +79,11 @@ final class AppCoordinator: Coordinator {
         childCoordinators.append(mainCoordinator)
 
         mainCoordinator.start()
+    }
+}
+
+extension AppCoordinator: AuthCoordinatorDelegate {
+    func didFinishAuthFlow() {
+        showMainFlow()
     }
 }

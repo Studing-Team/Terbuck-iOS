@@ -30,6 +30,23 @@ public extension UIViewController {
         present(customAlertViewController, animated: false)
     }
     
+    func showConfirmAlert(
+        mainTitle: String,
+        subTitle: String? = nil,
+        centerButton: TerbuckBottomButton,
+        centerButtonHandler: (() -> Void)? = nil
+    ) {
+        let customAlertViewController = CustomAlertViewController(
+            mainTitle: mainTitle,
+            subTitle: subTitle,
+            centerButton: centerButton,
+            centerButtonHandler: centerButtonHandler
+        )
+        
+        customAlertViewController.modalPresentationStyle = .overFullScreen
+        present(customAlertViewController, animated: false)
+    }
+    
     func showStoreBenefitAlert(storeName: String, address: String, category: CategoryType, benefitData: [String]) {
         let customStoreBenefitAlertViewController = CustomBenefitAlertViewController(
             name: storeName,

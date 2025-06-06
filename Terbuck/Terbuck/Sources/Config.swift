@@ -13,6 +13,7 @@ enum Config {
         enum Plist {
             static let naverId = "NMFClientId"
             static let naverMap = "NAVER_MAP_KEY"
+            static let kakaoNativeAppKey = "KAKAO_NATIVE_APP_KEY"
         }
     }
     
@@ -35,6 +36,13 @@ extension Config {
     static let naverMapKey: String = {
         guard let key = Config.infoDictionary[Keys.Plist.naverMap] as? String else {
             fatalError("⛔️NAVER_MAP_KEY is not set in plist for this configuration⛔️")
+        }
+        return key
+    }()
+    
+    static let kakaoNativeAppKey: String = {
+        guard let key = Config.infoDictionary[Keys.Plist.kakaoNativeAppKey] as? String else {
+            fatalError("⛔️KAKAO_NATIVE_APP_KEY is not set in plist for this configuration⛔️")
         }
         return key
     }()

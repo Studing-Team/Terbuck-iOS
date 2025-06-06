@@ -18,6 +18,7 @@ final class ToastMessageView: UIView {
     private let iconImageView = UIImageView()
     private let titleLabel = UILabel()
     private let actionLabel = UILabel()
+    private var labelAction: (() -> Void)?
     
     // MARK: - Init
     
@@ -31,6 +32,10 @@ final class ToastMessageView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setAction(action: @escaping () -> Void) {
+        self.labelAction = action
     }
 }
 
@@ -65,6 +70,8 @@ private extension ToastMessageView {
             $0.text = type.buttonTitle
             $0.font = DesignSystem.Font.uiFont(.captionMedium12)
             $0.addBottomBorderWithAttributedString(underlineColor: DesignSystem.Color.uiColor(.terbuckGreen10), textColor: DesignSystem.Color.uiColor(.terbuckGreen10))
+            $0.isUserInteractionEnabled = type.buttonTitle == "" ? false : true
+            $0.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(actionLabelTapped)))
             $0.isHidden = type.buttonTitle == "" ? true: false
         }
     }
@@ -82,5 +89,9 @@ private extension ToastMessageView {
         iconImageView.snp.makeConstraints {
             $0.size.equalTo(16)
         }
+    }
+    
+    @objc private func actionLabelTapped() {
+        labelAction?()
     }
 }

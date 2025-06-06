@@ -24,6 +24,11 @@ public final class AuthCheckButton: UIButton {
         }
     }
     
+    public enum AuthCheckType {
+        case notBorder
+        case nomal
+    }
+    
     // MARK: - Properties
     
     private var buttonState: ButtonState {
@@ -32,9 +37,15 @@ public final class AuthCheckButton: UIButton {
         }
     }
     
+    private var type: AuthCheckType
+    
     // MARK: - Init
     
-    public init(buttonState: ButtonState = .deactivate) {
+    public init(
+        type: AuthCheckType = .nomal,
+        buttonState: ButtonState = .deactivate
+    ) {
+        self.type = type
         self.buttonState = buttonState
         super.init(frame: .zero)
         setupButton()
@@ -49,22 +60,28 @@ public final class AuthCheckButton: UIButton {
     public func getButtonState() -> Bool {
         return self.buttonState == .activate ? true : false
     }
+    
+    public func changeButtonState(isSelect: Bool) {
+        self.buttonState = isSelect == true ? .activate: .deactivate
+    }
 }
 
 // MARK: - Private Extensions
 
 private extension AuthCheckButton {
     func setupButton() {
+        self.backgroundColor = .clear
+        self.layer.cornerRadius = 11
+        self.clipsToBounds = true
         
         self.snp.makeConstraints {
             $0.size.equalTo(22)
         }
-        
-        self.layer.cornerRadius = 11
-        self.clipsToBounds = true
     }
     
     func updateButtonState() {
+        self.configuration = nil
+        
         var config: UIButton.Configuration
 
         switch buttonState {
@@ -72,16 +89,20 @@ private extension AuthCheckButton {
             config = .filled()
             config.baseBackgroundColor = DesignSystem.Color.uiColor(.terbuckDarkGray10)
             config.image = .selectedCheck
-
+            self.layer.borderWidth = 0
+            
         case .deactivate:
             config = .bordered()
             config.baseBackgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
-            config.background.strokeColor = DesignSystem.Color.uiColor(.terbuckBlack5)
-            config.background.strokeWidth = 1
             config.image = .notSelectedCheck
+
+            if type == .nomal {
+                self.layer.borderWidth = 1
+                self.layer.borderColor = DesignSystem.Color.uiColor(.terbuckBlack5).cgColor
+            }
         }
 
-        config.imagePlacement = .all // 중앙에 이미지
+        config.imagePlacement = .all
         config.contentInsets = .zero
 
         self.configuration = config

@@ -52,6 +52,10 @@ public final class DetailStoreInfoViewController: UIViewController {
         setupHierarchy()
         setupLayout()
         setupDelegate()
+        
+        Task {
+            await detailStoreViewModel.fetchDetailStoreBenefitData()
+        }
     }
     
     public override func viewDidAppear(_ animated: Bool) {
@@ -78,6 +82,8 @@ private extension DetailStoreInfoViewController {
         customNavBar.setupBackButtonAction { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
+        
+        naverMovementButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         
         backgroundView.do {
             $0.backgroundColor = .clear
@@ -132,6 +138,12 @@ private extension DetailStoreInfoViewController {
     
     func setupDelegate() {
         
+    }
+    
+    @objc func buttonTapped() {
+        guard let url = URL(string: detailStoreViewModel.storeURL ?? ""),
+              UIApplication.shared.canOpenURL(url) else { return }
+        UIApplication.shared.open(url, options: [:])
     }
 }
 

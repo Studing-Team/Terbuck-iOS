@@ -97,6 +97,7 @@ private extension StoreCollectionViewCell {
         storeInfoTitleView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(22)
             $0.leading.equalToSuperview().inset(16)
+            $0.trailing.equalTo(moreBenefitButton.snp.leading).inset(10)
         }
         
         moreBenefitButton.snp.makeConstraints {

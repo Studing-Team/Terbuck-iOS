@@ -20,6 +20,7 @@ public struct ImageSectionView<T: ImageSectionDisplayable>: View {
     private let imageWidth: CGFloat
     private let imageHeight: CGFloat
     private let horizontalSpacing : CGFloat
+    private let imageType: ImageType
     
     // MARK: - Init
     
@@ -35,6 +36,8 @@ public struct ImageSectionView<T: ImageSectionDisplayable>: View {
         self.imageWidth = type == .detailPartner ? 335 : 203
         self.imageHeight = type == .detailPartner ? 335 : 203
         self.horizontalSpacing = type == .detailPartner ? 10 : 8
+        
+        imageType = type == .detailPartner ? .partnershipImage : .storeInfoImage
     }
     
     // MARK: - Body
@@ -45,9 +48,10 @@ public struct ImageSectionView<T: ImageSectionDisplayable>: View {
                 HStack(spacing: horizontalSpacing) {
                     ForEach(models.indices, id: \.self) { index in
                         AsyncImageViewRepresentable(
-                            imageData: models[index].images,
-                            type: .partnership
+                            imageURL: models[index].imageURL,
+                            type: imageType
                         )
+                        .scaledToFit()
                         .frame(width: imageWidth * (geometry.size.width / 375), height:  imageWidth * (geometry.size.width / 375))
                         .clipped()
                         .onTapGesture {
