@@ -31,9 +31,22 @@ let project = Project(
                         "UIColorName": "",
                         "UIImageName": "",
                     ],
+                    "BASE_URL": "$(BASE_URL)",
+                    "ACCESS_TOKEN_KEY": "$(ACCESS_TOKEN_KEY)",
+                    "REFRESH_TOKEN_KEY": "$(REFRESH_TOKEN_KEY)",
                     "NAVER_MAP_KEY": "$(NAVER_MAP_KEY)",
                     "NMFClientId": "$(NMFClientId)",
-                    "NSLocationWhenInUseUsageDescription": "현재 위치를 사용하려면 허용해주세요."
+                    "KAKAO_NATIVE_APP_KEY": "$(KAKAO_NATIVE_APP_KEY)",
+                    "NSLocationWhenInUseUsageDescription": "현재 위치를 사용하려면 허용해주세요.",
+                    "CFBundleURLTypes": [
+                        [
+                            "CFBundleURLSchemes": [ "kakao$(KAKAO_NATIVE_APP_KEY)" ]
+                        ]
+                    ],
+                    "LSApplicationQueriesSchemes": [
+                      "kakaokompassauth",
+                      "kakaolink"
+                    ]
                 ]
             ),
             sources: ["Terbuck/Sources/**"],
@@ -56,6 +69,7 @@ let project = Project(
                 .project(target: "StoreInterface", path: "Feature/StoreInterface"),
                 .project(target: "MypageFeature", path: "Feature/MypageFeature"),
                 .project(target: "MypageInterface", path: "Feature/MypageInterface"),
+                .project(target: "RegisterStudentCardFeature", path: "Feature/RegisterStudentCardFeature"),
             ]
         ),
         .target(

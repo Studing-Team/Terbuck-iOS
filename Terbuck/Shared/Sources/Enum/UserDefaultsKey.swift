@@ -9,4 +9,5 @@ import Foundation
 
 public enum UserDefaultsKey: String {
     case isStudentIDAuthenticated
+    case university
 }

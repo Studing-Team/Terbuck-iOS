@@ -15,3 +15,7 @@ public protocol Coordinator: AnyObject {
 public protocol ImagePreviewCoordinating: AnyObject {
     func showPreviewImage(vm: PreviewImageDisplayable)
 }
+
+public protocol AuthCoordinatorDelegate: AnyObject {
+    func didFinishAuthFlow()
+}
