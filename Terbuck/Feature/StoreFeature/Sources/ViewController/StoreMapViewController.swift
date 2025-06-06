@@ -20,6 +20,7 @@ public final class StoreMapViewController: UIViewController {
     
     // MARK: - Properties
     
+    private var markers: [NMFMarker] = []
     private let storeMapViewModel: StoreMapViewModel
     weak var coordinator: StoreCoordinator?
     private let locationManager = CLLocationManager()
@@ -27,17 +28,13 @@ public final class StoreMapViewController: UIViewController {
     
     // MARK: - Combine Properties
     
-    private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
-    
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
     
-    
     private let mapView = NMFMapView()
     private var currentLocationMarker: NMFMarker?
     private var bottomSheetVC: StoreListModalViewController
-    
     
     private let searchBarView = SearchBarView()
     private let myLocationButton = UIButton()
@@ -74,8 +71,7 @@ public final class StoreMapViewController: UIViewController {
         setupLocationManager()
         setupPresentModal()
         bindViewModel()
-        
-        viewLifeCycleSubject.send(.viewDidLoad)
+        updateMyLocation()
     }
 }
 
@@ -83,33 +79,25 @@ public final class StoreMapViewController: UIViewController {
 
 private extension StoreMapViewController {
     func bindViewModel() {
-        let input = StoreMapViewModel.Input(
-            viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher()
-        )
-        
-        let output = storeMapViewModel.transform(input: input)
-        
-        output.storeListData
+        storeMapViewModel.storeListSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] items in
-                // TODO: - 지도에 마커 업데이트
-                items.forEach {
-                    self?.updateMapMarkers($0)
-                }
+                self?.updateMap(with: items)
+//                self?.moveCameraToFitAllMarkers(items)
             }
             .store(in: &cancellables)
         
-        output.didSelectItem
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] itemId in
-                self?.coordinator?.showDetailStoreInfo()
-            }
-            .store(in: &cancellables)
-        
-        output.markerPinTappedResult
+        storeMapViewModel.markerTappedSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] itemId in
                 self?.bottomSheetVC.changeBottomSheet(.horizonList)
+            }
+            .store(in: &cancellables)
+        
+        storeMapViewModel.storeItemsTappedResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] itemId in
+                self?.coordinator?.showDetailStoreInfo(storeId: itemId)
             }
             .store(in: &cancellables)
     }
@@ -203,6 +191,14 @@ private extension StoreMapViewController {
     
     @objc func myLocationButtonTapped() {
         myLocationButton.isSelected.toggle()
+        updateMyLocation()
+    }
+    
+    @objc func searchBarTapped() {
+        self.coordinator?.searchStore()
+    }
+    
+    func updateMyLocation() {
         // 위치 권한 확인
         switch locationManager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
@@ -214,10 +210,6 @@ private extension StoreMapViewController {
 //            showLocationPermissionAlert()
             break
         }
-    }
-    
-    @objc func searchBarTapped() {
-        self.coordinator?.searchStore()
     }
 }
 
@@ -243,24 +235,55 @@ extension StoreMapViewController: NMFMapViewCameraDelegate {
         }
     }
     
-    func updateMapMarkers(_ items: StoreListModel) {
-        let marker = NMFMarker()
-        marker.iconImage = NMFOverlayImage(image: selectCategoryTypeImage(items.category))
-        marker.width = 34
-        marker.height = 42
-        marker.userInfo = ["store": items]
-        let storeLocation = NMGLatLng(lat: items.latitude, lng: items.longitude)
-        marker.position = storeLocation
-        
-        marker.mapView = mapView
-        
-        marker.touchHandler = { [weak self] (overlay) -> Bool in
-            if let store = overlay.userInfo["store"] as? StoreListModel {
-                print("마커가 눌린 가게: \(store.storeName)")
-                self?.moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
-                self?.storeMapViewModel.markerTappedSubject.send(store)
+    func moveCameraToFitAllMarkers(_ stores: [StoreListModel]) {
+        guard !stores.isEmpty else { return }
+
+        var minLat = stores.first!.latitude
+        var maxLat = stores.first!.latitude
+        var minLng = stores.first!.longitude
+        var maxLng = stores.first!.longitude
+
+        for store in stores {
+            minLat = min(minLat, store.latitude)
+            maxLat = max(maxLat, store.latitude)
+            minLng = min(minLng, store.longitude)
+            maxLng = max(maxLng, store.longitude)
+        }
+
+        let southWest = NMGLatLng(lat: minLat, lng: minLng)
+        let northEast = NMGLatLng(lat: maxLat, lng: maxLng)
+        let bounds = NMGLatLngBounds(southWest: southWest, northEast: northEast)
+
+        let cameraUpdate = NMFCameraUpdate(fit: bounds, padding: 50)
+        cameraUpdate.animation = .easeIn
+        mapView.moveCamera(cameraUpdate)
+    }
+
+    func updateMap(with items: [StoreListModel]) {
+        // 기존 마커 제거
+        markers.forEach { $0.mapView = nil }
+        markers.removeAll()
+
+        // 새 마커 추가
+        items.forEach {
+            let marker = NMFMarker()
+            marker.iconImage = NMFOverlayImage(image: selectCategoryTypeImage($0.category))
+            marker.width = 34
+            marker.height = 42
+            marker.userInfo = ["store": $0]
+            marker.position = NMGLatLng(lat: $0.latitude, lng: $0.longitude)
+            marker.mapView = mapView
+
+            marker.touchHandler = { [weak self] (overlay) -> Bool in
+                if let store = overlay.userInfo["store"] as? StoreListModel {
+                    print("마커가 눌린 가게: \(store.storeName)")
+                    self?.moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
+                    self?.storeMapViewModel.markerTappedSubject.send(store)
+                }
+                return true
             }
-            return true
+
+            markers.append(marker)
         }
     }
     
@@ -277,6 +300,9 @@ extension StoreMapViewController: NMFMapViewCameraDelegate {
         cameraUpdate.animation = .easeIn
         mapView.moveCamera(cameraUpdate)
         
+        storeMapViewModel.latitudeSubject.send(coordinate.latitude)
+        storeMapViewModel.longitudeSubject.send(coordinate.longitude)
+            
         // 마커 업데이트
         if currentLocationMarker == nil {
             currentLocationMarker = NMFMarker()

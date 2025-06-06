@@ -30,57 +30,68 @@ public final class DetailStoreInfoViewModel: PreviewImageDisplayable {
     public var sectionData: [DetailStoreSection: DetailStoreItem] = [:]
     public var selectImageData: PreviewImageModel?
     
-    public func fetchStoreBenefitData() {
-        let (headerModel, imageData, contentModel) = getStoreBenefit()
-        
-        var sectionData: [DetailStoreSection: DetailStoreItem] = [:]
-        sectionData[.title] = .storeTitle(headerModel)
-        
-        if let imageData {
-            sectionData[.image] = .storeImage(imageData)
+    public var storeURL: String?
+    private let searchDetailStoreUseCase: SearchDetailStoreUseCase
+    private let storeId: Int
+    
+    // MARK: - Init
+    
+    public init(
+        storeId: Int,
+        searchDetailStoreUseCase: SearchDetailStoreUseCase
+    ) {
+        self.storeId = storeId
+        self.searchDetailStoreUseCase = searchDetailStoreUseCase
+    }
+}
+
+// MARK: - Public Extension
+
+public extension DetailStoreInfoViewModel {
+    func fetchDetailStoreBenefitData() async {
+        do {
+            let (headerModel, imageData, contentModel) = try await getDetailStoreData()
+            
+            var sectionData: [DetailStoreSection: DetailStoreItem] = [:]
+            sectionData[.title] = .storeTitle(headerModel)
+            
+            if let imageData {
+                sectionData[.image] = .storeImage(imageData)
+            }
+            
+            sectionData[.benefit] = .storeBenefit(contentModel)
+            
+            self.sectionData = sectionData
+        } catch {
+            print("제휴업체 상세 조회 실패: \(error)")
         }
-        
-        sectionData[.benefit] = .storeBenefit(contentModel)
-        
-        self.sectionData = sectionData
     }
     
-    public func tappendImageSection(index: Int) {
+    func tappendImageSection(index: Int) {
         guard let titleItem = sectionData[.title], case .storeTitle(let titleModel) = titleItem else { return }
         
         guard let imageItem = sectionData[.image], case .storeImage(let imageModel) = imageItem else { return }
         
         selectImageData = PreviewImageModel(imageIndex: index,
                                             title: titleModel.storeName,
-                                            images: imageModel.map { $0.images })
+                                            images: imageModel.map { $0.imageURL })
     }
 }
 
-// MARK: - Private Extension
+// MARK: - Private API Extension
 
-private extension DetailStoreInfoViewModel {
-    func getStoreBenefit() -> StoreBenefitResult {
-        let headerModel = DetailStoreHeaderModel(
-            storeName: "터벅터벅 공릉점",
-            storeAddress: "노원구 동일로190길 49 지층"
-        )
-        
-        let imageData: [DetailStoreImageModel] = [
-            DetailStoreImageModel(DetailStoreimages: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!),
-            DetailStoreImageModel(DetailStoreimages: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!),
-            DetailStoreImageModel(DetailStoreimages: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!)
-        ]
-        
-        let contentModel = [
-            DetailStoreBenefitModel(benefitTitle: "18시 이전 방문 고객 소주 1병 제공"),
-            DetailStoreBenefitModel(benefitTitle: "25,000원 이상 주문 시, 빙수 또는 감자튀김 제공"),
-            DetailStoreBenefitModel(benefitTitle: "소주 볼링핀(10병) 인스타그램 스토리 총학과 꼬치네 계정 태그와 함께 업로드 시 치즈스틱 제공"),
-            DetailStoreBenefitModel(benefitTitle: "메이게츠에서의 영수증(결제일로부터 최대 3일) 보여줄 시 꼬치네에서 소주 1병 제공"),
-            DetailStoreBenefitModel(benefitTitle: "메이게츠에서의 영수증(결제일로부터 최대 3일) 보여줄 시 꼬치네에서 소주 1병 제공2"),
-            DetailStoreBenefitModel(benefitTitle: "메이게츠에서의 영수증(결제일로부터 최대 3일) 보여줄 시 꼬치네에서 소주 1병 제공3"),
-            DetailStoreBenefitModel(benefitTitle: "메이게츠에서의 영수증(결제일로부터 최대 3일) 보여줄 시 꼬치네에서 소주 1병 제공4")
-        ]
-        
-        return (headerModel, imageData, contentModel)
+private extension DetailStoreInfoViewModel {    
+    func getDetailStoreData() async throws -> StoreBenefitResult {
+        do {
+            
+            let result = try await self.searchDetailStoreUseCase.execute(storeId: storeId)
+            
+            storeURL = result.3
+            
+            return (result.0, result.1, result.2)
+        } catch (let error) {
+            print(error.localizedDescription)
+            throw error
+        }
     }
 }

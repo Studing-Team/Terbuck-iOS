@@ -99,20 +99,7 @@ final class SearchStoreViewController: UIViewController {
 
 private extension SearchStoreViewController {
     func bindViewModel() {
-        let input = StoreMapViewModel.Input(
-            viewLifeCycleEventAction: Empty().eraseToAnyPublisher()
-        )
-        
-        let output = storeMapViewModel.transform(input: input)
-        
-        output.searchStoreResult
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                
-                // TODO: - 검색 결과 CollectionView 로 업데이트
-                
-            }
-            .store(in: &cancellables)
+
     }
 }
 

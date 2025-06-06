@@ -9,11 +9,11 @@ import Foundation
 import Shared
 
 public struct DetailStoreImageModel: Hashable {
-    let DetailStoreimages: Data
+    let DetailStoreimageURL: String
 }
 
 extension DetailStoreImageModel: ImageSectionDisplayable {
-    public var images: Data {
-        DetailStoreimages
+    public var imageURL: String {
+        DetailStoreimageURL
     }
 }

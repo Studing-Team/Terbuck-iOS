@@ -11,77 +11,123 @@ import UIKit
 import DesignSystem
 import Shared
 
+enum StoreMapError: LocalizedError, Equatable {
+    case studentInfoFailed
+    case unknown
+
+    var errorDescription: String {
+        switch self {
+        case .studentInfoFailed:
+            return "유저 정보를 불러올 수 없어요."
+        case .unknown:
+            return "알 수 없는 오류가 발생했어요."
+        }
+    }
+}
+
 public final class StoreMapViewModel {
+    
+    // MARK: - UseCase Properties
+    
+    private var searchStoreMapUseCase: SearchStoreMapUseCase
     
     // MARK: - Properties
     
-    private var cachedItems: [String: StoreListModel] = [:]
-   
+    private var cachedItems: [Int: StoreListModel] = [:]
     
-    // MARK: - Combine Publishers Properties
+    private var latitude: Double?
+    private var longitude: Double?
     
-    let didSelectItemSubject = PassthroughSubject<Int, Never>()
-    let markerTappedSubject = PassthroughSubject<StoreListModel, Never>()
-    let searchTextFieldSubject = PassthroughSubject<String, Never>()
-    let searchStoreSubject = CurrentValueSubject<[StoreListModel], Never>([])
     
-    private let storeListDataSubject = CurrentValueSubject<[StoreListModel], Never>([])
-    var storeListDataPublisher: AnyPublisher<[StoreListModel], Never> {
-        storeListDataSubject.eraseToAnyPublisher()
-    }
+    // MARK: - Input Combine Publishers Properties
     
-    var storeCategoryPublisher = CurrentValueSubject<[CategoryModel], Never>([])
+    public let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
+    public let storeCategoryPublisher = PassthroughSubject<Int, Never>()
+    public let markerTappedSubject = PassthroughSubject<StoreListModel, Never>()
+    public let didSelectItemSubject = PassthroughSubject<Int, Never>()
+    public let latitudeSubject = CurrentValueSubject<Double?, Never>(nil)
+    public let longitudeSubject = CurrentValueSubject<Double?, Never>(nil)
     
+    // MARK: - Output Combine Publishers Properties
+    
+    public let storeListSubject = CurrentValueSubject<[StoreListModel], Never>([])
+    public let categoryItemsSubject = CurrentValueSubject<[CategoryModel], Never>([])
+    public let storeItemsTappedResult = PassthroughSubject<Int, Never>()
+
     private var cancellables = Set<AnyCancellable>()
     
-    // MARK: - Input
+    private let storeMapErrorSubject = PassthroughSubject<StoreMapError, Never>()
+
     
-    struct Input {
-        let viewLifeCycleEventAction: AnyPublisher<ViewLifeCycleEvent, Never>
-    }
+    // MARK: - Init
     
-    // MARK: - Output
-    
-    struct Output {
-        let storeListData: AnyPublisher<[StoreListModel], Never>
-        let categoryData: AnyPublisher<[CategoryModel], Never>
-        let didSelectItem: AnyPublisher<Int, Never>
-        let markerPinTappedResult: AnyPublisher<StoreListModel, Never>
-        let searchStoreResult: AnyPublisher<[StoreListModel], Never>
+    public init(
+        searchStoreMapUseCase: SearchStoreMapUseCase
+    ) {
+        self.searchStoreMapUseCase = searchStoreMapUseCase
+        binding()
+        fetchStoreCategory()
     }
     
     // MARK: - Public methods
     
-    func transform(input: Input) -> Output {
-        
-        input.viewLifeCycleEventAction
+    func binding() {
+        viewLifeCycleSubject
             .sink { [weak self] event in
                 guard let self else { return }
                 if event == .viewDidLoad {
-                    self.fetchStoreData()
                     self.fetchStoreCategory()
                 }
             }
             .store(in: &cancellables)
         
-        searchTextFieldSubject
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+        storeCategoryPublisher
+            .combineLatest(latitudeSubject, longitudeSubject)
+            .compactMap { category, lat, lng -> (Int, Double, Double)? in
+                guard let lat, let lng else { return nil }
+                return (category, lat, lng)
+            }
+            .handleEvents(receiveOutput: { [weak self] tuple in
+                let (categoryIndex, _, _) = tuple
+                self?.updateCategorySelection(to: categoryIndex)
+            })
+            .flatMap { [weak self] tuple -> AnyPublisher<[StoreListModel], Never> in
+                guard let self else {
+                    return Empty().eraseToAnyPublisher()
+                }
                 
-                // TODO: - 검색 관련한 로직
+                let (categoryIndex, lat, lng) = tuple
+                
+                let categoryItems = categoryItemsSubject.value
+                let categoryName = categoryIndex == 0 ? "" : categoryItems[categoryIndex].type.title
+                
+                return self.getStoreDataPublisher(category: categoryName, lat: lat, lng: lng)
+                    .handleEvents(receiveCompletion: { [weak self] completion in
+                        if case .failure(let error) = completion {
+                            self?.storeMapErrorSubject.send(error)
+                        }
+                    })
+                    .catch { _ in Just([]) }
+                    .eraseToAnyPublisher()
+            }
+            .sink { [weak self] storeList in
+                storeList.forEach {
+                    self?.cachedItems[$0.id] = $0
+                }
+                self?.storeListSubject.send(storeList)
             }
             .store(in: &cancellables)
-
-        return Output(
-            storeListData: storeListDataSubject.eraseToAnyPublisher(),
-            categoryData: storeCategoryPublisher.eraseToAnyPublisher(),
-            didSelectItem: didSelectItemSubject.eraseToAnyPublisher(),
-            markerPinTappedResult: markerTappedSubject.eraseToAnyPublisher(),
-            searchStoreResult: searchStoreSubject.eraseToAnyPublisher()
-        )
+        
+        
+        didSelectItemSubject
+            .sink { [weak self] index in
+                guard let data = self?.storeListSubject.value[index] else { return }
+                self?.storeItemsTappedResult.send(data.id)
+            }
+            .store(in: &cancellables)
     }
     
-    func item(forId id: String) -> StoreListModel? {
+    func item(forId id: Int) -> StoreListModel? {
         return cachedItems[id]
     }
     
@@ -106,43 +152,57 @@ public final class StoreMapViewModel {
         }
         return result
     }
+    
+    func updateLocationData(lat: Double, lng: Double) {
+        print("위치 업데이트 됐습니다.", lat, lng)
+        latitude = lat
+        longitude = lng
+    }
 }
 
+// MARK: - Private API Extension
+
 private extension StoreMapViewModel {
-    func fetchStoreData() {
-        getStoreDataPublisher()
-            .sink { [weak self] data in
-                guard let self else { return }
-                print("💡 store list count: \(data.count)")
-                self.cachedItems = Dictionary(uniqueKeysWithValues: data.map { ($0.id, $0) })
-                self.storeListDataSubject.send(data)
+    func getStoreDataPublisher(category: String, lat: Double, lng: Double) -> AnyPublisher<[StoreListModel], StoreMapError> {
+        return Future { [weak self] promise in
+            guard let self else {
+                promise(.failure(.unknown))
+                return
             }
-            .store(in: &cancellables)
+ 
+            Task {
+                do {
+                    let result = try await self.searchStoreMapUseCase.execute(category: category, latitude: String(lat), longitude: String(lng))
+                    promise(.success(result))
+                } catch {
+                    promise(.failure(.studentInfoFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
     }
-    
+}
+
+
+private extension StoreMapViewModel {
     func fetchStoreCategory() {
         let category = CategoryType.allCases.map {
             return CategoryModel(type: $0, isSelected: $0.title == "전체" ? true : false)
         }
         
-        storeCategoryPublisher.send(category)
+        categoryItemsSubject.send(category)
+        storeCategoryPublisher.send(0)
     }
     
-    func getStoreDataPublisher() -> AnyPublisher<[StoreListModel], Never> {
-        return Future { [weak self] promise in
-            guard let self = self else { return }
-            
-            let example = [
-                StoreListModel(image: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!, storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 490 지층", category: .restaurant, benefitCount: 2, latitude: 37.52468678447179, longitude: 126.6755638860265),
-                StoreListModel(image: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!, storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 491 지층", category: .restaurant, benefitCount: 2, latitude: 37.52292332189077, longitude: 126.6699605853461),
-                StoreListModel(image: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!, storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 492 지층", category: .restaurant, benefitCount: 2, latitude: 37.52201274703535, longitude: 126.67299627544598),
-                StoreListModel(image: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!, storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 493 지층", category: .restaurant, benefitCount: 2, latitude: 37.522782559157285, longitude: 126.6728006056389),
-                StoreListModel(image: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!, storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 494 지층", category: .restaurant, benefitCount: 2, latitude: 37.522750328076135, longitude: 126.6709285530035),
-                StoreListModel(image: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!, storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 495 지층", category: .restaurant, benefitCount: 2, latitude: 37.52202973167599, longitude: 126.67425185979165),
-                StoreListModel(image: UIImage.dumyPartnership.jpegData(compressionQuality: 1)!, storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 496 지층", category: .restaurant, benefitCount: 2, latitude: 37.52015323931828, longitude: 126.67337768520443)]
-            
-            promise(.success(example))
-        }
-        .eraseToAnyPublisher()
+    func updateCategorySelection(to selectRow: Int) {
+        
+        var category = categoryItemsSubject.value
+        guard let index = category.firstIndex(where: { $0.isSelected }) else { return }
+        guard index != selectRow else { return }
+
+        category[index].isSelected = false
+        category[selectRow].isSelected = true
+        
+        categoryItemsSubject.send(category)
     }
 }

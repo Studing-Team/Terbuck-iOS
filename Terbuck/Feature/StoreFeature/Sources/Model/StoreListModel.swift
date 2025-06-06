@@ -10,11 +10,8 @@ import Foundation
 import DesignSystem
 
 public struct StoreListModel: Identifiable, Hashable {
-    public var id: String {
-        return "\(storeName)-\(storeAddress)"
-    }
-    
-    let image: Data
+    public var id: Int
+    let imageURL: String
     let storeName: String
     let storeAddress: String
     let category: CategoryType

@@ -10,4 +10,5 @@ import Shared
 
 public struct DetailStoreBenefitModel: Hashable {
     let benefitTitle: String
+    let detailList: [String]
 }
