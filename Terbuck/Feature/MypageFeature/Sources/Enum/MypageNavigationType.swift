@@ -13,6 +13,7 @@ import Foundation
 /// - Note: 각 케이스는 마이페이지에서 특정 화면으로의 이동을 나타내며, 사용자 계정과 관련된 모든 기능을 포함합니다.
 ///
 /// ## 열거형의 각 케이스
+///   - `userInfo`: 학교 정보 변경 화면으로 이동
 ///   - `alarmSetting`: 알림 설정 화면으로 이동
 ///   - `inquiry`: 고객센터 화면으로 이동
 ///   - `serviceGuide`: 공지사항 화면으로 이동
@@ -21,6 +22,9 @@ import Foundation
 ///   - `withDraw`: 회원탈퇴 기능
 ///
 public enum MypageNavigationType {
+    /// 유저 정보 화면
+    case userInfo
+    
     /// 알림 설정 화면
     case alarmSetting
     

@@ -8,11 +8,16 @@
 import UIKit
 
 import DesignSystem
+import Shared
 
 import SnapKit
 import Then
 
 public final class MyInfoCollectionViewCell: UICollectionViewCell {
+    
+    // MARK: - Properties
+    
+    var buttonAction: (() -> Void)?
     
     // MARK: - UI Properties
     
@@ -33,6 +38,7 @@ public final class MyInfoCollectionViewCell: UICollectionViewCell {
         setupStyle()
         setupHierarchy()
         setupLayout()
+        setupButtonAction()
     }
     
     required init?(coder: NSCoder) {
@@ -43,12 +49,21 @@ public final class MyInfoCollectionViewCell: UICollectionViewCell {
 // MARK: - Extensions
 
 public extension MyInfoCollectionViewCell {
-    func configureCell(forModel model: UserInfoModel) {
-        nameLabel.text = model.userName
-        universityLabel.text = model.university
-        studentIdLabel.text = model.studentId
-        
-        updateStyle(isAuth: model.isAuthenticated)
+    func configureCell(forModel model: UserInfoModel?) {
+        if let model {
+            nameLabel.text = model.userName
+            universityLabel.text = model.university
+            studentIdLabel.text = model.studentId
+            
+            updateStyle(isAuth: model.isAuthenticated)
+        } else {
+            updateStyle(isAuth: false)
+            universityLabel.text = UserDefaultsManager.shared.string(for: .university)
+        }
+    }
+    
+    func bindingAction(action: @escaping () -> Void) {
+        buttonAction = action
     }
 }
 
@@ -105,6 +120,24 @@ private extension MyInfoCollectionViewCell {
     
     func updateStyle(isAuth: Bool) {
         contentView.backgroundColor = DesignSystem.Color.uiColor(isAuth ? .terbuckGreen50 : .terbuckBlack10)
-        self.userInfoStackView.isHidden = !isAuth
+        
+        if isAuth {
+            if !myInfoVerticalStackView.arrangedSubviews.contains(userInfoStackView) {
+                myInfoVerticalStackView.addArrangedSubview(userInfoStackView)
+            }
+        } else {
+            if myInfoVerticalStackView.arrangedSubviews.contains(userInfoStackView) {
+                myInfoVerticalStackView.removeArrangedSubview(userInfoStackView)
+                userInfoStackView.removeFromSuperview()
+            }
+        }
+    }
+    
+    func setupButtonAction() {
+        authStudentButton.addTarget(self, action: #selector(authAction), for: .touchUpInside)
+    }
+    
+    @objc func authAction() {
+        buttonAction?()
     }
 }

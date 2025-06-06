@@ -8,6 +8,7 @@
 import UIKit
 
 import MypageInterface
+import RegisterStudentCardFeature
 import Shared
 
 public class MypageCoordinator: MypageCoordinating {
@@ -16,17 +17,20 @@ public class MypageCoordinator: MypageCoordinating {
     private let navigationController: UINavigationController
     private let mypageFactory: MypageFactory
     private let alarmFactory: AlarmSettingFactory
+    private let changeUniversityFactory: ChangeUniversityFactory
     
     // MARK: - Init
     
     public init(
         navigationController: UINavigationController,
         mypageFactory: MypageFactory,
-        alarmFactory: AlarmSettingFactory
+        alarmFactory: AlarmSettingFactory,
+        changeUniversityFactory: ChangeUniversityFactory
     ) {
         self.navigationController = navigationController
         self.mypageFactory = mypageFactory
         self.alarmFactory = alarmFactory
+        self.changeUniversityFactory = changeUniversityFactory
     }
     
     // MARK: - Method
@@ -44,5 +48,21 @@ public class MypageCoordinator: MypageCoordinating {
         let alarmSettingVC = alarmFactory.makeAlarmSettingViewController(coordinator: self)
         alarmSettingVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(alarmSettingVC, animated: true)
+    }
+    
+    public func startChangeUniversity() {
+        let changeUniversityVC = changeUniversityFactory.makeChangeUniversityViewController(coordinator: self)
+        changeUniversityVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(changeUniversityVC, animated: true)
+    }
+    
+    public func registerStudentID() {
+        let viewModel = RegisterStudentCardViewModel(
+            registerStudentIDUseCase: RegisterStudentIDUseCaseImpl(repository: RegisterRepositoryImpl())
+        )
+        
+        let registerStudentIDCardVC = RegisterStudentCardViewController(viewModel: viewModel)
+        registerStudentIDCardVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(registerStudentIDCardVC, animated: true)
     }
 }
