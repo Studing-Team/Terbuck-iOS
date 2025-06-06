@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TerbuckUnderlineLabel: UILabel {
+public final class TerbuckUnderlineLabel: UILabel {
     
     public var underlineColor: UIColor = .black {
         didSet { updateAttributedText() }
