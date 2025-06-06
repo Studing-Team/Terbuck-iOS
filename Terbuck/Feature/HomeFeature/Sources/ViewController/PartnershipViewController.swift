@@ -26,6 +26,7 @@ final class PartnershipViewController: UIViewController {
     // MARK: - UI Properties
     
     private let customNavBar = CustomNavigationView(type: .nomal, title: "파트너십 혜택")
+    private let bottomButton = TerbuckBottomButton(type: .moveInstar)
     
     // MARK: - Init
     
@@ -49,6 +50,10 @@ final class PartnershipViewController: UIViewController {
         setupStyle()
         setupHierarchy()
         setupLayout()
+
+        Task {
+            await partnershipViewModel.fetchPartnershipData()
+        }
     }
 }
 

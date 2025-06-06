@@ -64,6 +64,10 @@ public final class TermsListView: UIView {
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    public func changeButtonState(isSelect: Bool) {
+        self.checkButton.changeButtonState(isSelect: isSelect)
+    }
 }
 
 // MARK: - Private Extensions
@@ -89,7 +93,7 @@ private extension TermsListView {
         
         titleLabel.snp.makeConstraints {
             $0.centerY.equalTo(checkButton)
-            $0.leading.equalTo(checkButton.snp.trailing).offset(6)
+            $0.leading.equalTo(checkButton.snp.trailing).offset(10)
         }
         
         arrowImageView.snp.makeConstraints {

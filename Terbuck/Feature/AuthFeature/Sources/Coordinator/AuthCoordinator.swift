@@ -18,6 +18,10 @@ public final class AuthCoordinator: AuthCoordinating {
     private let termsFactory: TermsFactory
     private let universityFactory: UniversityFactory
     
+    public weak var delegate: AuthCoordinatorDelegate?
+    
+    private var signupViewModel: TermsOfServiceViewModel?
+    
     // MARK: - Init
     
     public init(
@@ -42,16 +46,29 @@ public final class AuthCoordinator: AuthCoordinating {
     }
 
     public func startTermsOfService() {
-        let termsOfServiceVC = termsFactory.makeTermsViewController(coordinator: self)
+        signupViewModel = termsFactory.makeTermsViewModel()
+        
+        guard let signupViewModel else { return }
+        
+        let termsOfServiceVC = termsFactory.makeTermsViewController(coordinator: self, viewModel: signupViewModel)
+        termsOfServiceVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(termsOfServiceVC, animated: true)
     }
     
     public func startUniversity() {
-        let universityVC = universityFactory.makeUniversityViewController(coordinator: self)
+        let viewModel = UniversityViewModel(
+            signupUseCase: SignupUseCaseImpl(repository: AuthRepositoryImpl())
+        )
+        
+        let universityVC = universityFactory.makeUniversityViewController(
+            coordinator: self,
+            viewModel: viewModel
+        )
+        universityVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(universityVC, animated: true)
     }
 
     public func finishAuthFlow() {
-        // TODO: 회원가입 후
+        delegate?.didFinishAuthFlow()
     }
 }

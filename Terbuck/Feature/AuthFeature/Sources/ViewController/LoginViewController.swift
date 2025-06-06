@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 import DesignSystem
 
@@ -13,6 +14,10 @@ import SnapKit
 import Then
 
 public final class LoginViewController: UIViewController {
+    
+    // MARK: - Combine Properties
+    
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Properties
     
@@ -46,12 +51,54 @@ public final class LoginViewController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
-        
         setupStyle()
         setupHierarchy()
         setupLayout()
         setupDelegate()
+        bindViewModel()
+    }
+}
+
+// MARK: - Private Bind Extensions
+
+private extension LoginViewController {
+    func bindViewModel() {
+        let input = LoginViewModel.Input(
+            appleLoginButtonTapped: appleLoginButton.tapPublisher,
+            kakaoLoginButtonTapped: kakaoLoginButton.tapPublisher
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.loginResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
+                switch result {
+                case .success(let showSignup):
+                    if showSignup {
+                        self?.coordinator?.startTermsOfService()
+                    } else {
+                        self?.coordinator?.finishAuthFlow()
+                    }
+                case .failure(let error):
+                    switch error {
+                    case .appleLoginFailed:
+                        break
+                    case .kakaoLoginFailed:
+                        break
+                    case .serverLoginFailed:
+                        break
+                    case .unknown:
+                        self?.showConfirmAlert(
+                            mainTitle: error.errorDescription,
+                            subTitle: "잠시 후, 다시 시도해주세요.",
+                            centerButton: TerbuckBottomButton(type: .confirm),
+                            centerButtonHandler: {}
+                        )
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -59,6 +106,9 @@ public final class LoginViewController: UIViewController {
 
 private extension LoginViewController {
     func setupStyle() {
+        view.backgroundColor = .white
+        navigationItem.backButtonTitle = ""
+        
         terbuckTitleLabel.do {
             $0.text = "한 걸음마다 있는 우리 학교 제휴 혜택"
             $0.font = DesignSystem.Font.uiFont(.textRegular16)

@@ -8,13 +8,18 @@
 import UIKit
 
 public protocol TermsFactory {
-    func makeTermsViewController(coordinator: AuthCoordinator) -> UIViewController
+    func makeTermsViewController(coordinator: AuthCoordinator, viewModel: TermsOfServiceViewModel) -> UIViewController
+    func makeTermsViewModel() -> TermsOfServiceViewModel
 }
 
 public final class TermsOfServiceFactoryImpl: TermsFactory {
     public init() {}
 
-    public func makeTermsViewController(coordinator: AuthCoordinator) -> UIViewController {
-        return TermsOfServiceViewController()
+    public func makeTermsViewController(coordinator: AuthCoordinator, viewModel: TermsOfServiceViewModel) -> UIViewController {
+        return TermsOfServiceViewController(viewModel: makeTermsViewModel(), coordinator: coordinator)
+    }
+    
+    public func makeTermsViewModel() -> TermsOfServiceViewModel {
+        return TermsOfServiceViewModel()
     }
 }
