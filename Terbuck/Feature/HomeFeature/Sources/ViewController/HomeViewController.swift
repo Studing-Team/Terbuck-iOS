@@ -62,6 +62,8 @@ final class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        UserDefaultsManager.shared.set("서울과학기술대학교", for: .university)
+//        UserDefaults.standard.set("서울과학기술대학교", forKey: "University")
         viewLifeCycleSubject.send(.viewDidLoad)
         
         setupStyle(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
@@ -102,6 +104,19 @@ private extension HomeViewController {
                 } else {
                     guard let holeLocation = self?.holeLocation else { return }
                     self?.coordinator?.showOnboardiing(location: holeLocation)
+                }
+            }
+            .store(in: &cancellables)
+        
+        output.authStudentResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] authResult in
+                guard let self else { return }
+                
+                if authResult == false {
+                    ToastManager.shared.showToast(from: self, type: .notAuthorized) {
+                        self.coordinator?.registerStudentID()
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -170,7 +185,7 @@ private extension HomeViewController {
 private extension HomeViewController {
     @objc private func refreshData() {
         // 🔄 데이터 갱신 로직 실행
-        self.homeViewModel.selectedFilterSubject.send(.restaurent)
+        self.homeViewModel.selectedFilterSubject.send(homeViewModel.selectedFilterSubject.value)
 
         // 📉 애니메이션 종료
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -236,14 +251,14 @@ private extension HomeViewController {
     func createStoreSection() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(200)
+            heightDimension: .estimated(400)
         )
         
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(200)
+            heightDimension: .estimated(400)
         )
         
         let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
@@ -325,7 +340,7 @@ private extension HomeViewController {
         // 배경 추가
         let backgroundDecoration = NSCollectionLayoutDecorationItem.background(
             elementKind: "background")
-        backgroundDecoration.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 0, bottom: 0, trailing: 0)
+        backgroundDecoration.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 0, bottom: 5, trailing: 0)
         section.decorationItems = [backgroundDecoration]
 
         // 스크롤 비활성화 (단일 셀이므로)
@@ -342,8 +357,8 @@ extension HomeViewController: UICollectionViewDelegate {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
         
         switch item {
-        case .partnership:
-            self.coordinator?.showPartnership()
+        case .partnership(let model):
+            self.coordinator?.showPartnership(partnershipId: model.id)
         default:
             break
         }

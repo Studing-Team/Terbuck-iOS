@@ -9,10 +9,7 @@ import Foundation
 import DesignSystem
 
 public struct NearStoreModel: Identifiable, Hashable {
-    public var id: String {
-        return "\(storeName)-\(address)"
-    }
-
+    public var id: Int
     var storeName: String
     var cateotry: CategoryType
     var address: String

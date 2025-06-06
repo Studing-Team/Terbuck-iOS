@@ -8,6 +8,7 @@
 import UIKit
 
 import HomeInterface
+import RegisterStudentCardFeature
 import DesignSystem
 import Shared
 
@@ -16,15 +17,18 @@ public class HomeCoordinator: HomeCoordinating {
     
     private let navigationController: UINavigationController
     private let homeFactory: HomeFactory
+    private let partnershipFactory: PartnershipFactory
     
     // MARK: - Init
     
     public init(
         navigationController: UINavigationController,
-        homeFactory: HomeFactory
+        homeFactory: HomeFactory,
+        partnershipFactory: PartnershipFactory
     ) {
         self.navigationController = navigationController
         self.homeFactory = homeFactory
+        self.partnershipFactory = partnershipFactory
     }
     
     // MARK: - Method
@@ -51,12 +55,10 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
     }
     
     /// 파트너십 혜택 VC
-    public func showPartnership() {
-        let partnershipVM = PartnershipViewModel()
-        
-        let partnershipVC = PartnershipViewController(
-            partnershipViewModel: partnershipVM,
-            coordinator: self
+    public func showPartnership(partnershipId: Int) {
+        let partnershipVC = partnershipFactory.makePartnershipViewController(
+            coordinator: self,
+            partnershipId: partnershipId
         )
         
         partnershipVC.hidesBottomBarWhenPushed = true
@@ -82,7 +84,11 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
     }
     
     public func registerStudentID() {
-        let registerStudentIDCardVC = RegisterStudentCardViewController()
+        let viewModel = RegisterStudentCardViewModel(
+            registerStudentIDUseCase: RegisterStudentIDUseCaseImpl(repository: RegisterRepositoryImpl())
+        )
+        
+        let registerStudentIDCardVC = RegisterStudentCardViewController(viewModel: viewModel)
         registerStudentIDCardVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(registerStudentIDCardVC, animated: true)
     }

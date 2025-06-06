@@ -44,8 +44,5 @@ struct PartnershipView: View {
             }
             .background(Color.white)
         }
-        .onAppear {
-            viewModel.fetchPartnershipData()
-        }
     }
 }

@@ -15,10 +15,12 @@ public final class HomeTabFactoryImpl: HomeTabFactory {
     public func makeHomeCoordinator(navigationController: UINavigationController) -> HomeCoordinating {
         
         let homeFactory = HomeFactoryImpl()
+        let partnershipFactory = PartnershipFactoryImpl()
         
         return HomeCoordinator(
             navigationController: navigationController,
-            homeFactory: homeFactory
+            homeFactory: homeFactory,
+            partnershipFactory: partnershipFactory
         )
     }
 }
