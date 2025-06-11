@@ -8,7 +8,9 @@
 import Foundation
 import Combine
 
+import CoreKeyChain
 import Shared
+import DesignSystem
 
 enum MypageError: LocalizedError, Equatable {
     case studentInfoFailed
@@ -34,6 +36,7 @@ public final class MypageViewModel {
     
     private let navigationEventSubject = PassthroughSubject<MypageNavigationType, Never>()
     private let searchStudentInfoErrorSubject = PassthroughSubject<MypageError, Never>()
+    private let toasterMessageSubject = PassthroughSubject<ToastType, Never>()
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -50,6 +53,7 @@ public final class MypageViewModel {
     struct Input {
         let viewLifeCycleEventAction: AnyPublisher<ViewLifeCycleEvent, Never>
         let selectedCell: AnyPublisher<(section: MyPageType, index: Int), Never>
+        let logoutButtonTapped: AnyPublisher<Void, Never>
     }
     
     // MARK: - Output
@@ -57,7 +61,9 @@ public final class MypageViewModel {
     struct Output {
         let searchStudentInfoResult: AnyPublisher<Void, Never>
         let navigationEvent: AnyPublisher<MypageNavigationType, Never>
+        let logoutResult: AnyPublisher<Bool, Never>
         let searchStudentInfoError: AnyPublisher<MypageError, Never>
+        let toasterMessageResult: AnyPublisher<ToastType, Never>
     }
     
     // MARK: - Init
@@ -72,23 +78,29 @@ public final class MypageViewModel {
     
     func transform(input: Input) -> Output {
         let searchResult = input.viewLifeCycleEventAction
-            .flatMap { [weak self] _ -> AnyPublisher<Void, Never> in
+            .flatMap { [weak self] event -> AnyPublisher<Void, Never> in
                 guard let self else {
                     return Empty().eraseToAnyPublisher()
                 }
                 
-                return self.searchMyInfoPublisher()
-                    .handleEvents(receiveOutput: { [weak self] model in
-                        self?.userInfoModelSubject.send(model) // ✅ 상태 업데이트
-                    }, receiveCompletion: { [weak self] completion in
-                        if case .failure(let error) = completion {
-                            self?.searchStudentInfoErrorSubject.send(error) // ✅ 에러 전달
-                        }
-                    })
-                    .map { _ in () } // ✅ 의미 없는 Void 값으로 변환
-                    .catch { _ in Empty() } // ✅ 에러 발생해도 스트림 유지
-                    .eraseToAnyPublisher()
+                switch event {
+                case .viewDidLoad:
+                    return self.performSearchMyInfo()
+                    
+                case .viewWillAppear:
+                    let savedUniversityName = UserDefaultsManager.shared.string(for: .university)
+                    let currentUniversityName = self.userInfoModelSubject.value?.university
+                    
+                    if savedUniversityName != currentUniversityName {
+                        toasterMessageSubject.send(.changeUniversity)
+                        
+                        return self.performSearchMyInfo()
+                    } else {
+                        return Empty().eraseToAnyPublisher()
+                    }
+                }
             }
+            .eraseToAnyPublisher()
         
         input.selectedCell
             .sink { [weak self] section, index in
@@ -98,10 +110,22 @@ public final class MypageViewModel {
             }
             .store(in: &cancellables)
         
+        let logoutResult = input.logoutButtonTapped
+            .map { _ -> Bool in
+                KeychainManager.shared.clearTokens()
+                FileStorageManager.shared.delete(type: .studentIdCard)
+                UserDefaultsManager.shared.remove(.isStudentIDAuthenticated)
+                UserDefaultsManager.shared.remove(.university)
+                
+                return true
+            }
+        
         return Output(
             searchStudentInfoResult: searchResult.eraseToAnyPublisher(),
             navigationEvent: navigationEventSubject.eraseToAnyPublisher(),
-            searchStudentInfoError: searchStudentInfoError
+            logoutResult: logoutResult.eraseToAnyPublisher(),
+            searchStudentInfoError: searchStudentInfoError,
+            toasterMessageResult: toasterMessageSubject.eraseToAnyPublisher()
         )
     }
 }
@@ -119,6 +143,7 @@ private extension MypageViewModel {
             Task {
                 do {
                     let result = try await self.searchStudentInfoUseCase.execute()
+                    UserDefaultsManager.shared.set(result.isAuthenticated, for: .isStudentIDAuthenticated)
                     promise(.success(result))
                 } catch {
                     promise(.failure(.studentInfoFailed))
@@ -132,6 +157,20 @@ private extension MypageViewModel {
 // MARK: - Private Methods Extension
 
 private extension MypageViewModel {
+    func performSearchMyInfo() -> AnyPublisher<Void, Never> {
+        return searchMyInfoPublisher()
+            .handleEvents(receiveOutput: { [weak self] model in
+                self?.userInfoModelSubject.send(model)
+            }, receiveCompletion: { [weak self] completion in
+                if case .failure(let error) = completion {
+                    self?.searchStudentInfoErrorSubject.send(error)
+                }
+            })
+            .map { _ in () }
+            .catch { _ in Empty() }
+            .eraseToAnyPublisher()
+    }
+    
     func selectCellHandler(section: MyPageType, index: Int) {
         switch section {
         case .userInfo:
@@ -155,5 +194,15 @@ private extension MypageViewModel {
             default: break
             }
         }
+    }
+    
+    func saveStudentIdImage(imageData: Data) {
+        let isStudentId = FileStorageManager.shared.exists(type: .studentIdCard)
+        
+        if isStudentId {
+            FileStorageManager.shared.delete(type: .studentIdCard)
+        }
+        
+        let _ = FileStorageManager.shared.save(data: imageData, type: .studentIdCard)
     }
 }

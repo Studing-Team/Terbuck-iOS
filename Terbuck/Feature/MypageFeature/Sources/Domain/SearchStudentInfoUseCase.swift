@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Shared
 
 public protocol SearchStudentInfoUseCase {
     func execute() async throws -> UserInfoModel
@@ -20,8 +21,9 @@ public struct SearchStudentInfoUseCaseImpl: SearchStudentInfoUseCase {
         return UserInfoModel(
             userName: entity.studentName,
             studentId: entity.studentNum,
-            university: "",
-            isAuthenticated: false
+            university: UserDefaultsManager.shared.string(for: .university) ?? "정보 없음",
+            isAuthenticated: true,
+            imageUrl: entity.imageUrl
         )
     }
 }

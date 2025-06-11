@@ -14,7 +14,7 @@ import Shared
 import SnapKit
 import Then
 
-final class AlarmSettingViewControllor: UIViewController {
+final class AlarmSettingViewControllor: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
@@ -93,6 +93,8 @@ private extension AlarmSettingViewControllor {
 
 private extension AlarmSettingViewControllor {
     func setupStyle() {
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+        
         customNavBar.setupBackButtonAction { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
