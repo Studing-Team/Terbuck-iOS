@@ -12,4 +12,5 @@ public struct UserInfoModel {
     let studentId: String
     let university: String
     let isAuthenticated: Bool
+    let imageUrl: String
 }

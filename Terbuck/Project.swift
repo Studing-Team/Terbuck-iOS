@@ -61,6 +61,8 @@ let project = Project(
                 .project(target: "Resource", path: "Resource"),
                 .project(target: "Shared", path: "Shared"),
                 .project(target: "DesignSystem", path: "DesignSystem"),
+                .project(target: "SplashFeature", path: "Feature/SplashFeature"),
+                .project(target: "SplashInterface", path: "Feature/SplashInterface"),
                 .project(target: "AuthFeature", path: "Feature/AuthFeature"),
                 .project(target: "AuthInterface", path: "Feature/AuthInterface"),
                 .project(target: "HomeFeature", path: "Feature/HomeFeature"),

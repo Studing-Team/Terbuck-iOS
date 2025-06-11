@@ -16,15 +16,19 @@ import SnapKit
 import Then
 import NMapsMap
 
-public final class StoreMapViewController: UIViewController {
+final class StoreMapViewController: UIViewController {
     
     // MARK: - Properties
     
-    private var markers: [NMFMarker] = []
     private let storeMapViewModel: StoreMapViewModel
     weak var coordinator: StoreCoordinator?
     private let locationManager = CLLocationManager()
     private var bottomSheetTopConstraint: NSLayoutConstraint?
+    
+    // MARK: - Marker Properties
+    
+    private var allMarkersDic: [CategoryType: [NMFMarker]] = [:]
+    private var currentCategoryMarkers: [NMFMarker] = []
     
     // MARK: - Combine Properties
     
@@ -35,13 +39,15 @@ public final class StoreMapViewController: UIViewController {
     private let mapView = NMFMapView()
     private var currentLocationMarker: NMFMarker?
     private var bottomSheetVC: StoreListModalViewController
+    private var searchStoreVC: SearchStoreViewController?
     
-    private let searchBarView = SearchBarView()
+    private let searchBarView = SearchBarView(type: .search)
+    private lazy var storeInfoBottomView = StoreInfoBottomView()
     private let myLocationButton = UIButton()
     
     // MARK: - Init
     
-    public init(
+    init(
         storeMapViewModel: StoreMapViewModel,
         coordinator: StoreCoordinator
     ) {
@@ -61,7 +67,7 @@ public final class StoreMapViewController: UIViewController {
     
     // MARK: - Life Cycle
     
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
         
         setupStyle()
@@ -73,6 +79,13 @@ public final class StoreMapViewController: UIViewController {
         bindViewModel()
         updateMyLocation()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        storeMapViewModel.viewLifeCycleSubject.send(.viewWillAppear)
+        print("StoreMapViewController viewWillAppear")
+    }
 }
 
 // MARK: - Private Bind Extensions
@@ -82,15 +95,26 @@ private extension StoreMapViewController {
         storeMapViewModel.storeListSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] items in
-                self?.updateMap(with: items)
-//                self?.moveCameraToFitAllMarkers(items)
+                guard let self else { return }
+                
+                let index = storeMapViewModel.storeCategoryPublisher.value
+                let type = CategoryType.allCases[index]
+                
+                self.initStoreMarkers(with: items)
+                self.filterToCategoryTypeMarker(category: type)
+                self.fitAllMarkers(currentCategoryMarkers, in: mapView, currentIndex: self.storeMapViewModel.currentSnapIndex.value)
             }
             .store(in: &cancellables)
         
         storeMapViewModel.markerTappedSubject
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] itemId in
-                self?.bottomSheetVC.changeBottomSheet(.horizonList)
+            .sink { [weak self] tappedStore in
+                guard let self else { return }
+ 
+                self.storeInfoBottomView.configureData(forModel: tappedStore)
+                self.storeInfoBottomView.isHidden = false
+                self.bottomSheetVC.view.isHidden = true
+                self.tabBarController?.tabBar.isHidden = true
             }
             .store(in: &cancellables)
         
@@ -100,6 +124,139 @@ private extension StoreMapViewController {
                 self?.coordinator?.showDetailStoreInfo(storeId: itemId)
             }
             .store(in: &cancellables)
+        
+        storeMapViewModel.currentSnapIndex
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] index in
+                guard let self else { return }
+                fitAllMarkers(currentCategoryMarkers, in: mapView, currentIndex: index)
+            }
+            .store(in: &cancellables)
+        
+        storeMapViewModel.storeMapTypeSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] type in
+                guard let self else { return }
+                bottomSheetVC.view.isHidden = type == .search ? false : true
+                tabBarController?.tabBar.isHidden = type == .search ? false : true
+                storeInfoBottomView.isHidden = true
+                searchBarView.configureSearchType(type)
+                
+                if type == .search {
+                    let index = storeMapViewModel.storeCategoryPublisher.value
+                    let type = CategoryType.allCases[index]
+                    filterToCategoryTypeMarker(category: type)
+                    self.fitAllMarkers(currentCategoryMarkers, in: mapView, currentIndex: self.storeMapViewModel.currentSnapIndex.value)
+                }
+            }
+            .store(in: &cancellables)
+        
+        storeMapViewModel.searchListStoreTappedSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] searchStore in
+                self?.storeInfoBottomView.configureData(forModel: searchStore)
+                self?.searchBarView.configureSearchResultType(storeName: searchStore.storeName)
+                self?.makeSingleMarker(store: searchStore)
+                self?.updateSearchLayout(searchStore)
+            }
+            .store(in: &cancellables)
+    }
+}
+
+// MARK: - Private Marker Extensions
+
+private extension StoreMapViewController {
+    func initStoreMarkers(with items: [StoreListModel]) {
+        removeCurrentMarkersInMapView()
+        allMarkersDic.removeAll()
+
+        items.forEach {
+            let marker = NMFMarker()
+            marker.iconImage = NMFOverlayImage(image: selectCategoryTypeImage($0.category))
+            marker.width = 34
+            marker.height = 42
+            marker.userInfo = ["store": $0]
+            marker.position = NMGLatLng(lat: $0.latitude, lng: $0.longitude)
+            marker.mapView = mapView
+
+            marker.touchHandler = { [weak self] (overlay) -> Bool in
+                if let store = overlay.userInfo["store"] as? StoreListModel {
+                    print("마커가 눌린 가게: \(store.storeName)")
+                    self?.moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
+                    self?.storeMapViewModel.markerTappedSubject.send(store)
+                }
+                return true
+            }
+
+            allMarkersDic[$0.category, default: []].append(marker)
+            currentCategoryMarkers.append(marker)
+        }
+    }
+    
+    func removeCurrentMarkersInMapView() {
+        currentCategoryMarkers.forEach {
+            $0.mapView = nil
+        }
+        
+        currentCategoryMarkers = []
+    }
+    
+    /// 지도에 표기할 마커를 통해 mapView 에 할당하는 메서드
+    func makeMakerInMapView() {
+        currentCategoryMarkers.forEach {
+            $0.mapView = mapView
+        }
+    }
+    
+    func filterToCategoryTypeMarker(category: CategoryType) {
+        removeCurrentMarkersInMapView()
+        
+        if category == .all {
+            allMarkersDic.forEach { category, markers in
+                currentCategoryMarkers += markers
+            }
+        } else {
+            guard let categoryMarkers = allMarkersDic[category] else {
+                currentCategoryMarkers = []
+                return
+            }
+
+            currentCategoryMarkers = categoryMarkers
+        }
+
+        makeMakerInMapView()
+    }
+    
+    func makeSingleMarker(store: StoreListModel) {
+        removeCurrentMarkersInMapView()
+        
+        guard let categoryMarkers = allMarkersDic[store.category] else { return }
+        
+        let storeMarker = categoryMarkers.first { marker in
+            guard let storedStore = marker.userInfo["store"] as? StoreListModel else { return false }
+            return storedStore.id == store.id
+        }
+        
+        storeMarker?.mapView = mapView
+    }
+
+    
+    func fitAllMarkers(_ markers: [NMFMarker], in mapView: NMFMapView, currentIndex: Int) {
+        guard !markers.isEmpty else { return }
+
+        let height = [180, 290, 454, 700]
+        // 1. 모든 마커 좌표를 가져옴
+        let latLngs: [NMGLatLng] = markers.map { $0.position }
+        let bounds = NMGLatLngBounds(latLngs: latLngs)
+
+        // 2. 카메라 업데이트로 이동 (padding 포함)
+        let cameraUpdate = NMFCameraUpdate(fit: bounds, paddingInsets: UIEdgeInsets(
+            top: 250, left: 50, bottom: CGFloat(height[currentIndex] + 50), right: 50)
+        )
+        
+        cameraUpdate.animation = .linear
+        cameraUpdate.animationDuration = 0.3
+        mapView.moveCamera(cameraUpdate)
     }
 }
 
@@ -109,7 +266,7 @@ private extension StoreMapViewController {
     func setupStyle() {
         navigationItem.backButtonTitle = ""
 
-        [searchBarView, myLocationButton].forEach {
+        [searchBarView, myLocationButton, storeInfoBottomView].forEach {
             $0.do {
                 $0.layer.cornerRadius = 16
                 $0.layer.shadowColor = UIColor.black.withAlphaComponent(0.6).cgColor
@@ -131,10 +288,20 @@ private extension StoreMapViewController {
             $0.addGestureRecognizer(tapGesture)
             $0.isUserInteractionEnabled = true
         }
+        
+        storeInfoBottomView.do {
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(storeBottomTapped))
+            $0.addGestureRecognizer(tapGesture)
+            $0.isUserInteractionEnabled = true
+        }
+        
+        storeInfoBottomView.do {
+            $0.isHidden = true
+        }
     }
     
     func setupHierarchy() {
-        view.addSubviews(mapView, searchBarView, myLocationButton)
+        view.addSubviews(mapView, searchBarView, myLocationButton, storeInfoBottomView)
     }
     
     func setupLayout() {
@@ -153,6 +320,12 @@ private extension StoreMapViewController {
             $0.leading.equalTo(searchBarView.snp.trailing).offset(8)
             $0.trailing.equalToSuperview().inset(15)
             $0.size.equalTo(48)
+        }
+        
+        storeInfoBottomView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(15)
+            $0.bottom.equalToSuperview().inset(40)
+            $0.height.equalTo(112)
         }
     }
     
@@ -195,7 +368,16 @@ private extension StoreMapViewController {
     }
     
     @objc func searchBarTapped() {
-        self.coordinator?.searchStore()
+        if storeMapViewModel.storeMapTypeSubject.value == .search {
+            self.coordinator?.searchStore()
+        } else {
+            storeMapViewModel.storeMapTypeSubject.send(.search)
+        }
+    }
+    
+    @objc func storeBottomTapped() {
+        guard let store = storeMapViewModel.searchResultStoreTappedSubject.value else { return }
+        self.coordinator?.showDetailStoreInfo(storeId: store.id)
     }
     
     func updateMyLocation() {
@@ -210,6 +392,15 @@ private extension StoreMapViewController {
 //            showLocationPermissionAlert()
             break
         }
+    }
+    
+    func updateSearchLayout(_ store: StoreListModel) {
+        bottomSheetVC.view.isHidden = true
+        tabBarController?.tabBar.isHidden = true
+        
+        moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
+        storeMapViewModel.searchResultStoreTappedSubject.send(store)
+        storeInfoBottomView.isHidden = false
     }
 }
 
@@ -235,58 +426,6 @@ extension StoreMapViewController: NMFMapViewCameraDelegate {
         }
     }
     
-    func moveCameraToFitAllMarkers(_ stores: [StoreListModel]) {
-        guard !stores.isEmpty else { return }
-
-        var minLat = stores.first!.latitude
-        var maxLat = stores.first!.latitude
-        var minLng = stores.first!.longitude
-        var maxLng = stores.first!.longitude
-
-        for store in stores {
-            minLat = min(minLat, store.latitude)
-            maxLat = max(maxLat, store.latitude)
-            minLng = min(minLng, store.longitude)
-            maxLng = max(maxLng, store.longitude)
-        }
-
-        let southWest = NMGLatLng(lat: minLat, lng: minLng)
-        let northEast = NMGLatLng(lat: maxLat, lng: maxLng)
-        let bounds = NMGLatLngBounds(southWest: southWest, northEast: northEast)
-
-        let cameraUpdate = NMFCameraUpdate(fit: bounds, padding: 50)
-        cameraUpdate.animation = .easeIn
-        mapView.moveCamera(cameraUpdate)
-    }
-
-    func updateMap(with items: [StoreListModel]) {
-        // 기존 마커 제거
-        markers.forEach { $0.mapView = nil }
-        markers.removeAll()
-
-        // 새 마커 추가
-        items.forEach {
-            let marker = NMFMarker()
-            marker.iconImage = NMFOverlayImage(image: selectCategoryTypeImage($0.category))
-            marker.width = 34
-            marker.height = 42
-            marker.userInfo = ["store": $0]
-            marker.position = NMGLatLng(lat: $0.latitude, lng: $0.longitude)
-            marker.mapView = mapView
-
-            marker.touchHandler = { [weak self] (overlay) -> Bool in
-                if let store = overlay.userInfo["store"] as? StoreListModel {
-                    print("마커가 눌린 가게: \(store.storeName)")
-                    self?.moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
-                    self?.storeMapViewModel.markerTappedSubject.send(store)
-                }
-                return true
-            }
-
-            markers.append(marker)
-        }
-    }
-    
     func moveCameraToMarker(_ position: NMGLatLng) {
         let centeredPosition = NMGLatLng(lat: position.lat, lng: position.lng)
         let cameraUpdate = NMFCameraUpdate(scrollTo: centeredPosition)
@@ -299,13 +438,13 @@ extension StoreMapViewController: NMFMapViewCameraDelegate {
         let cameraUpdate = NMFCameraUpdate(scrollTo: NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude))
         cameraUpdate.animation = .easeIn
         mapView.moveCamera(cameraUpdate)
-        
-        storeMapViewModel.latitudeSubject.send(coordinate.latitude)
-        storeMapViewModel.longitudeSubject.send(coordinate.longitude)
+
+        storeMapViewModel.updateLocationData(lat: coordinate.latitude, lng: coordinate.longitude)
             
         // 마커 업데이트
         if currentLocationMarker == nil {
             currentLocationMarker = NMFMarker()
+            currentLocationMarker?.iconImage = NMFOverlayImage(image: UIImage.myDirection)
         }
         
         currentLocationMarker?.position = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
@@ -317,6 +456,7 @@ extension StoreMapViewController: NMFMapViewCameraDelegate {
     
 extension StoreMapViewController: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("새로운 위치로 업데이트")
         guard let location = locations.last else { return }
         updateMapToCurrentLocation(location.coordinate)
         locationManager.stopUpdatingLocation()
@@ -331,7 +471,8 @@ extension StoreMapViewController: CLLocationManagerDelegate {
 
 extension StoreMapViewController: NMFMapViewTouchDelegate {
     public func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
-        self.bottomSheetVC.changeBottomSheet(.verticalList)
+        self.bottomSheetVC.view.isHidden = false
+        self.tabBarController?.tabBar.isHidden = false
     }
 }
 

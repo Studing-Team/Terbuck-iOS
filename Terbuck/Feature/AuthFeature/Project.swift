@@ -14,6 +14,7 @@ let project = Project(
             resources: [],
             dependencies: [
                 .project(target: "AuthInterface", path: "../AuthInterface"),
+                .project(target: "UniversityInfoFeature", path: "../UniversityInfoFeature"),
                 .project(target: "Shared", path: "../../Shared"),
                 .project(target: "CoreNetwork", path: "../../Core/CoreNetwork"),
                 .project(target: "CoreKeyChain", path: "../../Core/CoreKeyChain"),

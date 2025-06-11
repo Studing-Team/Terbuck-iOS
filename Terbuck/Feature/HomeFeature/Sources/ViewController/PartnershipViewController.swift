@@ -16,7 +16,7 @@ import Resource
 import SnapKit
 import Then
 
-final class PartnershipViewController: UIViewController {
+final class PartnershipViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
@@ -62,6 +62,8 @@ final class PartnershipViewController: UIViewController {
 private extension PartnershipViewController {
     func setupStyle() {
         view.backgroundColor = .white
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+        
         customNavBar.setupBackButtonAction { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }

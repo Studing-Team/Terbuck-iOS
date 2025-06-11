@@ -16,7 +16,7 @@ import Shared
 import SnapKit
 import Then
 
-public final class RegisterStudentCardViewController: UIViewController {
+public final class RegisterStudentCardViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
@@ -135,6 +135,7 @@ private extension RegisterStudentCardViewController {
 private extension RegisterStudentCardViewController {
     func setupStyle() {
         self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
         
         customNavBar.setupBackButtonAction { [weak self] in
             self?.navigationController?.popViewController(animated: true)
@@ -221,7 +222,6 @@ private extension RegisterStudentCardViewController {
         bottomButton.snp.makeConstraints {
             $0.top.equalTo(textFieldStackView.snp.bottom).offset(view.convertByHeightRatio(120))
             $0.horizontalEdges.equalToSuperview().inset(20)
-//            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(view.convertByHeightRatio(8))
         }
     }
 }

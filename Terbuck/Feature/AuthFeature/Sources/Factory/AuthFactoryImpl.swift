@@ -15,13 +15,11 @@ public final class AuthFactoryImpl: AuthFactory {
     public func makeAuthCoordinator(navigationController: UINavigationController) -> AuthCoordinating {
         let loginFactory = LoginFactoryImpl()
         let termsFactory = TermsOfServiceFactoryImpl()
-        let universityFactory = UniversityFactoryImpl()
 
         return AuthCoordinator(
             navigationController: navigationController,
             loginFactory: loginFactory,
-            termsFactory: termsFactory,
-            universityFactory: universityFactory
+            termsFactory: termsFactory
         )
     }
 }

@@ -16,13 +16,11 @@ public final class MypageTabFactoryImpl: MypageTabFactory {
         
         let mypageFactory = MypageFactoryImpl()
         let alarmFactory = AlarmSettingFactoryImpl()
-        let changeUniversityFactory = ChangeUniversityFactoryImpl()
         
         return MypageCoordinator(
             navigationController: navigationController,
             mypageFactory: mypageFactory,
-            alarmFactory: alarmFactory,
-            changeUniversityFactory: changeUniversityFactory
+            alarmFactory: alarmFactory
         )
     }
 }

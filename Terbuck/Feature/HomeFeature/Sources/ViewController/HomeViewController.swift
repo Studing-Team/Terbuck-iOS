@@ -62,10 +62,8 @@ final class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        UserDefaultsManager.shared.set("서울과학기술대학교", for: .university)
-//        UserDefaults.standard.set("서울과학기술대학교", forKey: "University")
         viewLifeCycleSubject.send(.viewDidLoad)
-        
+        UserDefaultsManager.shared.set("서울과학기술대학교", for: .university)
         setupStyle(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
         setupHierarchy()
         setupLayout()
@@ -109,15 +107,18 @@ private extension HomeViewController {
             .store(in: &cancellables)
         
         output.authStudentResult
+            .compactMap { $0 }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] authResult in
                 guard let self else { return }
-                
+
                 if authResult == false {
                     ToastManager.shared.showToast(from: self, type: .notAuthorized) {
                         self.coordinator?.registerStudentID()
                     }
                 }
+                
+                studentIDCardButton.setImage(authResult ? .authIdCard : .notAuthIdCard, for: .normal)
             }
             .store(in: &cancellables)
         
@@ -125,6 +126,7 @@ private extension HomeViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.applySnapshot()
+                self?.collectionView.setContentOffset(.zero, animated: true)
             }
             .store(in: &cancellables)
         
@@ -384,7 +386,7 @@ extension HomeViewController {
                 cell.configureCell(forModel: model)
                 
                 cell.onMoreBenefitTapped { [weak self] in
-                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.cateotry, benefitData: model.subBenefit ?? [])
+                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.cateotry, benefitData: model.subBenefit)
                 }
                 
                 return cell
@@ -398,7 +400,7 @@ extension HomeViewController {
                 cell.configureCell(forModel: model)
                 
                 cell.onMoreBenefitTapped { [weak self] in
-                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.cateotry, benefitData: model.subBenefit ?? [])
+                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.cateotry, benefitData: model.subBenefit)
                 }
                 
                 return cell

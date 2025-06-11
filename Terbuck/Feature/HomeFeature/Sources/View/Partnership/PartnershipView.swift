@@ -39,7 +39,23 @@ struct PartnershipView: View {
                             .frame(minHeight: 100)
                             .padding(.horizontal, 20)
                             .padding(.top, 15)
+                            .padding(.bottom, 30)
                     }
+                    
+                    Button(action: {
+                        guard let url = URL(string: viewModel.instarURL ?? ""),
+                              UIApplication.shared.canOpenURL(url) else { return }
+                        UIApplication.shared.open(url, options: [:])
+                    }) {
+                        Text("인스타그램 게시물 보기")
+                            .font(DesignSystem.Font.swiftUIFont(.textSemi18))
+                            .foregroundColor(Color.white)
+                    }
+                    .frame(height: 52)
+                    .frame(maxWidth: .infinity)
+                    .background(DesignSystem.Color.swiftUIColor(.terbuckGreen50))
+                    .cornerRadius(16)
+                    .padding(.horizontal, 20)
                 }
             }
             .background(Color.white)

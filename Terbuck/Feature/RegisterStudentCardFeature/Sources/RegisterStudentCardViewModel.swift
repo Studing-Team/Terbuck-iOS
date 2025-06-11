@@ -66,7 +66,6 @@ public final class RegisterStudentCardViewModel {
     // MARK: - Public methods
     
     func transform(input: Input) -> Output {
-        
         let mergeRegisterInput = Publishers.CombineLatest3(
             input.registerStudentName,
             input.registerStudentId,
@@ -96,11 +95,17 @@ public final class RegisterStudentCardViewModel {
         
         let registerBottomButtonResult = input.bottomButtonTapped
             .flatMap { [weak self] in
-                guard let self = self else {
+                guard let self else {
                     return Just(false).eraseToAnyPublisher()
                 }
 
                 return self.putStudentCardPublisher()
+                    .handleEvents(receiveOutput: { _ in
+                        guard let imageData = self.studentImageData else { return }
+                        
+                        UserDefaultsManager.shared.set(true, for: .isStudentIDAuthenticated)
+                        let _ = FileStorageManager.shared.save(data: imageData, type: .studentIdCard)
+                    })
                     .catch { _ in Just(false).eraseToAnyPublisher() }
                     .eraseToAnyPublisher()
             }

@@ -1,8 +1,8 @@
 //
-//  UniversityInfoViewController.swift
-//  Login
+//  UniversityViewController.swift
+//  UniversityInfoFeature
 //
-//  Created by ParkJunHyuk on 4/12/25.
+//  Created by ParkJunHyuk on 6/11/25.
 //
 
 import UIKit
@@ -14,18 +14,32 @@ import Shared
 import SnapKit
 import Then
 
-final class UniversityInfoViewController: UIViewController {
+public enum UniversityType {
+    case register
+    case edit
+    
+    var title: String {
+        switch self {
+        case .register:
+            return "회원가입"
+        case .edit:
+            return "학교 변경"
+        }
+    }
+}
+
+public final class UniversityViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
+    private var type: UniversityType
     private var viewModel: UniversityViewModel
-    weak var coordinator: AuthCoordinator?
-    
+    public weak var delegate: RegisterUniversityDelegate?
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
     
-    private let customNavBar = CustomNavigationView(type: .nomal, title: "회원가입")
+    private let customNavBar: CustomNavigationView
     private let titleView = InformationTitleView(type: .university)
     
     private let universityListStackView = UIStackView()
@@ -35,16 +49,18 @@ final class UniversityInfoViewController: UIViewController {
     private let samUniversityView = UniversityListView(type: .sam)
     private let sungUniversityView = UniversityListView(type: .sung)
     
-    private let terbuckBottomButton = TerbuckBottomButton(type: .enter, isEnabled: false)
+    private let terbuckBottomButton: TerbuckBottomButton
     
     // MARK: - Init
     
-    init(
-        viewModel: UniversityViewModel,
-        coordinator: AuthCoordinator
+    public init(
+        type: UniversityType,
+        viewModel: UniversityViewModel
     ) {
+        self.type = type
         self.viewModel = viewModel
-        self.coordinator = coordinator
+        self.customNavBar = CustomNavigationView(type: .nomal, title: type.title)
+        self.terbuckBottomButton = TerbuckBottomButton(type: .save, isEnabled: false)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -54,7 +70,7 @@ final class UniversityInfoViewController: UIViewController {
     
     // MARK: - Life Cycle
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         
         setupStyle()
@@ -67,7 +83,7 @@ final class UniversityInfoViewController: UIViewController {
 
 // MARK: - Private Bind Extensions
 
-private extension UniversityInfoViewController {
+private extension UniversityViewController {
     func bindViewModel() {
         let universityTappedPublisher = Publishers.Merge4(
             kwUniversityView.tapPublisher.map { _ in University.kw },
@@ -79,7 +95,7 @@ private extension UniversityInfoViewController {
         
         let input = UniversityViewModel.Input(
             universityTapped: universityTappedPublisher,
-            signupButtonTapped: terbuckBottomButton.tapPublisher
+            bottomButtonTapped: terbuckBottomButton.tapPublisher
         )
         
         kwUniversityView.tapPublisher
@@ -153,14 +169,15 @@ private extension UniversityInfoViewController {
             }
             .store(in: &cancellables)
         
-        output.signupButtonResult
+        output.bottomButtonResult
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
-                switch result {
-                case .success:
-                    self?.coordinator?.finishAuthFlow()
-                case .failure(_):
-                    break
+                if result {
+                    if self?.type == .register {
+                        self?.delegate?.didFinishAuthFlow()
+                    } else {
+                        self?.navigationController?.popViewController(animated: true)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -169,10 +186,11 @@ private extension UniversityInfoViewController {
 
 // MARK: - Private Extensions
 
-private extension UniversityInfoViewController {
+private extension UniversityViewController {
     func setupStyle() {
         view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
         
         customNavBar.setupBackButtonAction { [weak self] in
             self?.navigationController?.popViewController(animated: true)
@@ -228,8 +246,8 @@ private extension UniversityInfoViewController {
 //#if canImport(SwiftUI) && DEBUG
 //import SwiftUI
 //
-//#Preview("UniversityInfoViewController") {
-//    UniversityInfoViewController()
+//#Preview("UniversityViewController") {
+//    UniversityViewController()
 //        .showPreview()
 //}
 //#endif

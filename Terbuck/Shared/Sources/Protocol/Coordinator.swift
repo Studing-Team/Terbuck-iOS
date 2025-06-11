@@ -19,3 +19,19 @@ public protocol ImagePreviewCoordinating: AnyObject {
 public protocol AuthCoordinatorDelegate: AnyObject {
     func didFinishAuthFlow()
 }
+
+public protocol notAuthCoordinatorDelegate: AnyObject {
+    func moveLoginFlow()
+}
+
+public protocol SplashCoordinatorDelegate: AnyObject {
+    func splashCoordinatorDidFinish(shouldShowLogin: Bool)
+}
+
+public protocol SplashViewControllerDelegate: AnyObject {
+    func splashDidFinish(shouldShowLogin: Bool)
+}
+
+public protocol RegisterUniversityDelegate: AnyObject {
+    func didFinishAuthFlow()
+}

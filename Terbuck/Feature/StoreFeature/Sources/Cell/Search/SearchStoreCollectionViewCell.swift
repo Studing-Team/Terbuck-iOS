@@ -53,24 +53,22 @@ public extension SearchStoreCollectionViewCell {
         benefitCountView.configureCount(count: model.benefitCount)
 
         setupStoreCategoryImage(model.category)
-        changeSearchTitle(searchTitle)
+        changeSearchTitle(searchTitle, storeName: model.storeName) // 직접 넘기기
     }
     
     private func setupStoreCategoryImage(_ type: CategoryType) {
         storeCategoryImageView.image = type.icon
     }
     
-    private func changeSearchTitle(_ searchTitle: String) {
-        guard let storeName = storeNameLabel.text else { return }
-        
+    private func changeSearchTitle(_ searchTitle: String, storeName: String) {
         let attributedText = NSMutableAttributedString(string: storeName)
         
         let range = (storeName as NSString).range(of: searchTitle, options: .caseInsensitive)
         if range.location != NSNotFound {
-            attributedText.addAttribute(.foregroundColor, value: UIColor.systemRed, range: range)
+            attributedText.addAttribute(.foregroundColor, value: DesignSystem.Color.uiColor(.terbuckGreen50), range: range)
             attributedText.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: storeNameLabel.font.pointSize), range: range)
         }
-        
+
         storeNameLabel.attributedText = attributedText
     }
 }
@@ -120,9 +118,9 @@ private extension SearchStoreCollectionViewCell {
         }
         
         rightArrowImageView.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(44.5)
-            $0.leading.equalTo(storeTitleStackView.snp.trailing)
+            $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().inset(30)
+            $0.size.equalTo(14)
         }
     }
 }

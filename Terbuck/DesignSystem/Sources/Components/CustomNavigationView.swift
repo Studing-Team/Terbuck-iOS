@@ -24,6 +24,7 @@ public final class CustomNavigationView: UIView {
     
     private var type: CustomNavigationType
     private var backAction: (() -> Void)?
+    private var studentButtonAction: (() -> Void)?
     
     // MARK: - UI Components
     
@@ -54,9 +55,17 @@ public final class CustomNavigationView: UIView {
     @objc private func didTapBack() {
         backAction?()
     }
+    
+    @objc private func didStudentButtonTapped() {
+        studentButtonAction?()
+    }
 
     public func setupBackButtonAction(_ action: @escaping () -> Void) {
         self.backAction = action
+    }
+    
+    public func setupRightButtonAction(_ action: @escaping () -> Void) {
+        self.studentButtonAction = action
     }
 }
 
@@ -85,6 +94,7 @@ private extension CustomNavigationView {
         if type == .benefitStore {
             studentIDCardButton.do {
                 $0.setImage(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated) ? .authIdCard : .notAuthIdCard, for: .normal)
+                $0.addTarget(self, action: #selector(didStudentButtonTapped), for: .touchUpInside)
             }
         }
     }

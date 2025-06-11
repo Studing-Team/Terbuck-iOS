@@ -158,7 +158,7 @@ public enum ImageType {
     
     var mode: UIView.ContentMode {
         switch self{
-        case .storeListImage:
+        case .storeListImage, .storeInfoImage:
             return .scaleAspectFill
         default:
             return .scaleAspectFit

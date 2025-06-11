@@ -10,5 +10,5 @@ import Foundation
 public struct SearchStudentInfoResponseDTO: Decodable {
     public let studentNumber: String
     public let name: String
-    public let image: String
+    public let imageURL: String
 }

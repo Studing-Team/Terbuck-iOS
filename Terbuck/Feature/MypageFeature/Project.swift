@@ -14,6 +14,7 @@ let project = Project(
             resources: [],
             dependencies: [
                 .project(target: "MypageInterface", path: "../MypageInterface"),
+                .project(target: "UniversityInfoFeature", path: "../UniversityInfoFeature"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared")
             ]

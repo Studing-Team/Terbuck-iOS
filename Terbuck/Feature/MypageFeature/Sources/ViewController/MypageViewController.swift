@@ -26,6 +26,7 @@ public final class MypageViewController: UIViewController {
     
     private let selectedCellSubject = PassthroughSubject<(section: MyPageType, index: Int), Never>()
     private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
+    private var logoutButtonSubject = PassthroughSubject<Void, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -65,6 +66,12 @@ public final class MypageViewController: UIViewController {
         
         viewLifeCycleSubject.send(.viewDidLoad)
     }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        viewLifeCycleSubject.send(.viewWillAppear)
+    }
 }
 
 // MARK: - Private Bind Extensions
@@ -73,7 +80,8 @@ private extension MypageViewController {
     func bindViewModel() {
         let input = MypageViewModel.Input(
             viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher(),
-            selectedCell: selectedCellSubject.eraseToAnyPublisher()
+            selectedCell: selectedCellSubject.eraseToAnyPublisher(),
+            logoutButtonTapped: logoutButtonSubject.eraseToAnyPublisher()
         )
         
         let output = mypageViewModel.transform(input: input)
@@ -85,18 +93,40 @@ private extension MypageViewController {
             }
             .store(in: &cancellables)
         
+        output.toasterMessageResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] type in
+                guard let self else { return }
+                ToastManager.shared.showToast(from: self, type: type)
+            }
+            .store(in: &cancellables)
+        
         output.navigationEvent
             .sink { [weak self] event in
                 switch event {
                 case .alarmSetting:
                     self?.coordinator?.startAlarmSetting()
+                    
+                case .inquiry:
+//                    self?.moveWebpage("https://terbuck.notion.site/11905c1258e080ee91cecfb7ff633bab")
+                    break
+                    
+                case .privacyPolicy:
+                    self?.moveWebpage("https://terbuck.notion.site/11905c1258e08063bba2f82d320de454")
+                    
+                case .serviceGuide:
+                    self?.moveWebpage("https://terbuck.notion.site/11905c1258e080ee91cecfb7ff633bab")
+                    
                 case .showLogout:
                     self?.showConfirmCancelAlert(
                         mainTitle: "로그아웃 하시겠습니까?",
                         leftButton: TerbuckBottomButton(type: .cancel),
                         rightButton: TerbuckBottomButton(type: .logout),
-                        rightButtonHandler: {}
+                        rightButtonHandler: {
+                            self?.logoutButtonSubject.send()
+                        }
                     )
+                    
                 case .withdraw:
                     self?.showConfirmCancelAlert(
                         mainTitle: "정말 탈퇴하시겠습니까?",
@@ -122,6 +152,16 @@ private extension MypageViewController {
                 }
             }
             .store(in: &cancellables)
+        
+        output.logoutResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
+                if result {
+                    self?.coordinator?.moveLoginFlow()
+                }
+            }
+            .store(in: &cancellables)
+        
     }
 }
 
@@ -173,6 +213,12 @@ private extension MypageViewController {
         collectionView.dataSource = self
         collectionView.delegate = self
     }
+    
+    func moveWebpage(_ urlString: String) {
+        guard let url = URL(string: urlString),
+              UIApplication.shared.canOpenURL(url) else { return }
+        UIApplication.shared.open(url, options: [:])
+    }
 }
 
 // MARK: - CollectionView Extension
@@ -214,7 +260,7 @@ private extension MypageViewController {
         // Item 정의
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .fractionalHeight(1.0)
+            heightDimension: .estimated(61)
         )
         
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -222,10 +268,10 @@ private extension MypageViewController {
         // Group 정의
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(61) //86
+            heightDimension: .estimated(61)
         )
         
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
 
         // Section 정의
         let section = NSCollectionLayoutSection(group: group)
@@ -298,11 +344,7 @@ extension MypageViewController: UICollectionViewDataSource, UICollectionViewDele
             cell.configureCell(forModel: model )
             
             cell.bindingAction(action: { [weak self] in
-                if model == nil {
-                    self?.coordinator?.registerStudentID()
-                } else {
-                    self?.coordinator?.startChangeUniversity()
-                }
+                self?.coordinator?.startEditUniversity()
             })
 
             return cell

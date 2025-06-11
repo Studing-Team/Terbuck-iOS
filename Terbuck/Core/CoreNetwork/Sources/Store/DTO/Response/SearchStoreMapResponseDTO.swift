@@ -13,6 +13,7 @@ public struct SearchStoreMapResponseDTO: Decodable {
 
 public struct SearchStoreMapListData: Decodable {
     public let shopId: Int
+    public let category: String
     public let name: String
     public let thumbnailImage: String
     public let address: String

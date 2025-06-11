@@ -25,7 +25,7 @@ extension MemberAPIEndpoint: EndpointProtocol {
         case .postSignin:
             return basePath.rawValue + "/signin"
         case .patchUniversity:
-            return basePath.rawValue + "/university"
+            return basePath.rawValue + "/univ"
         case .getStudentId, .putRegisterStudentId, .deleteStudentId:
             return basePath.rawValue + "/studentID"
         }
@@ -78,7 +78,7 @@ extension MemberAPIEndpoint: EndpointProtocol {
         switch self {
         case .putRegisterStudentId(let dto):
             return [
-                "idCardImage": dto.idCardImage,
+                "image": dto.image,
                 "name": dto.name,
                 "studentNumber": dto.studentNumber
             ]

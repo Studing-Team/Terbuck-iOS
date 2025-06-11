@@ -11,7 +11,7 @@ import CoreNetwork
 public struct SearchStudentInfoEntity {
     let studentNum: String
     let studentName: String
-    let imageUrl: URL?
+    let imageUrl: String
 }
 
 extension SearchStudentInfoResponseDTO {
@@ -19,7 +19,7 @@ extension SearchStudentInfoResponseDTO {
         return SearchStudentInfoEntity(
             studentNum: studentNumber,
             studentName: name,
-            imageUrl: URL(string: image)
+            imageUrl: imageURL
         )
     }
 }

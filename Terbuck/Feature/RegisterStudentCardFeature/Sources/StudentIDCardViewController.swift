@@ -28,6 +28,7 @@ public final class StudentIDCardViewController: UIViewController {
     private lazy var underlineLabel = TerbuckUnderlineLabel()
     
     private lazy var onboardingTitle = UILabel()
+    private lazy var studentImageView = UIImageView()
     private lazy var arrowImage = UIImageView()
     private lazy var registerButton = TerbuckBottomButton(type: .register)
     private lazy var nextTimeButton = UIButton()
@@ -62,6 +63,7 @@ public final class StudentIDCardViewController: UIViewController {
         setupHierarchy()
         setupLayout()
         setupButtonAction()
+        setupStudentIdCard()
     }
 }
 
@@ -69,12 +71,6 @@ public final class StudentIDCardViewController: UIViewController {
 
 private extension StudentIDCardViewController {
     func setupStyle() {
-        studentIdSection.do {
-            $0.layer.cornerRadius = 16
-            $0.layer.borderWidth = 1
-            $0.layer.borderColor = DesignSystem.Color.uiColor(.terbuckBlack10).cgColor
-        }
-        
         switch authType {
         case .auth:
             closeButton.do {
@@ -98,12 +94,29 @@ private extension StudentIDCardViewController {
                 $0.font = DesignSystem.Font.uiFont(.captionRegular11)
                 $0.underlineColor = DesignSystem.Color.uiColor(.terbuckBlack10)
                 $0.isUserInteractionEnabled = true
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(registerAction))
+                $0.addGestureRecognizer(tapGesture)
+            }
+            
+            studentImageView.do {
+                $0.contentMode = .scaleAspectFill
+                $0.clipsToBounds = true
+                $0.transform = CGAffineTransform(rotationAngle: .pi / 2)
+                $0.layer.cornerRadius = 16
+                $0.layer.borderWidth = 1
+                $0.layer.borderColor = DesignSystem.Color.uiColor(.terbuckBlack10).cgColor
             }
             
         case .onboarding:
+            studentIdSection.do {
+                $0.layer.cornerRadius = 16
+                $0.layer.borderWidth = 1
+                $0.layer.borderColor = DesignSystem.Color.uiColor(.terbuckBlack10).cgColor
+            }
+            
             arrowImage.do {
                 $0.image = .onboardingArrow
-                $0.contentMode = .scaleAspectFit
+                $0.contentMode = .scaleAspectFill
             }
             
             onboardingTitle.do {
@@ -147,7 +160,7 @@ private extension StudentIDCardViewController {
     func setupHierarchy() {
         switch authType {
         case .auth:
-            view.addSubviews(studentIdSection, closeButton, underlineLabel)
+            view.addSubviews(studentImageView, closeButton, underlineLabel)
             
         case .onboarding:
             view.addSubviews(onboardingTitle, arrowImage, studentIdSection, registerButton, nextTimeButton)
@@ -157,8 +170,10 @@ private extension StudentIDCardViewController {
     func setupLayout() {
         switch authType {
         case .auth:
-            studentIdSection.snp.makeConstraints {
+            studentImageView.snp.makeConstraints {
                 $0.center.equalToSuperview()
+                $0.height.equalTo(self.view.convertByWidthRatio(294))
+                $0.width.equalTo(self.view.convertByHeightRatio(472))
             }
             
             closeButton.snp.makeConstraints {
@@ -210,6 +225,11 @@ private extension StudentIDCardViewController {
             nextTimeButton.addTarget(self, action: #selector(cancelAction), for: .touchUpInside)
             registerButton.addTarget(self, action: #selector(registerAction), for: .touchUpInside)
         }
+    }
+    
+    func setupStudentIdCard() {
+        guard let imageData = FileStorageManager.shared.load(type: .studentIdCard) else { return }
+        studentImageView.image = UIImage(data: imageData)
     }
     
     @objc func cancelAction() {

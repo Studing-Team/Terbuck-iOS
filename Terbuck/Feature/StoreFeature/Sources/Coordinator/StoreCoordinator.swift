@@ -10,6 +10,7 @@ import UIKit
 import StoreInterface
 import DesignSystem
 import Shared
+import RegisterStudentCardFeature
 
 public class StoreCoordinator: StoreCoordinating {
     public var childCoordinators: [any Shared.Coordinator] = []
@@ -60,6 +61,34 @@ public class StoreCoordinator: StoreCoordinating {
         searchStoreVC.modalPresentationStyle = .overFullScreen
         searchStoreVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(searchStoreVC, animated: false)
+    }
+}
+
+extension StoreCoordinator: StudentIDCardFlowDelegate {
+    public func showOnboardiing(location: CGRect) {
+        
+    }
+    
+    public func registerStudentID() {
+        
+    }
+    
+    public func dismissAuthStudentID() {
+        navigationController.dismiss(animated: false) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                self.registerStudentID()
+            }
+        }
+    }
+    
+    public func showAuthStudentID() {
+        let studentIdCardVC = StudentIDCardViewController(
+            authType: .auth,
+            coordinator: self
+        )
+        
+        studentIdCardVC.modalPresentationStyle = .overFullScreen
+        navigationController.present(studentIdCardVC, animated: false)
     }
 }
 

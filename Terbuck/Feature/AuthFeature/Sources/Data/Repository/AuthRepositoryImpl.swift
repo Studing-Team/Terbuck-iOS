@@ -15,7 +15,6 @@ public protocol AuthRepository {
     func serverLoginWithApple(code: String, name: String) async throws -> SocialLoginResultEntity
     func loginWithAppleService() async throws -> (code: String, name: String)
     func loginWithKakaoService() async throws -> String
-    func postSignupMember(university: String) async throws -> Void
 }
 
 struct AuthRepositoryImpl: AuthRepository {
@@ -26,11 +25,6 @@ struct AuthRepositoryImpl: AuthRepository {
     private let appleLoginService = AppleLoginService.shared
     private let kakaoLoginService = KakaoLoginService.shared
     
-    func postSignupMember(university: String) async throws {
-        let requestDTO = SigninRequestDTO(university: university)
-        let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.postSignin(requestDTO))
-    }
-
     // MARK: - Server Function
     
     func serverLoginWithKakao(token: String) async throws -> SocialLoginResultEntity {

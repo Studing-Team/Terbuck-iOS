@@ -108,6 +108,13 @@ private extension APIClient {
         request.httpMethod = endpoint.method.rawValue
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         
+        // Endpoint Headers 설정
+        if let endpointHeader = endpoint.headers {
+            for (key, value) in endpointHeader.headers {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
+        
         var body = Data()
         let lineBreak = "\r\n"
         
@@ -165,7 +172,7 @@ private extension APIClient {
                     throw NetworkError.noData
                 }
             } catch (let error){
-                print("⚠️ APIResponse\(T.self) 디코딩 결과:", error.localizedDescription)
+                print("⚠️ APIResponse \(T.self) 디코딩 결과:", error.localizedDescription)
                 throw NetworkError.decodingFailed(error)
             }
             

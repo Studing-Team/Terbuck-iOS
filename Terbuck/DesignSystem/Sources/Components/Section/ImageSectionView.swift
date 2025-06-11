@@ -51,7 +51,6 @@ public struct ImageSectionView<T: ImageSectionDisplayable>: View {
                             imageURL: models[index].imageURL,
                             type: imageType
                         )
-                        .scaledToFit()
                         .frame(width: imageWidth * (geometry.size.width / 375), height:  imageWidth * (geometry.size.width / 375))
                         .clipped()
                         .onTapGesture {

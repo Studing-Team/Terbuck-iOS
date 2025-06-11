@@ -9,6 +9,7 @@ import UIKit
 
 import MypageInterface
 import RegisterStudentCardFeature
+import UniversityInfoFeature
 import Shared
 
 public class MypageCoordinator: MypageCoordinating {
@@ -17,20 +18,19 @@ public class MypageCoordinator: MypageCoordinating {
     private let navigationController: UINavigationController
     private let mypageFactory: MypageFactory
     private let alarmFactory: AlarmSettingFactory
-    private let changeUniversityFactory: ChangeUniversityFactory
+    
+    public weak var delegate: notAuthCoordinatorDelegate?
     
     // MARK: - Init
     
     public init(
         navigationController: UINavigationController,
         mypageFactory: MypageFactory,
-        alarmFactory: AlarmSettingFactory,
-        changeUniversityFactory: ChangeUniversityFactory
+        alarmFactory: AlarmSettingFactory
     ) {
         self.navigationController = navigationController
         self.mypageFactory = mypageFactory
         self.alarmFactory = alarmFactory
-        self.changeUniversityFactory = changeUniversityFactory
     }
     
     // MARK: - Method
@@ -50,12 +50,6 @@ public class MypageCoordinator: MypageCoordinating {
         navigationController.pushViewController(alarmSettingVC, animated: true)
     }
     
-    public func startChangeUniversity() {
-        let changeUniversityVC = changeUniversityFactory.makeChangeUniversityViewController(coordinator: self)
-        changeUniversityVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(changeUniversityVC, animated: true)
-    }
-    
     public func registerStudentID() {
         let viewModel = RegisterStudentCardViewModel(
             registerStudentIDUseCase: RegisterStudentIDUseCaseImpl(repository: RegisterRepositoryImpl())
@@ -64,5 +58,21 @@ public class MypageCoordinator: MypageCoordinating {
         let registerStudentIDCardVC = RegisterStudentCardViewController(viewModel: viewModel)
         registerStudentIDCardVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(registerStudentIDCardVC, animated: true)
+    }
+    
+    public func startEditUniversity() {
+        let viewModel = UniversityViewModel(editUniversityUseCase: EditUniversityUseCaseImpl(repository: UniversityRepositoryImpl()))
+        
+        let universityVC = UniversityViewController(
+            type: .edit,
+            viewModel: viewModel
+        )
+        
+        universityVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(universityVC, animated: true)
+    }
+    
+    public func moveLoginFlow() {
+        delegate?.moveLoginFlow()
     }
 }

@@ -19,6 +19,6 @@ public struct RegisterStudentIDUseCaseImpl: RegisterStudentIDUseCase {
     }
     
     public func execute(imageData: Data, studentName: String, studentId: String) async throws  {
-        try await repository.putRegisterStudentId(imageData: imageData, name: studentName, studentId: studentId)
+        try await repository.putRegisterStudentId(image: imageData, name: studentName, studentId: studentId)
     }
 }

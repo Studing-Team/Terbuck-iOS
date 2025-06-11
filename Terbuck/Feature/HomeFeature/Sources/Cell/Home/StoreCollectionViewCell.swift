@@ -51,6 +51,7 @@ public extension StoreCollectionViewCell {
     func configureCell(forModel model: NearStoreModel) {
         storeInfoTitleView.configureData(name: model.storeName, address: model.address, category: model.cateotry)
         mainBenefitLabel.text = model.mainBenefit
+        moreBenefitButton.isHidden = model.subBenefit.isEmpty
     }
 }
 

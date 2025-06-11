@@ -8,6 +8,8 @@
 
 import Foundation
 
+import SplashInterface
+import SplashFeature
 import AuthInterface
 import AuthFeature
 import HomeInterface
@@ -18,6 +20,10 @@ import MypageInterface
 import MypageFeature
 
 public final class AppDIContainer {
+    func makeSplashFactory() -> SplashFactory {
+        return SplashFactoryImpl()
+    }
+    
     func makeAuthFactory() -> AuthFactory {
         return AuthFactoryImpl()
     }
