@@ -8,12 +8,12 @@
 import Foundation
 
 public struct RegisterStudentIDRequestDTO: Encodable {
-    let idCardImage: Data
+    let image: Data
     let name: String
     let studentNumber: String
     
-    public init(idCardImage: Data, name: String, studentNumber: String) {
-        self.idCardImage = idCardImage
+    public init(image: Data, name: String, studentNumber: String) {
+        self.image = image
         self.name = name
         self.studentNumber = studentNumber
     }
