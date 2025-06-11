@@ -8,7 +8,7 @@
 import UIKit
 
 extension UIImage {
-    public static func downsample(imageData: Data, to pointSize: CGSize, scale: CGFloat, maxFileSize: Int = 1000000) -> Data? {
+    public static func downsample(imageData: Data, to pointSize: CGSize, scale: CGFloat, maxFileSize: Int = 3000000) -> Data? {
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let imageSource = CGImageSourceCreateWithData(imageData as CFData, imageSourceOptions) else {
             return nil
@@ -31,7 +31,7 @@ extension UIImage {
         let image = UIImage(cgImage: downsampledImage)
         
         // 최초 JPEG 압축 (quality: 1.0)
-        guard let jpegData = image.jpegData(compressionQuality: 0.9) else {
+        guard let jpegData = image.jpegData(compressionQuality: 1.0) else {
             return nil
         }
         
