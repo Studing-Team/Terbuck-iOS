@@ -9,6 +9,10 @@ import UIKit
 import Resource
 
 public extension UIImage {
+    static var terbuckLogo: UIImage {
+        return ResourceAsset.Image.terbuckLogo.image
+    }
+    
     static var kakaoLogo: UIImage {
         return ResourceAsset.Image.kakaoLogo.image
     }
@@ -99,6 +103,10 @@ public extension UIImage {
     
     static var studyMarkerPin: UIImage {
         return ResourceAsset.Image.studyMarker.image
+    }
+    
+    static var myDirection: UIImage {
+        return ResourceAsset.Image.myDirection.image
     }
 }
 
