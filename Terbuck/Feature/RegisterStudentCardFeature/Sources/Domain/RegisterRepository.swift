@@ -9,7 +9,7 @@ import Foundation
 import CoreNetwork
 
 public protocol RegisterRepository {
-    func putRegisterStudentId(imageData: Data, name: String, studentId: String) async throws -> Void
+    func putRegisterStudentId(image: Data, name: String, studentId: String) async throws -> Void
 }
 
 public struct RegisterRepositoryImpl: RegisterRepository {
@@ -17,8 +17,8 @@ public struct RegisterRepositoryImpl: RegisterRepository {
     
     public init() {}
     
-    public func putRegisterStudentId(imageData: Data, name: String, studentId: String) async throws {
-        let requestDTO = RegisterStudentIDRequestDTO(idCardImage: imageData, name: name, studentNumber: studentId)
+    public func putRegisterStudentId(image: Data, name: String, studentId: String) async throws {
+        let requestDTO = RegisterStudentIDRequestDTO(image: image, name: name, studentNumber: studentId)
         let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.putRegisterStudentId(requestDTO))
     }
 }
