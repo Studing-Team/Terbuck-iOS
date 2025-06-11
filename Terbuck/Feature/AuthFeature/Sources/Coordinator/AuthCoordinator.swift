@@ -8,6 +8,7 @@
 import UIKit
 
 import AuthInterface
+import UniversityInfoFeature
 import Shared
 
 public final class AuthCoordinator: AuthCoordinating {
@@ -16,7 +17,6 @@ public final class AuthCoordinator: AuthCoordinating {
     private let navigationController: UINavigationController
     private let loginFactory: LoginFactory
     private let termsFactory: TermsFactory
-    private let universityFactory: UniversityFactory
     
     public weak var delegate: AuthCoordinatorDelegate?
     
@@ -27,13 +27,11 @@ public final class AuthCoordinator: AuthCoordinating {
     public init(
         navigationController: UINavigationController,
         loginFactory: LoginFactory,
-        termsFactory: TermsFactory,
-        universityFactory: UniversityFactory
+        termsFactory: TermsFactory
     ) {
         self.navigationController = navigationController
         self.loginFactory = loginFactory
         self.termsFactory = termsFactory
-        self.universityFactory = universityFactory
     }
     
     public func start() {
@@ -57,18 +55,26 @@ public final class AuthCoordinator: AuthCoordinating {
     
     public func startUniversity() {
         let viewModel = UniversityViewModel(
-            signupUseCase: SignupUseCaseImpl(repository: AuthRepositoryImpl())
+            signupUseCase: SignupUseCaseImpl(repository: UniversityRepositoryImpl())
         )
         
-        let universityVC = universityFactory.makeUniversityViewController(
-            coordinator: self,
+        let universityVC = UniversityViewController(
+            type: .register,
             viewModel: viewModel
         )
+        
+        universityVC.delegate = self
         universityVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(universityVC, animated: true)
     }
 
     public func finishAuthFlow() {
+        delegate?.didFinishAuthFlow()
+    }
+}
+
+extension AuthCoordinator: RegisterUniversityDelegate {
+    public func didFinishAuthFlow() {
         delegate?.didFinishAuthFlow()
     }
 }
