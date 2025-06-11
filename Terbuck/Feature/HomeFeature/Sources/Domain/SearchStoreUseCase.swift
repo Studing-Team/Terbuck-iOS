@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Shared
 
 public protocol SearchStoreUseCase {
     func execute(category: String) async throws -> [NearStoreModel]
@@ -20,8 +21,8 @@ public struct SearchStoreUseCaseImpl: SearchStoreUseCase {
 
     public func execute(category: String) async throws -> [NearStoreModel] {
         
-        let universityName = UserDefaults.standard.string(forKey: "University") ?? ""
-
+        let universityName = UserDefaultsManager.shared.string(for: .university) ?? ""
+        
         let entity = try await repository.getSearchStore(university: universityName, category: category)
         
         return entity.map {
@@ -30,7 +31,8 @@ public struct SearchStoreUseCaseImpl: SearchStoreUseCase {
                 storeName: $0.name,
                 cateotry: $0.category,
                 address: $0.address,
-                mainBenefit: $0.benefits[0].title
+                mainBenefit: $0.benefits[0].title,
+                subBenefit: $0.benefits.dropFirst().map { $0.title }
             )
         }
     }

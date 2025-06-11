@@ -14,5 +14,5 @@ public struct NearStoreModel: Identifiable, Hashable {
     var cateotry: CategoryType
     var address: String
     var mainBenefit: String
-    var subBenefit: [String]? = nil
+    var subBenefit: [String]
 }

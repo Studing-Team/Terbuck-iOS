@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol DetailPartnershipUseCase {
-    func execute(partnershipId: Int) async throws -> (DetailPartnershipModel, [DetailPartnerImageModel], DetailPartnerBenefitModel)
+    func execute(partnershipId: Int) async throws -> (DetailPartnershipModel, [DetailPartnerImageModel], DetailPartnerBenefitModel, String)
 }
 
 public struct DetailPartnershipUseCaseImpl: DetailPartnershipUseCase {
@@ -18,14 +18,14 @@ public struct DetailPartnershipUseCaseImpl: DetailPartnershipUseCase {
         self.repository = repository
     }
 
-    public func execute(partnershipId: Int) async throws -> (DetailPartnershipModel, [DetailPartnerImageModel], DetailPartnerBenefitModel) {
+    public func execute(partnershipId: Int) async throws -> (DetailPartnershipModel, [DetailPartnerImageModel], DetailPartnerBenefitModel, String) {
         let entity = try await repository.getDetailPartner(partnershipId: partnershipId)
         return convertToModel(entity)
     }
 }
 
 extension DetailPartnershipUseCaseImpl {
-    func convertToModel(_ entity: DetailPartnershipEntity) -> (DetailPartnershipModel, [DetailPartnerImageModel], DetailPartnerBenefitModel) {
+    func convertToModel(_ entity: DetailPartnershipEntity) -> (DetailPartnershipModel, [DetailPartnerImageModel], DetailPartnerBenefitModel, String) {
         let headerModel = DetailPartnershipModel(partnershipName: entity.name, partnerCategoryType: PartnerCategoryType.from(entity.institution))
         
         let imageModel = entity.imageList.map {
@@ -34,6 +34,6 @@ extension DetailPartnershipUseCaseImpl {
         
         let contentModel = DetailPartnerBenefitModel(content: entity.detail)
         
-        return (headerModel, imageModel, contentModel)
+        return (headerModel, imageModel, contentModel, entity.snsLink)
     }
 }

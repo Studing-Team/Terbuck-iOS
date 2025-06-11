@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Shared
 
 public protocol SearchPartnershipUseCase {
     func searchExecute() async throws -> [PartnershipModel]
@@ -20,14 +21,14 @@ public struct SearchPartnershipUseCaseImpl: SearchPartnershipUseCase {
     }
 
     public func searchExecute() async throws -> [PartnershipModel] {
-        let universityName = UserDefaults.standard.string(forKey: "University") ?? ""
+        let universityName = UserDefaultsManager.shared.string(for: .university) ?? ""
         
         let entity = try await repository.getSearchPartner(university: universityName)
         return convertToModel(entity, false)
     }
     
     public func newSearchExecute() async throws -> [PartnershipModel] {
-        let universityName = UserDefaults.standard.string(forKey: "University") ?? ""
+        let universityName = UserDefaultsManager.shared.string(for: .university) ?? ""
         
         let entity = try await repository.getSearchNewPartner(university: universityName)
         return convertToModel(entity, true)

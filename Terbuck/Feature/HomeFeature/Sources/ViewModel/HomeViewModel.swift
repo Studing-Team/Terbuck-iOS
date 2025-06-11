@@ -33,7 +33,7 @@ public final class HomeViewModel {
     
     // MARK: - Private Combine Publishers Properties
     
-    private(set) var isAuthStudentSubject = CurrentValueSubject<Bool, Never>(false)
+    private let isAuthStudentSubject = CurrentValueSubject<Bool?, Never>(nil)
     private(set) var selectedFilterSubject = CurrentValueSubject<StoreFilterType, Never>(.restaurent)
     private let homeErrorSubject = PassthroughSubject<HomeError, Never>()
     private var cancellables = Set<AnyCancellable>()
@@ -53,7 +53,7 @@ public final class HomeViewModel {
     
     struct Output {
         let studentIDCardButtonResult: AnyPublisher<Bool, Never>
-        let authStudentResult: AnyPublisher<Bool, Never>
+        let authStudentResult: AnyPublisher<Bool?, Never>
         let homeError: AnyPublisher<HomeError, Never>
     }
     
@@ -79,11 +79,8 @@ public final class HomeViewModel {
         
         let studentIDCardButtonResult = input.studentIDCardButtonTap
             .map { [weak self] _ -> Bool in
-                guard let self else { return false }
-
-                // 여기서 로직 처리 예: 인증 여부 확인, 조건 분기 등
-               
-                return false
+                guard let self, let result = isAuthStudentSubject.value else { return false }
+                return result
             }
             .eraseToAnyPublisher()
         
@@ -194,8 +191,6 @@ private extension HomeViewModel {
                 promise(.failure(.unknown))
                 return
             }
-            
-            let categoryfilter = selectedFilterSubject.value.title
             
             Task {
                 do {
