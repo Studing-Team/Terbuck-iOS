@@ -27,22 +27,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let navigationController = UINavigationController()
         let authFactory = AppDIContainer().makeAuthFactory()
+        let splashFactory = AppDIContainer().makeSplashFactory()
         let homeTabFactory = AppDIContainer().makeHomeFactory()
         let storeTabFactory = AppDIContainer().makeStoreFactory()
         let mypageTabFactory = AppDIContainer().makeMypageFactory()
-        
-        appCoordinator = AppCoordinator(
-            navigationController: navigationController,
-            authFactory: authFactory,
-            homeTabFactory: homeTabFactory,
-            storeTabFactory: storeTabFactory,
-            mypageTabFactory: mypageTabFactory
-        )
         
         self.window = UIWindow(windowScene: windowScene)
         self.window?.overrideUserInterfaceStyle = .light
         self.window?.rootViewController = navigationController
         self.window?.makeKeyAndVisible()
+        
+        appCoordinator = AppCoordinator(
+            window: window!,
+            navigationController: navigationController,
+            splashFactory: splashFactory,
+            authFactory: authFactory,
+            homeTabFactory: homeTabFactory,
+            storeTabFactory: storeTabFactory,
+            mypageTabFactory: mypageTabFactory
+        )
         
         appCoordinator?.start()
     }

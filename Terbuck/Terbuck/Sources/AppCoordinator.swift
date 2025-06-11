@@ -8,6 +8,7 @@
 
 import UIKit
 
+import SplashInterface
 import AuthInterface
 import HomeInterface
 import StoreInterface
@@ -19,20 +20,26 @@ import CoreKeyChain
 final class AppCoordinator: Coordinator {
     var childCoordinators: [any Shared.Coordinator] = []
     
+    private var window: UIWindow
     private var navigationController: UINavigationController
+    private let splashFactory: SplashFactory
     private let authFactory: AuthFactory
     private let homeTabFactory: HomeTabFactory
     private let storeTabFactory: StoreTabFactory
     private let mypageTabFactory: MypageTabFactory
     
     init(
+        window: UIWindow,
         navigationController: UINavigationController,
+        splashFactory: SplashFactory,
         authFactory: AuthFactory,
         homeTabFactory: HomeTabFactory,
         storeTabFactory: StoreTabFactory,
         mypageTabFactory: MypageTabFactory
     ) {
+        self.window = window
         self.navigationController = navigationController
+        self.splashFactory = splashFactory
         self.authFactory = authFactory
         self.homeTabFactory = homeTabFactory
         self.storeTabFactory = storeTabFactory
@@ -40,14 +47,28 @@ final class AppCoordinator: Coordinator {
     }
     
     func start() {
-        if let token = KeychainManager.shared.load(key: .accessToken), !token.isEmpty {
-            showMainFlow()
-        } else {
-            showLoginFlow()
-        }
+        showSplash()
+    }
+    
+    private func showSplash() {
+        let splashCoordinator = splashFactory.makeSplashCoordinator(window: window)
+        splashCoordinator.delegate = self
+        childCoordinators.append(splashCoordinator)
+        splashCoordinator.start()
     }
     
     func showLoginFlow() {
+        childCoordinators.removeAll()
+        navigationController.viewControllers.removeAll()
+
+        UIView.transition(with: window,
+                          duration: 0.3,
+                          options: .transitionCrossDissolve,
+                          animations: {
+                            self.window.rootViewController = self.navigationController
+                        },
+                          completion: nil)
+        
         let authCoordinator = authFactory.makeAuthCoordinator(navigationController: navigationController)
         authCoordinator.delegate = self
         childCoordinators.append(authCoordinator)
@@ -55,19 +76,13 @@ final class AppCoordinator: Coordinator {
     }
     
     func showMainFlow() {
-        // 1. 기존 child 제거 (ex. 로그인 Coordinator 종료)
         childCoordinators.removeAll()
         navigationController.viewControllers.removeAll()
         
-        // 2. TabBarController 생성
         let tabBarController = CustomTabBarController()
-        
-        // 3. 현재 window의 rootViewController를 TabBarController로 변경
-        if let window = UIApplication.shared.windows.first {
-            window.rootViewController = tabBarController
-        }
 
-        // 2. 새로운 NavigationController (or 각 탭의 Nav 구성)
+        window.rootViewController = tabBarController
+        
         let mainCoordinator = MainCoordinator(
             tabBarController: tabBarController,
             homeTabFactory: homeTabFactory,
@@ -75,6 +90,8 @@ final class AppCoordinator: Coordinator {
             mypageTabFactory: mypageTabFactory
         )
 
+        mainCoordinator.delegate = self
+        
         // 3. childCoordinators 등록
         childCoordinators.append(mainCoordinator)
 
@@ -85,5 +102,21 @@ final class AppCoordinator: Coordinator {
 extension AppCoordinator: AuthCoordinatorDelegate {
     func didFinishAuthFlow() {
         showMainFlow()
+    }
+}
+
+extension AppCoordinator: notAuthCoordinatorDelegate {
+    func moveLoginFlow() {
+        showLoginFlow()
+    }
+}
+
+extension AppCoordinator: SplashCoordinatorDelegate {
+    func splashCoordinatorDidFinish(shouldShowLogin: Bool) {
+        if shouldShowLogin {
+            showLoginFlow()
+        } else {
+            showMainFlow()
+        }
     }
 }

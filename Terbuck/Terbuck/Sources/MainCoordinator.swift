@@ -22,6 +22,8 @@ final class MainCoordinator: Coordinator {
     private let storeTabFactory: StoreTabFactory
     private let mypageTabFactory: MypageTabFactory
     
+    public weak var delegate: notAuthCoordinatorDelegate?
+    
     init(
         tabBarController: UITabBarController,
         homeTabFactory: HomeTabFactory,
@@ -46,6 +48,8 @@ final class MainCoordinator: Coordinator {
         let homeCoordinator = homeTabFactory.makeHomeCoordinator(navigationController: homeNav)
         let storeCoordinator = storeTabFactory.makeStoreCoordinator(navigationController: storeNav)
         let mypageCoordinator = mypageTabFactory.makeMypageCoordinator(navigationController: myPageNav)
+        
+        mypageCoordinator.delegate = delegate
         
         childCoordinators.append(homeCoordinator)
         childCoordinators.append(storeCoordinator)

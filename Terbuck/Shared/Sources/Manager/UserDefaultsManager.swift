@@ -16,6 +16,7 @@ public final class UserDefaultsManager {
     // MARK: - Bool
     
     public func set(_ value: Bool, for key: UserDefaultsKey) {
+        print("📥 UserDefaults - \(value) 저장")
         defaults.set(value, forKey: key.rawValue)
     }
 
@@ -26,6 +27,7 @@ public final class UserDefaultsManager {
     // MARK: - String
     
     public func set(_ value: String, for key: UserDefaultsKey) {
+        print("📥 UserDefaults - \(value) 저장")
         defaults.set(value, forKey: key.rawValue)
     }
 
