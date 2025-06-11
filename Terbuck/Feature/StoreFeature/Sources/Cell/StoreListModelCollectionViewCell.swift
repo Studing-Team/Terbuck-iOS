@@ -23,13 +23,13 @@ public final class StoreListModelCollectionViewCell: UICollectionViewCell {
 
     private let storeAsyncImageView = AsyncImageView(frame: .zero)
     
-    private let storeInfoStackView = UIStackView()
     private let storeTitleStackView = UIStackView()
-    private let storeSubInfoStackView = UIStackView()
     
     private let storeNameLabel = UILabel()
     private let storeCategoryImageView = UIImageView()
     private let storeAddressLabel = UILabel()
+    private let addressContainerView = UIView()
+    private let spacerView = UIView()
     private let benefitCountView = BenefitCountView()
     private let rightArrowImageView = UIImageView()
     
@@ -72,9 +72,7 @@ private extension StoreListModelCollectionViewCell {
         
         storeAsyncImageView.do {
             $0.layer.cornerRadius = 10
-            $0.contentMode = .scaleAspectFill
             $0.clipsToBounds = true
-            $0.backgroundColor = .green
         }
 
         storeTitleStackView.do {
@@ -83,7 +81,6 @@ private extension StoreListModelCollectionViewCell {
             $0.addArrangedSubviews(storeNameLabel, storeCategoryImageView, UIView())
         }
 
-        
         storeNameLabel.do {
             $0.font = DesignSystem.Font.uiFont(.textSemi16)
             $0.textColor =  DesignSystem.Color.uiColor(.terbuckBlack50)
@@ -93,6 +90,7 @@ private extension StoreListModelCollectionViewCell {
             $0.font = DesignSystem.Font.uiFont(.captionMedium12)
             $0.textColor =  DesignSystem.Color.uiColor(.terbuckBlack10)
             $0.numberOfLines = 2
+            $0.lineBreakMode = .byWordWrapping
         }
         
         rightArrowImageView.do {
@@ -117,14 +115,15 @@ private extension StoreListModelCollectionViewCell {
             $0.top.equalTo(storeAsyncImageView.snp.top).offset(1)
             $0.leading.equalTo(storeAsyncImageView.snp.trailing).offset(15)
         }
-        
+
         storeAddressLabel.snp.makeConstraints {
             $0.top.equalTo(storeTitleStackView.snp.bottom).offset(4)
             $0.leading.equalTo(storeAsyncImageView.snp.trailing).offset(15)
         }
         
         benefitCountView.snp.makeConstraints {
-            $0.top.equalTo(storeAddressLabel.snp.bottom).offset(25)
+            $0.top.greaterThanOrEqualTo(storeAddressLabel.snp.bottom).offset(4) // 최소 여백
+            $0.top.lessThanOrEqualTo(storeAddressLabel.snp.bottom).offset(25) // 최대 여백
             $0.leading.equalTo(storeAsyncImageView.snp.trailing).offset(15)
             $0.bottom.equalTo(storeAsyncImageView.snp.bottom).inset(1)
         }
@@ -132,6 +131,7 @@ private extension StoreListModelCollectionViewCell {
         rightArrowImageView.snp.makeConstraints {
             $0.centerY.equalTo(storeAsyncImageView)
             $0.leading.equalTo(storeTitleStackView.snp.trailing)
+            $0.leading.equalTo(storeAddressLabel.snp.trailing)
             $0.trailing.equalToSuperview().inset(15)
             $0.width.equalTo(14)
         }

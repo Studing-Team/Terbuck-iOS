@@ -9,11 +9,12 @@ import UIKit
 import SwiftUI
 
 import DesignSystem
+import Shared
 
 import SnapKit
 import Then
 
-public final class DetailStoreInfoViewController: UIViewController {
+public final class DetailStoreInfoViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
@@ -78,6 +79,7 @@ public final class DetailStoreInfoViewController: UIViewController {
 private extension DetailStoreInfoViewController {
     func setupStyle() {
         view.backgroundColor = .white
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
         
         customNavBar.setupBackButtonAction { [weak self] in
             self?.navigationController?.popViewController(animated: true)
@@ -87,6 +89,14 @@ private extension DetailStoreInfoViewController {
         
         backgroundView.do {
             $0.backgroundColor = .clear
+        }
+        
+        customNavBar.setupRightButtonAction {
+            if UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated) {
+                self.coordinator?.showAuthStudentID()
+            } else {
+                ToastManager.shared.showToast(from: self, type: .notAuthorized)
+            }
         }
     }
     

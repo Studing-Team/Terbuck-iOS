@@ -34,31 +34,40 @@ public final class StoreMapViewModel {
     // MARK: - Properties
     
     private var cachedItems: [Int: StoreListModel] = [:]
+    private var categoryStoreData: [CategoryType: [StoreListModel]] = [:]
     
+    private var currentUniversityName: String?
     private var latitude: Double?
     private var longitude: Double?
-    
     
     // MARK: - Input Combine Publishers Properties
     
     public let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
-    public let storeCategoryPublisher = PassthroughSubject<Int, Never>()
+    public let storeMapTypeSubject = CurrentValueSubject<SearchBarType, Never>(.search)
+    public let storeCategoryPublisher = CurrentValueSubject<Int, Never>(0)
     public let markerTappedSubject = PassthroughSubject<StoreListModel, Never>()
     public let didSelectItemSubject = PassthroughSubject<Int, Never>()
     public let latitudeSubject = CurrentValueSubject<Double?, Never>(nil)
     public let longitudeSubject = CurrentValueSubject<Double?, Never>(nil)
+    public let currentSnapIndex = CurrentValueSubject<Int, Never>(1)
+    
+    // MARK: - SearchStore Input Combine Publishers Properties
+    
+    public let searchTextFieldSubject = PassthroughSubject<String, Never>()
+    public let searchListStoreTappedSubject = PassthroughSubject<StoreListModel, Never>()
+    public let searchResultStoreTappedSubject = CurrentValueSubject<StoreListModel?, Never>(nil)
     
     // MARK: - Output Combine Publishers Properties
     
     public let storeListSubject = CurrentValueSubject<[StoreListModel], Never>([])
     public let categoryItemsSubject = CurrentValueSubject<[CategoryModel], Never>([])
     public let storeItemsTappedResult = PassthroughSubject<Int, Never>()
+    public let filteredStoreListSubject = PassthroughSubject<[StoreListModel], Never>()
 
     private var cancellables = Set<AnyCancellable>()
     
     private let storeMapErrorSubject = PassthroughSubject<StoreMapError, Never>()
 
-    
     // MARK: - Init
     
     public init(
@@ -66,42 +75,39 @@ public final class StoreMapViewModel {
     ) {
         self.searchStoreMapUseCase = searchStoreMapUseCase
         binding()
-        fetchStoreCategory()
     }
     
     // MARK: - Public methods
     
     func binding() {
         viewLifeCycleSubject
-            .sink { [weak self] event in
-                guard let self else { return }
-                if event == .viewDidLoad {
-                    self.fetchStoreCategory()
+            .sink { [weak self] type in
+                switch type {
+                case .viewDidLoad:
+                    self?.fetchStoreCategory()
+                case .viewWillAppear:
+                    let savedUniversityName = UserDefaultsManager.shared.string(for: .university)
+                    
+                    if let name = self?.currentUniversityName, savedUniversityName != name {
+                        self?.fetchStoreCategory()
+                    }
                 }
             }
             .store(in: &cancellables)
         
-        storeCategoryPublisher
-            .combineLatest(latitudeSubject, longitudeSubject)
-            .compactMap { category, lat, lng -> (Int, Double, Double)? in
-                guard let lat, let lng else { return nil }
-                return (category, lat, lng)
-            }
-            .handleEvents(receiveOutput: { [weak self] tuple in
-                let (categoryIndex, _, _) = tuple
-                self?.updateCategorySelection(to: categoryIndex)
+        let sharedPublisher = storeCategoryPublisher
+            .handleEvents(receiveOutput: { [weak self] index in
+                self?.updateCategorySelection(to: index)
             })
-            .flatMap { [weak self] tuple -> AnyPublisher<[StoreListModel], Never> in
-                guard let self else {
-                    return Empty().eraseToAnyPublisher()
-                }
-                
-                let (categoryIndex, lat, lng) = tuple
-                
-                let categoryItems = categoryItemsSubject.value
-                let categoryName = categoryIndex == 0 ? "" : categoryItems[categoryIndex].type.title
-                
-                return self.getStoreDataPublisher(category: categoryName, lat: lat, lng: lng)
+            .share()
+        
+        // ✅ 전체 카테고리일 경우: 서버 호출
+        let fetchPublisher = sharedPublisher
+            .filter { categoryIndex in categoryIndex == 0 }
+            .flatMap { [weak self] categoryIndex -> AnyPublisher<[StoreListModel], Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+
+                return self.getStoreDataPublisher(category: "", lat: latitude, lng: longitude)
                     .handleEvents(receiveCompletion: { [weak self] completion in
                         if case .failure(let error) = completion {
                             self?.storeMapErrorSubject.send(error)
@@ -110,19 +116,51 @@ public final class StoreMapViewModel {
                     .catch { _ in Just([]) }
                     .eraseToAnyPublisher()
             }
+        
+        // ✅ 특정 카테고리 선택시: 필터링만 수행
+        let filterPublisher = sharedPublisher
+            .filter { categoryIndex in categoryIndex != 0 }
+            .handleEvents(receiveOutput: { [weak self] categoryIndex in
+                self?.updateStoreList(to: categoryIndex)
+            })
+            .map { _ in [StoreListModel]() } // 빈 리스트로 데이터 방출
+
+        // ✅ 병합 후 처리
+        Publishers.Merge(fetchPublisher, filterPublisher)
             .sink { [weak self] storeList in
+                guard !storeList.isEmpty else { return }
+                self?.categoryStoreData.removeAll()
+                
                 storeList.forEach {
                     self?.cachedItems[$0.id] = $0
+                    self?.categoryStoreData[$0.category, default: []].append($0)
                 }
+
                 self?.storeListSubject.send(storeList)
             }
             .store(in: &cancellables)
-        
         
         didSelectItemSubject
             .sink { [weak self] index in
                 guard let data = self?.storeListSubject.value[index] else { return }
                 self?.storeItemsTappedResult.send(data.id)
+            }
+            .store(in: &cancellables)
+        
+        
+        searchTextFieldSubject
+            .sink { [weak self] searchText in
+                guard let self = self else { return }
+
+                let searchResult = self.storeListSubject.value.filter { store in
+                    let storeName = store.storeName
+                    let consonants = self.extractInitialConsonants(from: storeName)
+
+                    return storeName.contains(searchText) || consonants.contains(searchText)
+                }
+
+                // 검색 결과를 따로 보낸다면 여기에 전달
+                self.filteredStoreListSubject.send(searchResult)
             }
             .store(in: &cancellables)
     }
@@ -163,16 +201,23 @@ public final class StoreMapViewModel {
 // MARK: - Private API Extension
 
 private extension StoreMapViewModel {
-    func getStoreDataPublisher(category: String, lat: Double, lng: Double) -> AnyPublisher<[StoreListModel], StoreMapError> {
+    func getStoreDataPublisher(category: String, lat: Double?, lng: Double?) -> AnyPublisher<[StoreListModel], StoreMapError> {
         return Future { [weak self] promise in
             guard let self else {
                 promise(.failure(.unknown))
                 return
             }
- 
+            
             Task {
                 do {
-                    let result = try await self.searchStoreMapUseCase.execute(category: category, latitude: String(lat), longitude: String(lng))
+                    let latString = lat.map { String($0) } ?? ""
+                    let lngString = lng.map { String($0) } ?? ""
+                    
+                    let result = try await self.searchStoreMapUseCase.execute(
+                        category: category,
+                        latitude: latString,
+                        longitude: lngString
+                    )
                     promise(.success(result))
                 } catch {
                     promise(.failure(.studentInfoFailed))
@@ -183,9 +228,12 @@ private extension StoreMapViewModel {
     }
 }
 
+// MARK: - Private Function Extension
 
 private extension StoreMapViewModel {
     func fetchStoreCategory() {
+        currentUniversityName = UserDefaultsManager.shared.string(for: .university)
+        
         let category = CategoryType.allCases.map {
             return CategoryModel(type: $0, isSelected: $0.title == "전체" ? true : false)
         }
@@ -204,5 +252,11 @@ private extension StoreMapViewModel {
         category[selectRow].isSelected = true
         
         categoryItemsSubject.send(category)
+    }
+    
+    func updateStoreList(to selectRow: Int) {
+        let categoryData = categoryItemsSubject.value
+        guard let categoryStoreList = categoryStoreData[categoryData[selectRow].type] else { return }
+        self.storeListSubject.send(categoryStoreList)
     }
 }

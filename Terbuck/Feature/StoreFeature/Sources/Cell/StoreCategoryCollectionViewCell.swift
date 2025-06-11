@@ -54,11 +54,6 @@ public final class StoreCategoryCollectionVieCell: UICollectionViewCell {
 // MARK: - Extensions
 
 public extension StoreCategoryCollectionVieCell {
-//    func configureCell(forCase model: CategoryType) {
-//        categoryType = model
-//        categoryImageView.image = model.icon
-//        categoryTitleLabel.text = model.title
-//    }
     func configureCell(forCase model: CategoryModel) {
         print("바뀌고 있는 셀:", model.type.title)
         self.contentStackView.backgroundColor = model.isSelected ? DesignSystem.Color.uiColor(.terbuckGreen50) : .white
@@ -79,6 +74,7 @@ public extension StoreCategoryCollectionVieCell {
             categoryImageView.isHidden = false
             categoryTitleLabel.isHidden = model.isSelected ? true : false
             categoryTitleLabel.textColor = DesignSystem.Color.uiColor(.terbuckBlack30)
+            categoryTitleLabel.font = DesignSystem.Font.uiFont(.textRegular14)
                 
             if model.isSelected == true {
                 categoryImageView.image = model.type.selectIcon
@@ -141,49 +137,7 @@ private extension StoreCategoryCollectionVieCell {
             
         } else {
             categoryTitleLabel.isHidden = isSelected ? true : false
-            
-            if isSelected {
-                
-//                contentStackView.removeArrangedSubview(categoryTitleLabel)
-//                categoryTitleLabel.removeFromSuperview()
-            } else {
-                
-//                contentStackView.insertArrangedSubview(categoryTitleLabel, at: 1)
-            }
+            categoryTitleLabel.font = DesignSystem.Font.uiFont(.textRegular14)
         }
-        
-//        if categoryTitleLabel.text == "전체" {
-//            print("실행 되고 있음")
-////            categoryTitleLabel.isHidden = false
-//            categoryTitleLabel.font = isSelected ? DesignSystem.Font.uiFont(.textSemi14) : DesignSystem.Font.uiFont(.textRegular14)
-//            categoryTitleLabel.textColor = isSelected ? .white : DesignSystem.Color.uiColor(.terbuckBlack30)
-//            contentStackView.layoutMargins = UIEdgeInsets(top: 8.5, left: 12, bottom: 8.5, right: 12)
-//        } else {
-//            contentStackView.layoutMargins = isSelected ? UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12) : UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
-//        }
-        
-        
-        
-//        if categoryTitleLabel.text == "전체" {
-//            categoryTitleLabel.isHidden = false
-//            categoryTitleLabel.font = isSelected ? DesignSystem.Font.uiFont(.textSemi14) : DesignSystem.Font.uiFont(.textRegular14)
-//            categoryTitleLabel.textColor = isSelected ? .white : DesignSystem.Color.uiColor(.terbuckBlack30)
-//            contentStackView.layoutMargins = UIEdgeInsets(top: 8.5, left: 12, bottom: 8.5, right: 12)
-//        } else {
-////            categoryTitleLabel.isHidden = isSelected
-//            categoryTitleLabel.textColor = isSelected ? .white : DesignSystem.Color.uiColor(.terbuckBlack30)
-////            categoryTitleLabel.font = DesignSystem.Font.uiFont(.textRegular14)
-//
-//            contentStackView.layoutMargins = isSelected
-//            ? UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
-//            : UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
-//            
-//            // 옵션: 숨길 때 width를 0으로
-////            categoryTitleLabel.snp.remakeConstraints {
-////                if isSelected {
-////                    $0.width.equalTo(0)
-////                }
-////            }
-//        }
     }
 }

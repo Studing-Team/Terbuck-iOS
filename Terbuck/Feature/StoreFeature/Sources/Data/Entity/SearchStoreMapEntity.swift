@@ -11,6 +11,7 @@ import CoreNetwork
 public struct SearchStoreMapEntity {
     public let id: Int
     public let name: String
+    public let category: String
     public let storeImageURL: String
     public let address: String
     public let latitude: Double
@@ -23,6 +24,7 @@ extension SearchStoreMapListData {
         return SearchStoreMapEntity(
             id: shopId,
             name: name,
+            category: category,
             storeImageURL: thumbnailImage,
             address: address,
             latitude: latitude,

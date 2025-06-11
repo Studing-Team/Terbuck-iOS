@@ -8,6 +8,7 @@
 import Foundation
 import CoreNetwork
 import DesignSystem
+import Shared
 
 public protocol SearchStoreMapUseCase {
     func execute(category: String, latitude: String, longitude: String) async throws -> [StoreListModel]
@@ -22,7 +23,7 @@ public struct SearchStoreMapUseCaseImpl: SearchStoreMapUseCase {
 
     public func execute(category: String, latitude: String, longitude: String) async throws -> [StoreListModel] {
         
-        let universityName = UserDefaults.standard.string(forKey: "University") ?? ""
+        let universityName = UserDefaultsManager.shared.string(for: .university) ?? ""
 
         let entity = try await repository.getSearchStoreMap(university: universityName, category: category, latitude: latitude, longitude: longitude)
         
@@ -32,7 +33,7 @@ public struct SearchStoreMapUseCaseImpl: SearchStoreMapUseCase {
                 imageURL: $0.storeImageURL,
                 storeName: $0.name,
                 storeAddress: $0.address,
-                category: CategoryType.from(category),
+                category: CategoryType.from($0.category),
                 benefitCount: $0.benefitCount,
                 latitude: $0.latitude,
                 longitude: $0.longitude

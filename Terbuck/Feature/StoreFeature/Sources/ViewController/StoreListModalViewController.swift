@@ -67,7 +67,8 @@ public final class StoreListModalViewController: UIViewController {
         layout.scrollDirection = .vertical
 
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        layout.itemSize = CGSize(width: 375, height: 112)
+        layout.itemSize = CGSize(width: UIScreen.main.bounds.width, height: 112)
+        
         collectionView.backgroundColor = .white
         collectionView.showsVerticalScrollIndicator = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -82,11 +83,10 @@ public final class StoreListModalViewController: UIViewController {
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: 65, height: 34)
         $0.collectionViewLayout = layout
-        $0.contentInset = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+        $0.contentInset = UIEdgeInsets(top: 3, left: 15, bottom: 10, right: 15)
         $0.backgroundColor = .clear
         $0.showsHorizontalScrollIndicator = false
         $0.allowsMultipleSelection = false
-        $0.layer.cornerRadius = 16
         $0.layer.shadowColor = UIColor.black.withAlphaComponent(0.6).cgColor
         $0.layer.shadowOffset = CGSize(width: 3, height: 3)  // 그림자 위치
         $0.layer.shadowOpacity = 0.3  // 그림자 투명도
@@ -229,7 +229,7 @@ public final class StoreListModalViewController: UIViewController {
             }
 
             currentSnapIndex = newSnapIndex
-
+            storeMapViewModel.currentSnapIndex.send(newSnapIndex)
             delegate?.bottomSheet(self, currentPoint: snapPoints[currentSnapIndex], didChangeHeight: 0)
         
         default:
@@ -335,14 +335,14 @@ private extension StoreListModalViewController {
         }
         
         contentView.snp.makeConstraints {
-            $0.top.equalTo(categoryCollectionView.snp.bottom).offset(12)
+            $0.top.equalTo(categoryCollectionView.snp.bottom).offset(5)
             $0.leading.trailing.bottom.equalToSuperview()
         }
         
         categoryCollectionView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(16)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(34)
+            $0.height.equalTo(45)
         }
         
         indicator.snp.makeConstraints {
@@ -353,7 +353,7 @@ private extension StoreListModalViewController {
         }
         
         storeCollectionView.snp.makeConstraints {
-            storeCollectionViewTopConstraint = $0.top.equalTo(indicator.snp.bottom).offset(15).constraint
+            storeCollectionViewTopConstraint = $0.top.equalTo(indicator.snp.bottom).offset(10).constraint
             $0.horizontalEdges.equalToSuperview()
             bottomConstraint = $0.bottom.equalToSuperview().constraint
         }
