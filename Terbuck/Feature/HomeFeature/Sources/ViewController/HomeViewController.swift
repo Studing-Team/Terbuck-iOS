@@ -63,7 +63,7 @@ final class HomeViewController: UIViewController {
         super.viewDidLoad()
         
         viewLifeCycleSubject.send(.viewDidLoad)
-        
+        UserDefaultsManager.shared.set("서울과학기술대학교", for: .university)
         setupStyle(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
         setupHierarchy()
         setupLayout()
