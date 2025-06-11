@@ -76,22 +76,23 @@ final class SearchStoreViewController: UIViewController {
         setupHierarchy()
         setupLayout()
         setupDelegate()
+        setupCollectionView()
+        setupDataSource()
         bindViewModel()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
         textField.becomeFirstResponder()
     }
     
-    @objc func didTapBack() {
+    @objc func backButtonTapped() {
         self.navigationController?.popViewController(animated: false)
     }
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
-        
-        // TODO: - 검색 텍스트를 VM 으로 연결
-    
+        storeMapViewModel.searchTextFieldSubject.send(textField.text ?? "")
     }
 }
 
@@ -99,7 +100,23 @@ final class SearchStoreViewController: UIViewController {
 
 private extension SearchStoreViewController {
     func bindViewModel() {
+        storeMapViewModel.filteredStoreListSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] result in
+                guard let self else { return }
 
+                let keyword = self.textField.text ?? ""
+                self.updateSnapshot(
+                    keyword: keyword,
+                    currentSearches: [], // 필요 시 최근 검색어 리스트로 교체
+                    searchResults: result
+                )
+                
+                UIView.performWithoutAnimation {
+                    self.collectionView.reloadData()
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -110,6 +127,8 @@ private extension SearchStoreViewController {
         collectionView.do {
             let layout = UICollectionViewFlowLayout()
             layout.scrollDirection = .vertical
+            layout.itemSize = CGSize(width: UIScreen.main.bounds.width, height: 103)
+            layout.minimumLineSpacing = 0
             $0.showsVerticalScrollIndicator = false
             $0.collectionViewLayout = layout
         }
@@ -127,8 +146,11 @@ private extension SearchStoreViewController {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CurrentSearchStoreCollectionViewCell.className, for: indexPath) as! CurrentSearchStoreCollectionViewCell
 //                cell.configure(with: store)
                 return cell
-            case .searchResult:
+            case .searchResult(let model):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchStoreCollectionViewCell.className, for: indexPath) as! SearchStoreCollectionViewCell
+                
+                let keyword = self.textField.text ?? ""
+                cell.configureCell(forModel: model, searchTitle: keyword)
                 return cell
             }
         }
@@ -154,6 +176,8 @@ private extension SearchStoreViewController {
 
 private extension SearchStoreViewController {
     func setupStyle() {
+        self.view.backgroundColor = .white
+        
         containerView.do {
             $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite5)
             $0.layer.cornerRadius = 16
@@ -164,7 +188,7 @@ private extension SearchStoreViewController {
             let image = UIImage(systemName: "chevron.left", withConfiguration: config)
             $0.setImage(image, for: .normal)
             $0.tintColor = DesignSystem.Color.uiColor(.terbuckBlack30)
-            $0.addTarget(self, action: #selector(didTapBack), for: .touchUpInside)
+            $0.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         }
         
         rightSearchImageView.do {
@@ -177,8 +201,7 @@ private extension SearchStoreViewController {
         textField.do {
             $0.placeholder = "우리 대학 제휴 업체는?"
             $0.font = DesignSystem.Font.uiFont(.textRegular16)
-            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
-            $0.tintColor = DesignSystem.Color.uiColor(.terbuckBlack10)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
             $0.backgroundColor = .clear
             $0.borderStyle = .none
             $0.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
@@ -221,7 +244,7 @@ private extension SearchStoreViewController {
         }
         
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(containerView.snp.bottom)
+            $0.top.equalTo(containerView.snp.bottom).offset(10)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
@@ -238,16 +261,21 @@ extension SearchStoreViewController: UICollectionViewDelegate {
         
         switch item {
         case .currentSearch(let model):
-            // 최근 검색어를 눌렀을 때의 처리
-            
             currentSearchTappedSubject.send(model)
             
-//            handleCurrentSearchSelection(model)
         case .searchResult(let model):
             // 검색 결과 항목을 눌렀을 때의 처리)
-            
-            searchTappedSubject.send(model)
+            storeMapViewModel.storeMapTypeSubject.send(.searchResult)
+            storeMapViewModel.searchListStoreTappedSubject.send(model)
+            view.endEditing(true)
+            navigationController?.popViewController(animated: false)
         }
+    }
+}
+
+extension SearchStoreViewController: UIScrollViewDelegate {
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        view.endEditing(true)
     }
 }
 
