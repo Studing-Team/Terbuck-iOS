@@ -61,7 +61,8 @@ public enum DesignSystem {
                 case .terbuckToastBackground:
                     return UIColor(asset: ResourceAsset.Color.terbuckToast)!
                 case .terbuckStudentBackground:
-                    return UIColor(asset: ResourceAsset.Color.terbuckAlertBack)!.withAlphaComponent(0.85)
+                    return UIColor(asset: ResourceAsset.Color.terbuckAlertBack)!
+                        .withAlphaComponent(0.90)
                 case .terbuckPartnerBlack:
                     return UIColor(asset: ResourceAsset.Color.terbuckPartnerBlack)!
                 }

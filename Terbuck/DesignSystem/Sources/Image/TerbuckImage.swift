@@ -72,9 +72,13 @@ public extension UIImage {
     static var moreBenefitIcon: UIImage {
         return ResourceAsset.Image.moreBenefit.image
     }
+    
+    static var closeXIcon: UIImage {
+        return ResourceAsset.Image.closeX.image
+    }
 }
 
-// MARK: - Marker Image
+// MARK: - Select Marker Image
 
 public extension UIImage {
     static var barMarkerPin: UIImage {
@@ -107,6 +111,38 @@ public extension UIImage {
     
     static var myDirection: UIImage {
         return ResourceAsset.Image.myDirection.image
+    }
+}
+
+// MARK: - Not Select Marker Image
+
+public extension UIImage {
+    static var notSelectBarMarkerPin: UIImage {
+        return ResourceAsset.Image.notSelectBarMarker.image
+    }
+    
+    static var notSelectCafeMarkerPin: UIImage {
+        return ResourceAsset.Image.notSelectCafeMarker.image
+    }
+    
+    static var notSelectCultureMarkerPin: UIImage {
+        return ResourceAsset.Image.notSelectCultureMarker.image
+    }
+    
+    static var notSelectGymMarkerPin: UIImage {
+        return ResourceAsset.Image.notSelectGymMarker.image
+    }
+    
+    static var notSelectHospitalMarkerPin: UIImage {
+        return ResourceAsset.Image.notSelectHospitalMarker.image
+    }
+    
+    static var notSelectRestaurantMarkerPin: UIImage {
+        return ResourceAsset.Image.notSelectRestaurantMarker.image
+    }
+    
+    static var notSelectStudyMarkerPin: UIImage {
+        return ResourceAsset.Image.notSelectStudyMarker.image
     }
 }
 
