@@ -25,7 +25,7 @@ public final class SegmentedTabView: UIView {
     public var selectedFilterPublisher: AnyPublisher<StoreFilterType, Never> {
         selectedFilterSubject.eraseToAnyPublisher()
     }
-    
+    private var didInitialLayout = false
     // MARK: - UI Properties
     
     private let stackView = UIStackView()
@@ -41,12 +41,6 @@ public final class SegmentedTabView: UIView {
         setupHierarchy()
         setupLayout()
         configureButtons()
-        
-        // ✅ layout 강제 완료 후 indicator 설정
-        DispatchQueue.main.async {
-            self.layoutIfNeeded()
-            self.selectSegment(type: .restaurent, animated: false)
-        }
     }
     
     required init?(coder: NSCoder) {
@@ -55,7 +49,13 @@ public final class SegmentedTabView: UIView {
     
     public override func layoutSubviews() {
         super.layoutSubviews()
-        selectSegment(type: selectedType, animated: false)
+        
+        guard !didInitialLayout else { return }
+        didInitialLayout = true
+
+        DispatchQueue.main.async {
+            self.selectSegment(type: self.selectedType, animated: false)
+        }
     }
 }
 
@@ -76,6 +76,10 @@ private extension SegmentedTabView {
         indicatorView.do {
             $0.backgroundColor = .white
             $0.layer.cornerRadius = 14
+            $0.layer.shadowOpacity = 0.3
+            $0.layer.shadowRadius = 30
+            $0.layer.shadowOffset = CGSize(width: 1, height: 1)
+            $0.layer.shadowColor = UIColor.gray.withAlphaComponent(0.6).cgColor
         }
     }
     
@@ -149,7 +153,7 @@ private extension SegmentedTabView {
 
     func selectSegment(type: StoreFilterType, animated: Bool = true) {
         guard let index = StoreFilterType.allCases.firstIndex(of: type) else { return }
-        
+        print("현재 인덱스", index)
         let button = buttons[index]
         selectedType = type
 
@@ -163,5 +167,7 @@ private extension SegmentedTabView {
             let isSelected = i == index
             btn.isSelected = isSelected
         }
+        
+        self.layoutIfNeeded()
     }
 }

@@ -62,7 +62,6 @@ final class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        viewLifeCycleSubject.send(.viewDidLoad)
         UserDefaultsManager.shared.set("서울과학기술대학교", for: .university)
         setupStyle(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
         setupHierarchy()
@@ -71,6 +70,14 @@ final class HomeViewController: UIViewController {
         bindViewModel()
         setupCollectionView()
         setupDataSource()
+        
+        viewLifeCycleSubject.send(.viewDidLoad)
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        viewLifeCycleSubject.send(.viewWillAppear)
     }
     
     override func viewDidLayoutSubviews() {
@@ -386,7 +393,7 @@ extension HomeViewController {
                 cell.configureCell(forModel: model)
                 
                 cell.onMoreBenefitTapped { [weak self] in
-                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.cateotry, benefitData: model.subBenefit)
+                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.category, benefitData: model.subBenefit)
                 }
                 
                 return cell
@@ -400,7 +407,7 @@ extension HomeViewController {
                 cell.configureCell(forModel: model)
                 
                 cell.onMoreBenefitTapped { [weak self] in
-                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.cateotry, benefitData: model.subBenefit)
+                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.category, benefitData: model.subBenefit)
                 }
                 
                 return cell

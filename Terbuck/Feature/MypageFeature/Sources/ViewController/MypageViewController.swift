@@ -97,7 +97,10 @@ private extension MypageViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] type in
                 guard let self else { return }
-                ToastManager.shared.showToast(from: self, type: type)
+                
+                ToastManager.shared.showToast(from: self, type: type) {
+                    self.coordinator?.registerStudentID()
+                }
             }
             .store(in: &cancellables)
         
@@ -341,7 +344,7 @@ extension MypageViewController: UICollectionViewDataSource, UICollectionViewDele
             
             let model = mypageViewModel.userInfoModelSubject.value
             
-            cell.configureCell(forModel: model )
+            cell.configureCell(forModel: model)
             
             cell.bindingAction(action: { [weak self] in
                 self?.coordinator?.startEditUniversity()

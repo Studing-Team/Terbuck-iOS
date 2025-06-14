@@ -42,16 +42,13 @@ struct DetailStoreInfoView: View {
 
 private extension DetailStoreInfoView {
     func titleSection() -> some View {
-        if let titleItem = viewModel.sectionData[.title], case .storeTitle(let model) = titleItem {
-            TitleSectionView<DetailStoreHeaderModel>(
-                type: type,
-                model: model
-            )
-        } else {
-            TitleSectionView<DetailStoreHeaderModel>(
-                type: type,
-                model: DetailStoreHeaderModel(storeName: "데이터 없음", storeAddress: "데이터 없음")
-            )
+        VStack(spacing: 0) {
+            if let titleItem = viewModel.sectionData[.title], case .storeTitle(let model) = titleItem {
+                TitleSectionView<DetailStoreHeaderModel>(
+                    type: type,
+                    model: model
+                )
+            }
         }
     }
     
@@ -64,8 +61,6 @@ private extension DetailStoreInfoView {
                     onImageTapped: onImageTapped
                 )
                 .frame(height: 203 * (geometry.size.width / 375))
-            } else {
-                // TODO: - loading 안됐을때
             }
         }
     }
@@ -114,23 +109,5 @@ struct BenefitSectionView: View {
                     }
             }
         }
-//        ScrollView {
-//            VStack(alignment: .leading,spacing: 0) {
-//                ForEach(benefitModel, id: \.self) { model in
-//                    Text(model.benefitTitle)
-//                        .font(DesignSystem.Font.swiftUIFont(.textRegular14))
-//                        .foregroundStyle(DesignSystem.Color.swiftUIColor(.terbuckBlack50))
-//                        .frame(maxWidth: .infinity)
-//                        .padding(.vertical, 18)
-//                        .padding(.horizontal, 15)
-//                        .overlay {
-//                            RoundedRectangle(cornerRadius: 8)
-//                                .fill(DesignSystem.Color.swiftUIColor(.terbuckWhite3))
-//                        }
-//                        .padding(.bottom, 8)
-//                }
-//            }
-//            .padding()
-//        }
     }
 }

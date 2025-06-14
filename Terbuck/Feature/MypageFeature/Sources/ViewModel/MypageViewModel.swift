@@ -90,6 +90,8 @@ public final class MypageViewModel {
                 case .viewWillAppear:
                     let savedUniversityName = UserDefaultsManager.shared.string(for: .university)
                     let currentUniversityName = self.userInfoModelSubject.value?.university
+
+                    guard let currentUniversityName else { return Empty().eraseToAnyPublisher() }
                     
                     if savedUniversityName != currentUniversityName {
                         toasterMessageSubject.send(.changeUniversity)
