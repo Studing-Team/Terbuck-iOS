@@ -26,7 +26,7 @@ public final class CustomBenefitAlertViewController: UIViewController {
     private let alertBackgroundView = UIView()
     private let storeInfoTitleView = StoreInfoTitleView()
     private let moreBeneiftStackView = UIStackView()
-    private let bottomButton = TerbuckBottomButton(type: .close)
+    private let bottomButton = TerbuckBottomButton(type: .close(type: .nomal))
     
     // MARK: - Init
     

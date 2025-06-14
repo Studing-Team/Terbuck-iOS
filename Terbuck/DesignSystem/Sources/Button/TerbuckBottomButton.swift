@@ -10,6 +10,11 @@ import UIKit
 import SnapKit
 import Then
 
+public enum ButtonType {
+    case nomal
+    case alert
+}
+
 public enum TerbuckButtonType {
     case confirm
     case next
@@ -19,7 +24,7 @@ public enum TerbuckButtonType {
     case cancel
     case draw
     case save
-    case close
+    case close(type: ButtonType)
     case moveNaver
     case moveInstar
     
@@ -52,6 +57,14 @@ public enum TerbuckButtonType {
         switch self {
         case .cancel, .logout, .draw:
             return 39
+            
+        case .close(let type):
+            switch type {
+            case .alert:
+                return 39
+            case .nomal:
+                return 52
+            }
         default:
             return 52
         }
@@ -70,6 +83,15 @@ public enum TerbuckButtonType {
         switch self {
         case .cancel, .logout, .draw:
             return 8
+            
+        case .close(let type):
+            switch type {
+            case .alert:
+                return 8
+            case .nomal:
+                return 16
+            }
+            
         default:
             return 16
         }
