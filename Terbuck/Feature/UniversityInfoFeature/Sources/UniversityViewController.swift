@@ -181,6 +181,22 @@ private extension UniversityViewController {
                 }
             }
             .store(in: &cancellables)
+        
+        output.errorResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] error in
+                switch error {
+                case .notEditUniversity:
+                    self?.showConfirmAlert(
+                        mainTitle: error.localizedDescription,
+                        subTitle: "동일한 대학교를 선택했습니다\n다른 대학교를 선택해주세요",
+                        centerButton: TerbuckBottomButton(type: .close(type: .alert))
+                    )
+                default:
+                    break
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 

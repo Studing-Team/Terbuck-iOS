@@ -13,6 +13,7 @@ import Shared
 enum UniversityError: LocalizedError, Equatable {
     case signupFailed
     case editUniversityFailed
+    case notEditUniversity
     case unknown
 
     var errorDescription: String? {
@@ -21,6 +22,8 @@ enum UniversityError: LocalizedError, Equatable {
             return "회원가입에 실패했습니다."
         case .editUniversityFailed:
             return "대학교를 변경하지 못했습니다."
+        case .notEditUniversity:
+            return "대학교를 변경할 수 없습니다"
         case .unknown:
             return "알 수 없는 오류가 발생했어요."
         }
@@ -36,9 +39,10 @@ public class UniversityViewModel {
     
     var universityName: String? = nil
     
-    // MARK: - Public Combine Publishers Properties
+    // MARK: - Private Combine Publishers Properties
     
     private let selectedUniversitySubject = CurrentValueSubject<University?, Never>(nil)
+    private let errorSubject = PassthroughSubject<UniversityError, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Input
@@ -52,6 +56,7 @@ public class UniversityViewModel {
     
     struct Output {
         let selectedUniversity: AnyPublisher<University?, Never>
+        let errorResult: AnyPublisher<UniversityError, Never>
         let bottomButtonResult: AnyPublisher<Bool, Never>
     }
     
@@ -98,10 +103,15 @@ public class UniversityViewModel {
                 if let _ = self.editUniversityUseCase, let universityName = self.universityName {
                     return editUniversityPublisher(universityName)
                         .map { _ in
+                            UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
                             UserDefaultsManager.shared.set(universityName, for: .university)
+                            FileStorageManager.shared.delete(type: .studentIdCard)
                             return true
                         }
-                        .catch { _ in Just(false) }
+                        .catch { error in
+                            self.errorSubject.send(error)
+                            return Just(false)
+                        }
                         .eraseToAnyPublisher()
                 }
                 
@@ -111,6 +121,7 @@ public class UniversityViewModel {
         
         return Output(
             selectedUniversity: selectedUniversitySubject.eraseToAnyPublisher(),
+            errorResult: errorSubject.eraseToAnyPublisher(),
             bottomButtonResult: bottomButtonResult
         )
     }
@@ -142,6 +153,11 @@ private extension UniversityViewModel {
         return Future { [weak self] promise in
             guard let self, let editUniversityUseCase else {
                 promise(.failure(.unknown))
+                return
+            }
+            
+            if university == UserDefaultsManager.shared.string(for: .university) {
+                promise(.failure(.notEditUniversity))
                 return
             }
             
