@@ -20,7 +20,10 @@ public final class StoreCollectionViewCell: UICollectionViewCell {
     
     // MARK: - UI Properties
 
-    private let storeInfoTitleView = StoreInfoTitleView()
+    private let storeNameLabel = UILabel()
+    private let storeCategoryImage = UIImageView()
+    private let storeAddressLabel = UILabel()
+    
     private let benefitBackgroundImage = UIImageView()
     private let mainBenefitLabel = UILabel()
     private let moreBenefitButton = UILabel()
@@ -49,7 +52,9 @@ public final class StoreCollectionViewCell: UICollectionViewCell {
 
 public extension StoreCollectionViewCell {
     func configureCell(forModel model: NearStoreModel) {
-        storeInfoTitleView.configureData(name: model.storeName, address: model.address, category: model.cateotry)
+        storeNameLabel.text = model.storeName
+        storeCategoryImage.image = model.category.colorIcon
+        storeAddressLabel.text = model.address
         mainBenefitLabel.text = model.mainBenefit
         moreBenefitButton.isHidden = model.subBenefit.isEmpty
     }
@@ -68,12 +73,25 @@ private extension StoreCollectionViewCell {
             $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20))
         }
         
+        storeNameLabel.do {
+            $0.font = DesignSystem.Font.uiFont(.textSemi18)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
+            $0.numberOfLines = 2
+            $0.lineBreakMode = .byCharWrapping
+        }
+        
+        storeAddressLabel.do {
+            $0.font = DesignSystem.Font.uiFont(.captionMedium12)
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
+//            $0.numberOfLines = 2
+        }
+        
         mainBenefitLabel.do {
             $0.font = DesignSystem.Font.uiFont(.textSemi16)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
             $0.numberOfLines = 2
             $0.textAlignment = .center
-            $0.lineBreakMode = .byCharWrapping
+            $0.lineBreakMode = .byWordWrapping
         }
         
         moreBenefitButton.do {
@@ -90,24 +108,36 @@ private extension StoreCollectionViewCell {
     }
     
     func setupHierarchy() {
-        contentView.addSubviews(storeInfoTitleView, moreBenefitButton, benefitBackgroundImage)
+        contentView.addSubviews(storeNameLabel, storeAddressLabel, storeCategoryImage, mainBenefitLabel, moreBenefitButton, benefitBackgroundImage)
         benefitBackgroundImage.addSubviews(mainBenefitLabel)
     }
     
     func setupLayout() {
-        storeInfoTitleView.snp.makeConstraints {
+        storeNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(22)
-            $0.leading.equalToSuperview().inset(16)
-            $0.trailing.equalTo(moreBenefitButton.snp.leading).inset(10)
+            $0.leading.equalToSuperview().offset(16)
+            $0.width.lessThanOrEqualTo(self.convertByWidthRatio(195))
         }
         
+        storeAddressLabel.snp.makeConstraints {
+            $0.top.equalTo(storeNameLabel.snp.bottom).offset(6)
+            $0.leading.equalToSuperview().inset(16)
+            $0.width.equalTo(self.convertByWidthRatio(200))
+        }
+        
+        storeCategoryImage.snp.makeConstraints {
+            $0.top.equalTo(storeNameLabel)
+            $0.leading.equalTo(storeNameLabel.snp.trailing).offset(4)
+            $0.size.equalTo(24)
+        }
+
         moreBenefitButton.snp.makeConstraints {
             $0.top.equalToSuperview().offset(26)
             $0.trailing.equalToSuperview().inset(15)
         }
-        
+                
         benefitBackgroundImage.snp.makeConstraints {
-            $0.top.equalTo(storeInfoTitleView.snp.bottom).offset(17)
+            $0.top.equalTo(storeAddressLabel.snp.bottom).offset(17)
             $0.horizontalEdges.equalToSuperview().inset(15)
             $0.bottom.equalToSuperview().inset(19)
         }
