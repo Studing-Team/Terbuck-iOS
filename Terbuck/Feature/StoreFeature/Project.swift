@@ -13,9 +13,13 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
+                .external(name: "SnapKit"),
+                .external(name: "Then"),
                 .external(name: "NMapsMap"),
                 .project(target: "StoreInterface", path: "../StoreInterface"),
-                .project(target: "DesignSystem", path: "../../DesignSystem")
+                .project(target: "DesignSystem", path: "../../DesignSystem"),
+                .project(target: "Shared", path: "../../Shared"),
+                .project(target: "RegisterStudentCardFeature", path: "../RegisterStudentCardFeature")
             ]
         )
     ]

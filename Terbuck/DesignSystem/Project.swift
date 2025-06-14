@@ -13,6 +13,8 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
+                .external(name: "SnapKit"),
+                .external(name: "Then"),
                 .project(target: "Resource", path: "../Resource"),
                 .project(target: "Shared", path: "../Shared")
             ]
