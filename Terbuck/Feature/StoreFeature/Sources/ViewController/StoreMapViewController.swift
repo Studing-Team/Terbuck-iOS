@@ -29,6 +29,11 @@ final class StoreMapViewController: UIViewController {
     
     private var allMarkersDic: [CategoryType: [NMFMarker]] = [:]
     private var currentCategoryMarkers: [NMFMarker] = []
+    private var selectedMarker: NMFMarker? {
+        didSet {
+            changeMarkerImage()
+        }
+    }
     
     // MARK: - Combine Properties
     
@@ -42,7 +47,7 @@ final class StoreMapViewController: UIViewController {
     private var searchStoreVC: SearchStoreViewController?
     
     private let searchBarView = SearchBarView(type: .search)
-    private lazy var storeInfoBottomView = StoreInfoBottomView()
+    private let storeInfoBottomView = StoreInfoBottomView()
     private let myLocationButton = UIButton()
     
     // MARK: - Init
@@ -112,9 +117,7 @@ private extension StoreMapViewController {
                 guard let self else { return }
  
                 self.storeInfoBottomView.configureData(forModel: tappedStore)
-                self.storeInfoBottomView.isHidden = false
-                self.bottomSheetVC.view.isHidden = true
-                self.tabBarController?.tabBar.isHidden = true
+                self.updateSearchLayout(tappedStore)
             }
             .store(in: &cancellables)
         
@@ -180,11 +183,18 @@ private extension StoreMapViewController {
             marker.mapView = mapView
 
             marker.touchHandler = { [weak self] (overlay) -> Bool in
-                if let store = overlay.userInfo["store"] as? StoreListModel {
+                if let store = overlay.userInfo["store"] as? StoreListModel,
+                   let tappedMarker = overlay as? NMFMarker {
+                    
                     print("마커가 눌린 가게: \(store.storeName)")
                     self?.moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
                     self?.storeMapViewModel.markerTappedSubject.send(store)
+                    
+                    self?.changeMarkerSize(tappedMarker: tappedMarker)
+                    
+                    self?.selectedMarker = tappedMarker
                 }
+                
                 return true
             }
 
@@ -228,6 +238,7 @@ private extension StoreMapViewController {
     }
     
     func makeSingleMarker(store: StoreListModel) {
+        selectedMarker = nil
         removeCurrentMarkersInMapView()
         
         guard let categoryMarkers = allMarkersDic[store.category] else { return }
@@ -240,7 +251,6 @@ private extension StoreMapViewController {
         storeMarker?.mapView = mapView
     }
 
-    
     func fitAllMarkers(_ markers: [NMFMarker], in mapView: NMFMapView, currentIndex: Int) {
         guard !markers.isEmpty else { return }
 
@@ -257,6 +267,33 @@ private extension StoreMapViewController {
         cameraUpdate.animation = .linear
         cameraUpdate.animationDuration = 0.3
         mapView.moveCamera(cameraUpdate)
+    }
+    
+    func changeMarkerSize(tappedMarker: NMFMarker) {
+        // 이전 마커 복원
+        if let previousMarker = self.selectedMarker, previousMarker != tappedMarker {
+            previousMarker.width = 34
+            previousMarker.height = 42
+
+        }
+        
+        // 현재 마커 확대
+        tappedMarker.width = 48
+        tappedMarker.height = 60
+    }
+    
+    func changeMarkerImage() {
+        currentCategoryMarkers.forEach {
+            if selectedMarker != nil && selectedMarker != $0 {
+                if let storeData = $0.userInfo["store"] as? StoreListModel {
+                    $0.iconImage = NMFOverlayImage(image: selectCategoryTypeImage(storeData.category, isSelected: false))
+                }
+            } else {
+                if let storeData = $0.userInfo["store"] as? StoreListModel {
+                    $0.iconImage = NMFOverlayImage(image: selectCategoryTypeImage(storeData.category))
+                }
+            }
+        }
     }
 }
 
@@ -405,24 +442,24 @@ private extension StoreMapViewController {
 }
 
 extension StoreMapViewController: NMFMapViewCameraDelegate {
-    func selectCategoryTypeImage(_ type: CategoryType) -> UIImage {
+    func selectCategoryTypeImage(_ type: CategoryType, isSelected: Bool = true) -> UIImage {
         switch type {
         case .all:
             return UIImage()
         case .bar:
-            return .barMarkerPin
+            return isSelected == true ? .barMarkerPin : .notSelectBarMarkerPin
         case .cafe:
-            return .cafeMarkerPin
+            return isSelected == true ? .cafeMarkerPin : .notSelectCafeMarkerPin
         case .culture:
-            return .cultureMarkerPin
+            return isSelected == true ? .cultureMarkerPin : .notSelectCultureMarkerPin
         case .gym:
-            return .gymMarkerPin
+            return isSelected == true ? .gymMarkerPin : .notSelectGymMarkerPin
         case .hospital:
-            return .hospitalMarkerPin
+            return isSelected == true ? .hospitalMarkerPin : .notSelectHospitalMarkerPin
         case .restaurant:
-            return .restaurantMarkerPin
+            return isSelected == true ? .restaurantMarkerPin : .notSelectRestaurantMarkerPin
         case .study:
-            return .studyMarkerPin
+            return isSelected == true ? .studyMarkerPin : .notSelectStudyMarkerPin
         }
     }
     
@@ -471,7 +508,11 @@ extension StoreMapViewController: CLLocationManagerDelegate {
 
 extension StoreMapViewController: NMFMapViewTouchDelegate {
     public func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
+        selectedMarker?.width = 34
+        selectedMarker?.height = 42
+        self.selectedMarker = nil
         self.bottomSheetVC.view.isHidden = false
+        self.storeInfoBottomView.isHidden = true
         self.tabBarController?.tabBar.isHidden = false
     }
 }
