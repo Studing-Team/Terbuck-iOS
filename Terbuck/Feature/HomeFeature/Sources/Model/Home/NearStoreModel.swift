@@ -11,7 +11,7 @@ import DesignSystem
 public struct NearStoreModel: Identifiable, Hashable {
     public var id: Int
     var storeName: String
-    var cateotry: CategoryType
+    var category: CategoryType
     var address: String
     var mainBenefit: String
     var subBenefit: [String]

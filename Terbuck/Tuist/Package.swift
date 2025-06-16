@@ -12,6 +12,7 @@ import PackageDescription
             "KakaoSDKCommon": .framework,
             "KakaoSDKAuth": .framework,
             "KakaoSDKUser": .framework,
+            "NMapsMap": .framework,
         ]
     )
 #endif

@@ -74,18 +74,7 @@ private extension StudentIDCardViewController {
         switch authType {
         case .auth:
             closeButton.do {
-                var config = UIButton.Configuration.filled()
-                
-                let attributedString = AttributedString("닫기", attributes: .init([
-                        .font: DesignSystem.Font.uiFont(.textSemi14),
-                        .foregroundColor: DesignSystem.Color.uiColor(.terbuckBlack30)
-                    ]
-                ))
-                
-                config.attributedTitle = attributedString
-                config.baseBackgroundColor = DesignSystem.Color.uiColor(.terbuckBlack10)
-                config.cornerStyle = .capsule
-                $0.configuration = config
+                $0.setImage(UIImage.closeXIcon, for: .normal)
             }
             
             underlineLabel.do {
@@ -160,7 +149,7 @@ private extension StudentIDCardViewController {
     func setupHierarchy() {
         switch authType {
         case .auth:
-            view.addSubviews(studentImageView, closeButton, underlineLabel)
+            view.addSubviews(studentImageView, closeButton)
             
         case .onboarding:
             view.addSubviews(onboardingTitle, arrowImage, studentIdSection, registerButton, nextTimeButton)
@@ -177,16 +166,11 @@ private extension StudentIDCardViewController {
             }
             
             closeButton.snp.makeConstraints {
-                $0.horizontalEdges.equalToSuperview().inset(145)
-                $0.height.equalTo(view.convertByHeightRatio(33))
-            }
-            
-            underlineLabel.snp.makeConstraints {
-                $0.top.equalTo(closeButton.snp.bottom).offset(view.convertByHeightRatio(16))
-                $0.bottom.equalToSuperview().inset(view.convertByHeightRatio(80))
                 $0.centerX.equalToSuperview()
+                $0.bottom.equalToSuperview().inset(view.convertByHeightRatio(70))
+                $0.size.equalTo(view.convertByHeightRatio(52))
             }
-            
+
         case .onboarding:
             onboardingTitle.snp.makeConstraints {
                 $0.top.equalToSuperview().offset(view.convertByHeightRatio(121))

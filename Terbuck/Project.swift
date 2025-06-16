@@ -27,6 +27,13 @@ let project = Project(
 //            infoPlist: .extendingDefault(with: infoPlist),
             infoPlist: .extendingDefault(
                 with: [
+                    "UIDeviceFamily": [1],
+                    "CFBundleDisplayName": "터벅",
+                    "CFBundleShortVersionString": "1.0.0",
+                    "CFBundleVersion": "1",
+                    "UISupportedInterfaceOrientations": [
+                        "UIInterfaceOrientationPortrait"
+                    ],
                     "UILaunchScreen": [
                         "UIColorName": "",
                         "UIImageName": "",
@@ -46,18 +53,24 @@ let project = Project(
                     "LSApplicationQueriesSchemes": [
                       "kakaokompassauth",
                       "kakaolink"
+                    ],
+                    "UIApplicationSceneManifest": [
+                        "UIApplicationSupportsMultipleScenes": true,
+                        "UISceneConfigurations": [
+                            "UIWindowSceneSessionRoleApplication": [
+                                [
+                                    "UISceneConfigurationName": "Default Configuration",
+                                    "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
+                                ]
+                            ]
+                        ]
                     ]
                 ]
             ),
             sources: ["Terbuck/Sources/**"],
             resources: ["Terbuck/Resources/**"],
             dependencies: [
-                .external(name: "SnapKit"),
-                .external(name: "Then"),
                 .external(name: "FirebaseMessaging"),
-                .external(name: "KakaoSDKCommon"),
-                .external(name: "KakaoSDKAuth"),
-                .external(name: "KakaoSDKUser"),
                 .project(target: "Resource", path: "Resource"),
                 .project(target: "Shared", path: "Shared"),
                 .project(target: "DesignSystem", path: "DesignSystem"),
@@ -70,8 +83,6 @@ let project = Project(
                 .project(target: "StoreFeature", path: "Feature/StoreFeature"),
                 .project(target: "StoreInterface", path: "Feature/StoreInterface"),
                 .project(target: "MypageFeature", path: "Feature/MypageFeature"),
-                .project(target: "MypageInterface", path: "Feature/MypageInterface"),
-                .project(target: "RegisterStudentCardFeature", path: "Feature/RegisterStudentCardFeature"),
             ]
         ),
         .target(

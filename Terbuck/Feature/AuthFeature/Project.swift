@@ -13,8 +13,11 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
+                .external(name: "SnapKit"),
+                .external(name: "Then"),
                 .project(target: "AuthInterface", path: "../AuthInterface"),
                 .project(target: "UniversityInfoFeature", path: "../UniversityInfoFeature"),
+                .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),
                 .project(target: "CoreNetwork", path: "../../Core/CoreNetwork"),
                 .project(target: "CoreKeyChain", path: "../../Core/CoreKeyChain"),

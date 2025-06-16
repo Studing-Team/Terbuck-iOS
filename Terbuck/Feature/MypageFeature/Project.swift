@@ -13,10 +13,13 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
+                .external(name: "SnapKit"),
+                .external(name: "Then"),
                 .project(target: "MypageInterface", path: "../MypageInterface"),
-                .project(target: "UniversityInfoFeature", path: "../UniversityInfoFeature"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
-                .project(target: "Shared", path: "../../Shared")
+                .project(target: "Shared", path: "../../Shared"),
+                .project(target: "UniversityInfoFeature", path: "../UniversityInfoFeature"),
+                .project(target: "RegisterStudentCardFeature", path: "../RegisterStudentCardFeature")
             ]
         )
     ]

@@ -29,7 +29,7 @@ public struct SearchStoreUseCaseImpl: SearchStoreUseCase {
             NearStoreModel(
                 id: $0.id,
                 storeName: $0.name,
-                cateotry: $0.category,
+                category: $0.category,
                 address: $0.address,
                 mainBenefit: $0.benefits[0].title,
                 subBenefit: $0.benefits.dropFirst().map { $0.title }

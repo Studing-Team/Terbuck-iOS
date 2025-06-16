@@ -59,7 +59,7 @@ public struct ImageSectionView<T: ImageSectionDisplayable>: View {
                         .contentShape(Rectangle())
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, type == .detailPartner ? 20 : 8)
             }
             .scrollTargetLayout()
             .scrollTargetBehavior(.viewAligned)

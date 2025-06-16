@@ -15,10 +15,7 @@ import Then
 public final class StoreInfoTitleView: UIView {
 
     // MARK: - UI Components
-    
-    private let storeInfoStackView = UIStackView()
-    private let storeNameInfoStackView = UIStackView()
-    
+
     private let storeCategoryImage = UIImageView()
     private let storeNameLabel = UILabel()
     private let storeAddressLabel = UILabel()
@@ -48,44 +45,38 @@ public final class StoreInfoTitleView: UIView {
 
 private extension StoreInfoTitleView {
     func setupStyle() {
-        storeInfoStackView.do {
-            $0.axis = .vertical
-            $0.spacing = 6
-            $0.alignment = .leading
-            $0.addArrangedSubviews(storeNameInfoStackView, storeAddressLabel)
-        }
-        
-        storeNameInfoStackView.do {
-            $0.axis = .horizontal
-            $0.spacing = 4
-            $0.addArrangedSubviews(storeNameLabel, storeCategoryImage)
-        }
-        
         storeNameLabel.do {
             $0.font = DesignSystem.Font.uiFont(.textSemi18)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
             $0.numberOfLines = 2
+            $0.lineBreakMode = .byCharWrapping
         }
         
         storeAddressLabel.do {
             $0.font = DesignSystem.Font.uiFont(.captionMedium12)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
         }
-        
-        storeNameLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        storeNameLabel.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
     }
     
     func setupHierarchy() {
-        self.addSubviews(storeInfoStackView)
+        self.addSubviews(storeNameLabel, storeCategoryImage, storeAddressLabel)
     }
     
     func setupLayout() {
-        storeInfoStackView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+        storeNameLabel.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.leading.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+        
+        storeAddressLabel.snp.makeConstraints {
+            $0.top.equalTo(storeNameLabel.snp.bottom).offset(6)
+            $0.horizontalEdges.equalToSuperview()
         }
         
         storeCategoryImage.snp.makeConstraints {
+            $0.top.equalTo(storeNameLabel)
+            $0.leading.equalTo(storeNameLabel.snp.trailing).offset(4)
             $0.size.equalTo(24)
         }
     }
