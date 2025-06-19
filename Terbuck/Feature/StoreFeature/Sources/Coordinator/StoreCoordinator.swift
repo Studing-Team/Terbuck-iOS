@@ -70,7 +70,13 @@ extension StoreCoordinator: StudentIDCardFlowDelegate {
     }
     
     public func registerStudentID() {
+        let viewModel = RegisterStudentCardViewModel(
+            registerStudentIDUseCase: RegisterStudentIDUseCaseImpl(repository: RegisterRepositoryImpl())
+        )
         
+        let registerStudentIDCardVC = RegisterStudentCardViewController(viewModel: viewModel)
+        registerStudentIDCardVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(registerStudentIDCardVC, animated: true)
     }
     
     public func dismissAuthStudentID() {

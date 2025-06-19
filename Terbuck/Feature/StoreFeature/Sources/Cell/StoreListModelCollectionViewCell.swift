@@ -84,6 +84,7 @@ private extension StoreListModelCollectionViewCell {
         storeNameLabel.do {
             $0.font = DesignSystem.Font.uiFont(.textSemi16)
             $0.textColor =  DesignSystem.Color.uiColor(.terbuckBlack50)
+            $0.numberOfLines = 2
         }
         
         storeAddressLabel.do {

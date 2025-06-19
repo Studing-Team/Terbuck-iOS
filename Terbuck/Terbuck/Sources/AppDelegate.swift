@@ -19,7 +19,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // MARK: - 카카오 로그인 설정
         
-        print("설정", Config.kakaoNativeAppKey)
         KakaoSDK.initSDK(appKey: Config.kakaoNativeAppKey)
         
         if isFirstLaunchAfterInstall() {
