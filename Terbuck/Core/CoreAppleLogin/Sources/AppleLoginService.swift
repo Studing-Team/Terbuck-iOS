@@ -36,7 +36,11 @@ extension AppleLoginService: ASAuthorizationControllerDelegate {
             return
         }
         
-        let userName = credential.fullName?.givenName ?? "Unknown"
+        let fullName = credential.fullName
+        let givenName = fullName?.givenName ?? ""
+        let familyName = fullName?.familyName ?? ""
+        let userName = "\(familyName)\(givenName)"
+        
         let authCode = String(data: credential.authorizationCode ?? Data(), encoding: .utf8) ?? ""
         
         print("애플로그인 결과 반환",authCode, userName)

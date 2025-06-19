@@ -62,7 +62,6 @@ final class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        UserDefaultsManager.shared.set("서울과학기술대학교", for: .university)
         setupStyle(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
         setupHierarchy()
         setupLayout()
@@ -120,7 +119,7 @@ private extension HomeViewController {
                 guard let self else { return }
 
                 if authResult == false {
-                    ToastManager.shared.showToast(from: self, type: .notAuthorized) {
+                    ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
                         self.coordinator?.registerStudentID()
                     }
                 }
