@@ -129,7 +129,7 @@ private extension CustomAlertViewController {
          }
          
          subTitleLabel.do {
-             $0.numberOfLines = 2
+             $0.numberOfLines = 0
              $0.textAlignment = .center
              
              let paragraph = NSMutableParagraphStyle()

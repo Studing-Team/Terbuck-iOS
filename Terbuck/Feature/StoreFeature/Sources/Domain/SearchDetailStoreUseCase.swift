@@ -9,7 +9,7 @@ import Foundation
 import CoreNetwork
 
 public protocol SearchDetailStoreUseCase {
-    func execute(storeId: Int) async throws -> (DetailStoreHeaderModel, [DetailStoreImageModel]?, [DetailStoreBenefitModel], String)
+    func execute(storeId: Int) async throws -> (DetailStoreHeaderModel, [DetailStoreImageModel]?, [DetailStoreBenefitModel], String, [String])
 }
 
 public struct SearchDetailStoreUseCaseImpl: SearchDetailStoreUseCase {
@@ -19,7 +19,7 @@ public struct SearchDetailStoreUseCaseImpl: SearchDetailStoreUseCase {
         self.repository = repository
     }
 
-    public func execute(storeId: Int) async throws -> (DetailStoreHeaderModel, [DetailStoreImageModel]?, [DetailStoreBenefitModel], String){
+    public func execute(storeId: Int) async throws -> (DetailStoreHeaderModel, [DetailStoreImageModel]?, [DetailStoreBenefitModel], String,  [String]){
         let entity = try await repository.getSearchDetailStore(storeId: storeId)
         
         return convertToModel(entity)
@@ -27,7 +27,7 @@ public struct SearchDetailStoreUseCaseImpl: SearchDetailStoreUseCase {
 }
 
 extension SearchDetailStoreUseCaseImpl {
-    func convertToModel(_ entity: SearchDetailStoreEntity) -> (DetailStoreHeaderModel, [DetailStoreImageModel]?, [DetailStoreBenefitModel], String) {
+    func convertToModel(_ entity: SearchDetailStoreEntity) -> (DetailStoreHeaderModel, [DetailStoreImageModel]?, [DetailStoreBenefitModel], String, [String]) {
         
         let headerModel = DetailStoreHeaderModel(storeName: entity.storeName, storeAddress: entity.address)
         
@@ -35,10 +35,14 @@ extension SearchDetailStoreUseCaseImpl {
             DetailStoreImageModel(DetailStoreimageURL: $0)
         }
         
+        let useagesListModel = entity.usagesList.map {
+            $0.usagesTitle
+        }
+        
         let contentModel = entity.benefitList.map {
             DetailStoreBenefitModel(benefitTitle: $0.title, detailList: $0.detailList)
         }
         
-        return (headerModel, imageModel, contentModel, entity.storeURL)
+        return (headerModel, imageModel, contentModel, entity.storeURL, useagesListModel)
     }
 }

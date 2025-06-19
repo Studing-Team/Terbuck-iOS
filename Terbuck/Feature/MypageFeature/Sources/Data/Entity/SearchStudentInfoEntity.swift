@@ -9,16 +9,20 @@ import Foundation
 import CoreNetwork
 
 public struct SearchStudentInfoEntity {
-    let studentNum: String
     let studentName: String
-    let imageUrl: String
+    let universityName: String
+    let isAuth: Bool
+    let studentNum: String?
+    let imageUrl: String?
 }
 
 extension SearchStudentInfoResponseDTO {
     func toEntity() -> SearchStudentInfoEntity {
         return SearchStudentInfoEntity(
-            studentNum: studentNumber,
             studentName: name,
+            universityName: university,
+            isAuth: isRegistered,
+            studentNum: studentNumber,
             imageUrl: imageURL
         )
     }

@@ -71,7 +71,7 @@ private extension SocialLoginButton {
     func setupStyle(type: SocialButtonType) {
         if type.hasBorder {
             self.layer.borderColor =  DesignSystem.Color.uiColor(.terbuckBlack50).cgColor
-            self.layer.borderWidth = 0.5
+            self.layer.borderWidth = 0.7
         }
         
         self.backgroundColor = type.backgroundColor

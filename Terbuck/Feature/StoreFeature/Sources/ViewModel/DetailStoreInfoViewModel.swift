@@ -31,6 +31,16 @@ public final class DetailStoreInfoViewModel: PreviewImageDisplayable {
     public var selectImageData: PreviewImageModel?
     
     public var storeURL: String?
+    public var storeUsagesList = [String]()
+    
+    public var isUseagesListModal = false {
+        didSet {
+            onUseagesListModalChanged?(isUseagesListModal)
+        }
+    }
+
+    public var onUseagesListModalChanged: ((Bool) -> Void)?
+    
     private let searchDetailStoreUseCase: SearchDetailStoreUseCase
     private let storeId: Int
     
@@ -87,6 +97,7 @@ private extension DetailStoreInfoViewModel {
             let result = try await self.searchDetailStoreUseCase.execute(storeId: storeId)
             
             storeURL = result.3
+            storeUsagesList = result.4
             
             return (result.0, result.1, result.2)
         } catch (let error) {

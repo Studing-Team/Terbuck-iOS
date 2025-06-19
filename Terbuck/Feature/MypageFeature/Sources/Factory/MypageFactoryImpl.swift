@@ -18,7 +18,7 @@ public final class MypageFactoryImpl: MypageFactory {
 
     public func makeMypageViewController(coordinator: MypageCoordinator) -> UIViewController {
         let viewModel = MypageViewModel(
-            searchStudentInfoUseCase: SearchStudentInfoUseCaseImpl(repository: MemberRepositoryImpl())
+            searchStudentInfoUseCase: SearchStudentInfoUseCaseImpl(repository: MemberRepositoryImpl()), deleteMemberUseCase: DeleteMemberUseCaseImpl(repository: MemberRepositoryImpl())
         )
         
         return MypageViewController(

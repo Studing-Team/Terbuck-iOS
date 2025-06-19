@@ -31,6 +31,7 @@ public final class MypageViewModel {
     // MARK: - Properties
     
     private var searchStudentInfoUseCase: SearchStudentInfoUseCase
+    private var deleteMemberUseCase: DeleteMemberUseCase
     
     // MARK: - Private Combine Publishers Properties
     
@@ -54,6 +55,7 @@ public final class MypageViewModel {
         let viewLifeCycleEventAction: AnyPublisher<ViewLifeCycleEvent, Never>
         let selectedCell: AnyPublisher<(section: MyPageType, index: Int), Never>
         let logoutButtonTapped: AnyPublisher<Void, Never>
+        let withdrawButtonTapped: AnyPublisher<Void, Never>
     }
     
     // MARK: - Output
@@ -62,6 +64,7 @@ public final class MypageViewModel {
         let searchStudentInfoResult: AnyPublisher<Void, Never>
         let navigationEvent: AnyPublisher<MypageNavigationType, Never>
         let logoutResult: AnyPublisher<Bool, Never>
+        let withdrawResult: AnyPublisher<Bool, Never>
         let searchStudentInfoError: AnyPublisher<MypageError, Never>
         let toasterMessageResult: AnyPublisher<ToastType, Never>
     }
@@ -69,9 +72,11 @@ public final class MypageViewModel {
     // MARK: - Init
     
     public init(
-        searchStudentInfoUseCase: SearchStudentInfoUseCase
+        searchStudentInfoUseCase: SearchStudentInfoUseCase,
+        deleteMemberUseCase: DeleteMemberUseCase
     ) {
         self.searchStudentInfoUseCase = searchStudentInfoUseCase
+        self.deleteMemberUseCase = deleteMemberUseCase
     }
     
     // MARK: - Public methods
@@ -114,18 +119,33 @@ public final class MypageViewModel {
         
         let logoutResult = input.logoutButtonTapped
             .map { _ -> Bool in
-                KeychainManager.shared.clearTokens()
-                FileStorageManager.shared.delete(type: .studentIdCard)
-                UserDefaultsManager.shared.remove(.isStudentIDAuthenticated)
-                UserDefaultsManager.shared.remove(.university)
+                self.allDeleteMyData()
                 
                 return true
             }
+        
+        let withdrawResult = input.withdrawButtonTapped
+            .flatMap { [weak self] _ -> AnyPublisher<Bool, Never> in
+                guard let self else {
+                    return Empty().eraseToAnyPublisher()
+                }
+                
+                return self.deleteMemberPublisher()
+                    .catch { _ in Empty() }
+                    .eraseToAnyPublisher()
+            }
+            .handleEvents(receiveOutput: { [weak self] isSuccess in
+                if isSuccess {
+                    self?.allDeleteMyData()
+                }
+            })
+            .eraseToAnyPublisher()
         
         return Output(
             searchStudentInfoResult: searchResult.eraseToAnyPublisher(),
             navigationEvent: navigationEventSubject.eraseToAnyPublisher(),
             logoutResult: logoutResult.eraseToAnyPublisher(),
+            withdrawResult: withdrawResult.eraseToAnyPublisher(),
             searchStudentInfoError: searchStudentInfoError,
             toasterMessageResult: toasterMessageSubject.eraseToAnyPublisher()
         )
@@ -146,7 +166,27 @@ private extension MypageViewModel {
                 do {
                     let result = try await self.searchStudentInfoUseCase.execute()
                     UserDefaultsManager.shared.set(result.isAuthenticated, for: .isStudentIDAuthenticated)
+                    UserDefaultsManager.shared.set(result.university, for: .university)
                     promise(.success(result))
+                } catch {
+                    promise(.failure(.studentInfoFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func deleteMemberPublisher() -> AnyPublisher<Bool, MypageError> {
+        return Future { [weak self] promise in
+            guard let self else {
+                promise(.failure(.unknown))
+                return
+            }
+            
+            Task {
+                do {
+                    let _ = try await self.deleteMemberUseCase.execute()
+                    promise(.success(true))
                 } catch {
                     promise(.failure(.studentInfoFailed))
                 }
@@ -206,5 +246,12 @@ private extension MypageViewModel {
         }
         
         let _ = FileStorageManager.shared.save(data: imageData, type: .studentIdCard)
+    }
+    
+    func allDeleteMyData() {
+        KeychainManager.shared.clearTokens()
+        FileStorageManager.shared.delete(type: .studentIdCard)
+        UserDefaultsManager.shared.remove(.isStudentIDAuthenticated)
+        UserDefaultsManager.shared.remove(.university)
     }
 }

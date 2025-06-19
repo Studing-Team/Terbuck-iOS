@@ -7,8 +7,13 @@
 
 import UIKit
 
+public enum AuthorizedType {
+    case home
+    case detailStore
+}
+
 public enum ToastType {
-    case notAuthorized
+    case notAuthorized(type: AuthorizedType)
     case noticeStudentCard
     case alarmStudentCard
     case changeUniversity
@@ -78,6 +83,12 @@ public enum ToastType {
     
     var padding: CGFloat {
         switch self {
+        case .notAuthorized(let type):
+            if type == .detailStore {
+                return 68
+            } else {
+                return 16
+            }
         case .noticeStudentCard, .alarmStudentCard, .moreBenefit:
             return 68
         default:

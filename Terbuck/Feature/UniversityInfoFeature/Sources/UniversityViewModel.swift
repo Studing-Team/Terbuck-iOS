@@ -95,7 +95,10 @@ public class UniversityViewModel {
                 
                 if let _ = self.signupUseCase, let universityName = self.universityName {
                     return self.signupPublisher(universityName)
-                        .map { _ in true }
+                        .map { _ in
+                            UserDefaultsManager.shared.set(universityName, for: .university)
+                            return true
+                        }
                         .catch { _ in Just(false) }
                         .eraseToAnyPublisher()
                 }

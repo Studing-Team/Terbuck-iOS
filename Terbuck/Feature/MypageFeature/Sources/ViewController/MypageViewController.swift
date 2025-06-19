@@ -27,6 +27,7 @@ public final class MypageViewController: UIViewController {
     private let selectedCellSubject = PassthroughSubject<(section: MyPageType, index: Int), Never>()
     private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
     private var logoutButtonSubject = PassthroughSubject<Void, Never>()
+    private var withdrawButtonSubject = PassthroughSubject<Void, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -81,7 +82,8 @@ private extension MypageViewController {
         let input = MypageViewModel.Input(
             viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher(),
             selectedCell: selectedCellSubject.eraseToAnyPublisher(),
-            logoutButtonTapped: logoutButtonSubject.eraseToAnyPublisher()
+            logoutButtonTapped: logoutButtonSubject.eraseToAnyPublisher(),
+            withdrawButtonTapped: withdrawButtonSubject.eraseToAnyPublisher()
         )
         
         let output = mypageViewModel.transform(input: input)
@@ -136,7 +138,9 @@ private extension MypageViewController {
                         subTitle: "탈퇴 회원의 정보는 완전히 삭제되며\n터벅을 떠나면 회원가입부터 다시 해야해요",
                         leftButton: TerbuckBottomButton(type: .cancel),
                         rightButton: TerbuckBottomButton(type: .draw),
-                        rightButtonHandler: {}
+                        rightButtonHandler: {
+                            self?.withdrawButtonSubject.send()
+                        }
                     )
                 default:
                     break
@@ -165,6 +169,14 @@ private extension MypageViewController {
             }
             .store(in: &cancellables)
         
+        output.withdrawResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
+                if result {
+                    self?.coordinator?.moveLoginFlow()
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 

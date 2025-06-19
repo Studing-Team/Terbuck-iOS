@@ -14,12 +14,17 @@ public struct SearchDetailStoreEntity {
     let storeImageURL: [String]
     let address: String
     let benefitCount: Int
-    let benefitList: [SearchDetailStroeBenefitData]
+    let benefitList: [SearchDetailStoreBenefitData]
+    let usagesList: [SearchDetailStoreUsagesData]
 }
 
-public struct SearchDetailStroeBenefitData {
+public struct SearchDetailStoreBenefitData {
     let title: String
     let detailList: [String]
+}
+
+public struct SearchDetailStoreUsagesData {
+    let usagesTitle: String
 }
 
 extension SearchStoreDetailResponseDTO {
@@ -31,8 +36,9 @@ extension SearchStoreDetailResponseDTO {
             address: address,
             benefitCount: benefitCount,
             benefitList: benefitList.map {
-                SearchDetailStroeBenefitData(title: $0.title, detailList: $0.detailList)
-            }
+                SearchDetailStoreBenefitData(title: $0.title, detailList: $0.detailList)
+            },
+            usagesList: usagesList.map { SearchDetailStoreUsagesData(usagesTitle: $0.introduction) }
         )
     }
 }

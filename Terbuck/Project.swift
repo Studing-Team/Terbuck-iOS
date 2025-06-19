@@ -54,6 +54,9 @@ let project = Project(
                       "kakaokompassauth",
                       "kakaolink"
                     ],
+                    "UIBackgroundModes": [
+                        "remote-notification"
+                    ],
                     "UIApplicationSceneManifest": [
                         "UIApplicationSupportsMultipleScenes": true,
                         "UISceneConfigurations": [
@@ -69,6 +72,7 @@ let project = Project(
             ),
             sources: ["Terbuck/Sources/**"],
             resources: ["Terbuck/Resources/**"],
+            entitlements: .file(path: "Terbuck/Terbuck.entitlements"),
             dependencies: [
                 .external(name: "FirebaseMessaging"),
                 .project(target: "Resource", path: "Resource"),

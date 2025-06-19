@@ -9,9 +9,9 @@ import Foundation
 
 public struct AppleLoginRequestDTO: Encodable {
     let code: String
-    let name: String?
+    let name: String
     
-    public init(code: String, name: String?) {
+    public init(code: String, name: String) {
         self.code = code
         self.name = name
     }

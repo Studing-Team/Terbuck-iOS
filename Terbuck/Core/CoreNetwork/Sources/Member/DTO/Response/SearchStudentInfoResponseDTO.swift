@@ -8,7 +8,9 @@
 import Foundation
 
 public struct SearchStudentInfoResponseDTO: Decodable {
-    public let studentNumber: String
     public let name: String
-    public let imageURL: String
+    public let university: String
+    public let isRegistered: Bool
+    public let studentNumber: String?
+    public let imageURL: String?
 }

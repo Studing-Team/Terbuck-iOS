@@ -92,7 +92,24 @@ private extension APIClient {
             }
         }
         
-        print("🚀 URL: \(String(describing: urlRequest.url))")
+        print("🚀 URL: \(urlRequest.url?.absoluteString ?? "nil")")
+        print("🚀 Method: \(urlRequest.httpMethod ?? "nil")")
+        
+        print("🚀 Headers:")
+        if let headers = urlRequest.allHTTPHeaderFields {
+            for (key, value) in headers {
+                print("    \(key): \(value)")
+            }
+        } else {
+            print("    (no headers)")
+        }
+        
+        if let httpBody = urlRequest.httpBody,
+           let bodyString = String(data: httpBody, encoding: .utf8) {
+            print("🚀 Body:\n\(bodyString)")
+        } else {
+            print("🚀 Body: (no body)")
+        }
         
         return urlRequest
     }
@@ -154,6 +171,17 @@ private extension APIClient {
         
         print("🚀 StatusCode: \(String(describing: httpResponse.statusCode))")
         
+        // 204 No Content 대응
+        if httpResponse.statusCode == 204 {
+            if T.self == EmptyResponseDTO.self, let emptyResult = EmptyResponseDTO() as? T {
+                print("📦 EmptyResponseDTO 반환")
+                return emptyResult
+            } else {
+                throw NetworkError.noData
+            }
+        }
+        
+        // 정상적으로 body 가 있어야 하는 경우
         guard let data = data else {
             throw NetworkError.noData
         }
