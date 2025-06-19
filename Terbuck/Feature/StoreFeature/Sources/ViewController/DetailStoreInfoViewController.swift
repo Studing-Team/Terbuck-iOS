@@ -54,6 +54,8 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
         setupLayout()
         setupDelegate()
         
+        ToastManager.shared.showToast(from: self, type: .moreBenefit)
+        
         Task {
             await detailStoreViewModel.fetchDetailStoreBenefitData()
         }
@@ -62,7 +64,19 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        ToastManager.shared.showToast(from: self, type: .moreBenefit)
+        detailStoreViewModel.onUseagesListModalChanged = { [weak self] isPresented in
+            if isPresented {
+                self?.showConfirmAlert(
+                    mainTitle: "이용방법",
+                    subTitle: self?.detailStoreViewModel.storeUsagesList.joined(separator: "\n"),
+                    centerButton: TerbuckBottomButton(type: .close(type: .alert), isEnabled: true),
+                    centerButtonHandler: {
+                        self?.dismiss(animated: false)
+                        self?.detailStoreViewModel.isUseagesListModal = false
+                    }
+                )
+            }
+        }
     }
     
     public override func viewDidLayoutSubviews() {
@@ -95,7 +109,9 @@ private extension DetailStoreInfoViewController {
             if UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated) {
                 self.coordinator?.showAuthStudentID()
             } else {
-                ToastManager.shared.showToast(from: self, type: .notAuthorized)
+                ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .detailStore)) {
+                    self.coordinator?.registerStudentID()
+                }
             }
         }
     }

@@ -68,19 +68,12 @@ private extension DetailStoreInfoView {
     func benefitsSection() -> some View {
         VStack {
             if let benefitItem = viewModel.sectionData[.benefit], case .storeBenefit(let models) = benefitItem {
-                BenefitSectionView(benefitModel: models)
+                benefitSectionView(benefitModel: models, storeUsagesList: viewModel.storeUsagesList)
             }
         }
     }
-}
-
-
-
-struct BenefitSectionView: View {
     
-    let benefitModel: [DetailStoreBenefitModel]
-    
-    var body: some View {
+    func benefitSectionView(benefitModel: [DetailStoreBenefitModel], storeUsagesList: [String]) -> some View {
         VStack(alignment: .leading,spacing: 0) {
             HStack(spacing: 4) {
                 Image(uiImage: .selectStoreIcon)
@@ -88,6 +81,19 @@ struct BenefitSectionView: View {
                 Text("혜택 \(benefitModel.count)가지")
                     .font(DesignSystem.Font.swiftUIFont(.textSemi18))
                     .foregroundStyle(DesignSystem.Color.swiftUIColor(.terbuckBlack50))
+                
+                Spacer()
+                
+                if !storeUsagesList.isEmpty {
+                    Button(action: {
+                        viewModel.isUseagesListModal = true
+                    }) {
+                        Text("이용방법")
+                            .font(DesignSystem.Font.swiftUIFont(.textSemi14))
+                            .foregroundStyle(DesignSystem.Color.swiftUIColor(.terbuckBlack10))
+                    }
+                    .padding(.trailing, 5)
+                }
             }
             .padding(.vertical, 15)
             .padding(.bottom, 3)
