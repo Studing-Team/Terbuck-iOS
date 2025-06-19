@@ -20,10 +20,10 @@ public struct SearchStudentInfoUseCaseImpl: SearchStudentInfoUseCase {
         
         return UserInfoModel(
             userName: entity.studentName,
-            studentId: entity.studentNum,
-            university: UserDefaultsManager.shared.string(for: .university) ?? "정보 없음",
-            isAuthenticated: true,
-            imageUrl: entity.imageUrl
+            studentId: entity.studentNum ?? "",
+            university: entity.universityName,
+            isAuthenticated: entity.isAuth,
+            imageUrl: entity.imageUrl ?? ""
         )
     }
 }
