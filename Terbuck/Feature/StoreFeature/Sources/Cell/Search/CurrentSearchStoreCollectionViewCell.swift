@@ -17,7 +17,8 @@ public final class CurrentSearchStoreCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Properties
     
-    private var moreBenefitTapHandler: (() -> Void)?
+    private var deleteButtonHandler: ((CurrentSearchModel) -> Void)?
+    private var serachStoreData: CurrentSearchModel?
     
     // MARK: - UI Properties
 
@@ -42,8 +43,13 @@ public final class CurrentSearchStoreCollectionViewCell: UICollectionViewCell {
 // MARK: - Extensions
 
 public extension CurrentSearchStoreCollectionViewCell {
-    func configureCell(_ title: String) {
-        currentStoreNameLabel.text = title
+    func configureCell(_ serachData: CurrentSearchModel) {
+        serachStoreData = serachData
+        currentStoreNameLabel.text = serachData.storeName
+    }
+    
+    func configureButtonAction(action: @escaping (CurrentSearchModel) -> Void) {
+        deleteButtonHandler = action
     }
 }
 
@@ -55,6 +61,14 @@ private extension CurrentSearchStoreCollectionViewCell {
             $0.font = DesignSystem.Font.uiFont(.textRegular16)
             $0.textColor =  DesignSystem.Color.uiColor(.terbuckBlack50)
         }
+        
+        deleteButton.do {
+            let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .regular)
+            let image = UIImage(systemName: "xmark", withConfiguration: config)
+            $0.setImage(image, for: .normal)
+            $0.tintColor = DesignSystem.Color.uiColor(.terbuckBlack10)
+            $0.addTarget(self, action: #selector(deleteButtonAction), for: .touchUpInside)
+        }
     }
     
     func setupHierarchy() {
@@ -63,17 +77,21 @@ private extension CurrentSearchStoreCollectionViewCell {
     
     func setupLayout() {
         currentStoreNameLabel.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(18)
+            $0.verticalEdges.equalToSuperview().inset(19)
             $0.leading.equalToSuperview().offset(30)
             $0.trailing.equalTo(deleteButton.snp.leading).inset(15)
-            $0.size.equalTo(88)
         }
         
         deleteButton.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(18)
+            $0.centerY.equalTo(currentStoreNameLabel)
             $0.trailing.equalToSuperview().inset(30)
-            $0.size.equalTo(16)
         }
+    }
+    
+    @objc
+    func deleteButtonAction() {
+        guard let serachStoreData else { return }
+        deleteButtonHandler?(serachStoreData)
     }
 }
 
