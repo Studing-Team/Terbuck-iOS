@@ -9,10 +9,8 @@ import Foundation
 
 import DesignSystem
 
-public struct CurrentSearchModel: Identifiable, Hashable {
-    public var id: String {
-        return "\(storeName)"
-    }
-    
+public struct CurrentSearchModel: Identifiable, Hashable, Codable {
+    public var id: Int
     let storeName: String
+    let searchDate: Date
 }
