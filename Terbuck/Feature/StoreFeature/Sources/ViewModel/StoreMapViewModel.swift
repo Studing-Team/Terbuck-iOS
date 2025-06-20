@@ -50,12 +50,15 @@ public final class StoreMapViewModel {
     public let latitudeSubject = CurrentValueSubject<Double?, Never>(nil)
     public let longitudeSubject = CurrentValueSubject<Double?, Never>(nil)
     public let currentSnapIndex = CurrentValueSubject<Int, Never>(1)
+    public let storeSearchKeywordSubject = CurrentValueSubject<[CurrentSearchModel], Never>([])
     
     // MARK: - SearchStore Input Combine Publishers Properties
     
     public let searchTextFieldSubject = PassthroughSubject<String, Never>()
     public let searchListStoreTappedSubject = PassthroughSubject<StoreListModel, Never>()
     public let searchResultStoreTappedSubject = CurrentValueSubject<StoreListModel?, Never>(nil)
+    public let currentSearchTappedSubject = PassthroughSubject<CurrentSearchModel, Never>()
+    public let deleteSearchModelSubject = PassthroughSubject<CurrentSearchModel, Never>()
     
     // MARK: - Output Combine Publishers Properties
     
@@ -147,22 +150,55 @@ public final class StoreMapViewModel {
             }
             .store(in: &cancellables)
         
-        
         searchTextFieldSubject
+            .removeDuplicates() // 같은 값 반복 방지
             .sink { [weak self] searchText in
                 guard let self = self else { return }
+                
+                if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    // 입력값이 비어 있을 때
+                    let currentData = self.currentSearchKeyword()
+                    
+                    self.storeSearchKeywordSubject.send(currentData)
+                } else {
+                    // 입력값이 있을 때
+                    let searchResult = self.storeListSubject.value.filter { store in
+                        let storeName = store.storeName
+                        let consonants = self.extractInitialConsonants(from: storeName)
 
-                let searchResult = self.storeListSubject.value.filter { store in
-                    let storeName = store.storeName
-                    let consonants = self.extractInitialConsonants(from: storeName)
+                        return storeName.contains(searchText) || consonants.contains(searchText)
+                    }
 
-                    return storeName.contains(searchText) || consonants.contains(searchText)
+                    self.filteredStoreListSubject.send(searchResult)
                 }
-
-                // 검색 결과를 따로 보낸다면 여기에 전달
-                self.filteredStoreListSubject.send(searchResult)
             }
             .store(in: &cancellables)
+        
+        searchListStoreTappedSubject
+            .sink { [weak self] storeData in
+                print("store 탭됨", storeData.storeName)
+                self?.addSearchKeyword(storeModel: storeData)
+            }
+            .store(in: &cancellables)
+        
+        currentSearchTappedSubject
+            .sink { [weak self] storeData in
+                guard let filterData = self?.cachedItems[storeData.id] else {
+                    print("CachedItmes 에 데이터 없음")
+                    return
+                }
+                
+                self?.storeMapTypeSubject.send(.searchResult)
+                self?.searchListStoreTappedSubject.send(filterData)
+            }
+            .store(in: &cancellables)
+        
+        deleteSearchModelSubject
+            .sink { [weak self] searchData in
+                self?.deleteSearchKeyword(storeModel: searchData)
+            }
+            .store(in: &cancellables)
+        
     }
     
     func item(forId id: Int) -> StoreListModel? {
@@ -258,5 +294,43 @@ private extension StoreMapViewModel {
         let categoryData = categoryItemsSubject.value
         guard let categoryStoreList = categoryStoreData[categoryData[selectRow].type] else { return }
         self.storeListSubject.send(categoryStoreList)
+    }
+    
+    // 기기 내부에 저장된 최근 검색어 불러오기
+    func currentSearchKeyword() -> [CurrentSearchModel] {
+        let searchKeywordData = FileStorageManager.shared.loadJSON(type: .recentSearchKeywords, as: [CurrentSearchModel].self)
+        
+        var currentSearchKeywordData = [CurrentSearchModel]()
+        
+        if let searchKeywordData {
+            currentSearchKeywordData = searchKeywordData.sorted(by: {$0.searchDate > $1.searchDate})
+        }
+        
+        return currentSearchKeywordData
+    }
+    
+    // 검색어 추가
+    func addSearchKeyword(storeModel: StoreListModel) {
+        var currentSearchKeyword = storeSearchKeywordSubject.value
+
+        let searchKeyword = CurrentSearchModel(id: storeModel.id, storeName: storeModel.storeName, searchDate: Date())
+
+        currentSearchKeyword.removeAll { $0.storeName == searchKeyword.storeName }
+        currentSearchKeyword.insert(searchKeyword, at: 0)
+
+        storeSearchKeywordSubject.send(currentSearchKeyword)
+
+        let _ = FileStorageManager.shared.saveJSON(currentSearchKeyword, type: .recentSearchKeywords)
+    }
+    
+    // 최근 검색어 삭제
+    func deleteSearchKeyword(storeModel: CurrentSearchModel) {
+        var currentSearchKeyword = storeSearchKeywordSubject.value
+        
+        currentSearchKeyword.removeAll { $0.storeName == storeModel.storeName }
+        
+        storeSearchKeywordSubject.send(currentSearchKeyword)
+
+        let _ = FileStorageManager.shared.saveJSON(currentSearchKeyword, type: .recentSearchKeywords)
     }
 }

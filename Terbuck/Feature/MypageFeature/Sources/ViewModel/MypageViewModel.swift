@@ -245,7 +245,7 @@ private extension MypageViewModel {
             FileStorageManager.shared.delete(type: .studentIdCard)
         }
         
-        let _ = FileStorageManager.shared.save(data: imageData, type: .studentIdCard)
+        let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
     }
     
     func allDeleteMyData() {

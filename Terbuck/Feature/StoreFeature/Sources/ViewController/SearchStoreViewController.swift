@@ -33,10 +33,7 @@ final class SearchStoreViewController: UIViewController {
     weak var coordinator: StoreCoordinator?
     
     // MARK: - Combine Properties
-    
-    private let currentSearchTappedSubject = PassthroughSubject<CurrentSearchModel, Never>()
-    private let searchTappedSubject = PassthroughSubject<StoreListModel, Never>()
-    
+
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -79,6 +76,8 @@ final class SearchStoreViewController: UIViewController {
         setupCollectionView()
         setupDataSource()
         bindViewModel()
+        
+        storeMapViewModel.searchTextFieldSubject.send("")
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -108,13 +107,22 @@ private extension SearchStoreViewController {
                 let keyword = self.textField.text ?? ""
                 self.updateSnapshot(
                     keyword: keyword,
-                    currentSearches: [], // 필요 시 최근 검색어 리스트로 교체
+                    currentSearches: [],
                     searchResults: result
                 )
-                
-                UIView.performWithoutAnimation {
-                    self.collectionView.reloadData()
-                }
+            }
+            .store(in: &cancellables)
+        
+        storeMapViewModel.storeSearchKeywordSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] result in
+                guard let self else { return }
+
+                self.updateSnapshot(
+                    keyword: "",
+                    currentSearches: result,
+                    searchResults: []
+                )
             }
             .store(in: &cancellables)
     }
@@ -127,7 +135,6 @@ private extension SearchStoreViewController {
         collectionView.do {
             let layout = UICollectionViewFlowLayout()
             layout.scrollDirection = .vertical
-            layout.itemSize = CGSize(width: UIScreen.main.bounds.width, height: 103)
             layout.minimumLineSpacing = 0
             $0.showsVerticalScrollIndicator = false
             $0.collectionViewLayout = layout
@@ -136,6 +143,13 @@ private extension SearchStoreViewController {
         // Cell 등록 (최근 검색, 검색 시)
         collectionView.register(CurrentSearchStoreCollectionViewCell.self, forCellWithReuseIdentifier: CurrentSearchStoreCollectionViewCell.className)
         collectionView.register(SearchStoreCollectionViewCell.self, forCellWithReuseIdentifier: SearchStoreCollectionViewCell.className)
+        
+        // 커스텀 헤더 뷰 등록
+        collectionView.register(
+            CustomHeaderCollectionReusableView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: CustomHeaderCollectionReusableView.className
+        )
     }
     
     func setupDataSource() {
@@ -144,7 +158,12 @@ private extension SearchStoreViewController {
             switch item {
             case .currentSearch(let store):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CurrentSearchStoreCollectionViewCell.className, for: indexPath) as! CurrentSearchStoreCollectionViewCell
-//                cell.configure(with: store)
+                
+                cell.configureCell(store)
+                cell.configureButtonAction { [weak self] searchData in
+                    self?.storeMapViewModel.deleteSearchModelSubject.send(searchData)
+                }
+                
                 return cell
             case .searchResult(let model):
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchStoreCollectionViewCell.className, for: indexPath) as! SearchStoreCollectionViewCell
@@ -153,6 +172,20 @@ private extension SearchStoreViewController {
                 cell.configureCell(forModel: model, searchTitle: keyword)
                 return cell
             }
+        }
+        
+        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
+            guard kind == UICollectionView.elementKindSectionHeader else {
+                return nil
+            }
+            
+            let headerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: CustomHeaderCollectionReusableView.className,
+                for: indexPath
+            ) as! CustomHeaderCollectionReusableView
+   
+            return headerView
         }
     }
     
@@ -261,14 +294,58 @@ extension SearchStoreViewController: UICollectionViewDelegate {
         
         switch item {
         case .currentSearch(let model):
-            currentSearchTappedSubject.send(model)
+            storeMapViewModel.currentSearchTappedSubject.send(model)
             
+            view.endEditing(true)
+            navigationController?.popViewController(animated: false)
+
         case .searchResult(let model):
             // 검색 결과 항목을 눌렀을 때의 처리)
             storeMapViewModel.storeMapTypeSubject.send(.searchResult)
             storeMapViewModel.searchListStoreTappedSubject.send(model)
             view.endEditing(true)
             navigationController?.popViewController(animated: false)
+        }
+    }
+}
+
+extension SearchStoreViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+
+        guard let item = dataSource.itemIdentifier(for: indexPath) else {
+            return CGSize(width: UIScreen.main.bounds.width, height: 0)
+        }
+
+        switch item {
+        case .currentSearch:
+            return CGSize(width: UIScreen.main.bounds.width, height: 55)
+        case .searchResult:
+            return CGSize(width: UIScreen.main.bounds.width, height: 103)
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForHeaderInSection section: Int) -> CGSize {
+        
+        // 현재 snapshot 을 가져오기
+        let snapshot = dataSource.snapshot()
+        
+        // currentSearch 타입이 포함되어 있으면 헤더 표시
+        let hasCurrentSearchItems = snapshot.itemIdentifiers.contains {
+            if case .currentSearch = $0 {
+                return true
+            } else {
+                return false
+            }
+        }
+        
+        if hasCurrentSearchItems {
+            return CGSize(width: collectionView.frame.width, height: 55)
+        } else {
+            return .zero
         }
     }
 }
