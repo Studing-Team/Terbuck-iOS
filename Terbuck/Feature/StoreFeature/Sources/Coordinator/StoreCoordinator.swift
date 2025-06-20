@@ -90,7 +90,8 @@ extension StoreCoordinator: StudentIDCardFlowDelegate {
     public func showAuthStudentID() {
         let studentIdCardVC = StudentIDCardViewController(
             authType: .auth,
-            coordinator: self
+            coordinator: self,
+            viewModel: StudentIdCardViewModel()
         )
         
         studentIdCardVC.modalPresentationStyle = .overFullScreen

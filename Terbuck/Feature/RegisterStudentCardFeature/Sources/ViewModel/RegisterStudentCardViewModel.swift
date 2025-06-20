@@ -103,7 +103,6 @@ public final class RegisterStudentCardViewModel {
                     .handleEvents(receiveOutput: { _ in
                         guard let imageData = self.studentImageData else { return }
                         
-                        UserDefaultsManager.shared.set(true, for: .isStudentIDAuthenticated)
                         let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
                     })
                     .catch { _ in Just(false).eraseToAnyPublisher() }

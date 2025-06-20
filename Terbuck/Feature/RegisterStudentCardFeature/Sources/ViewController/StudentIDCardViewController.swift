@@ -6,7 +6,9 @@
 //
 
 import UIKit
+import Combine
 
+import CoreNetwork
 import DesignSystem
 import Shared
 
@@ -19,13 +21,19 @@ public final class StudentIDCardViewController: UIViewController {
     
     private let authType: AuthStudentType
     private var holeLocation: CGRect?
+    
+    private var viewModel: StudentIdCardViewModel
     weak var coordinator: StudentIDCardFlowDelegate?
+    
+    // MARK: - Combine Publishers Properties
+    
+    private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
     
     private let studentIdSection = ExampleStudentIDView()
     private lazy var closeButton = UIButton()
-    private lazy var underlineLabel = TerbuckUnderlineLabel()
     
     private lazy var onboardingTitle = UILabel()
     private lazy var studentImageView = UIImageView()
@@ -38,11 +46,13 @@ public final class StudentIDCardViewController: UIViewController {
     public init(
         authType: AuthStudentType,
         location: CGRect? = nil,
-        coordinator: StudentIDCardFlowDelegate
+        coordinator: StudentIDCardFlowDelegate,
+        viewModel: StudentIdCardViewModel
     ) {
         self.authType = authType
         self.holeLocation = location
         self.coordinator = coordinator
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -64,6 +74,28 @@ public final class StudentIDCardViewController: UIViewController {
         setupLayout()
         setupButtonAction()
         setupStudentIdCard()
+        bindViewModel()
+        
+        viewLifeCycleSubject.send(.viewDidLoad)
+    }
+}
+
+// MARK: - Private Bind Extensions
+
+private extension StudentIDCardViewController {
+    func bindViewModel() {
+        let input = StudentIdCardViewModel.Input(
+            viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.viewLifeCycleEventResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] imageData in
+                self?.studentImageView.image = UIImage(data: imageData)
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -75,16 +107,6 @@ private extension StudentIDCardViewController {
         case .auth:
             closeButton.do {
                 $0.setImage(UIImage.closeXIcon, for: .normal)
-            }
-            
-            underlineLabel.do {
-                $0.text = "학생증 재등록"
-                $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
-                $0.font = DesignSystem.Font.uiFont(.captionRegular11)
-                $0.underlineColor = DesignSystem.Color.uiColor(.terbuckBlack10)
-                $0.isUserInteractionEnabled = true
-                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(registerAction))
-                $0.addGestureRecognizer(tapGesture)
             }
             
             studentImageView.do {
@@ -212,8 +234,9 @@ private extension StudentIDCardViewController {
     }
     
     func setupStudentIdCard() {
-        guard let imageData = FileStorageManager.shared.load(type: .studentIdCard) else { return }
-        studentImageView.image = UIImage(data: imageData)
+        if let imageData = FileStorageManager.shared.load(type: .studentIdCard) {
+            studentImageView.image = UIImage(data: imageData)
+        }
     }
     
     @objc func cancelAction() {

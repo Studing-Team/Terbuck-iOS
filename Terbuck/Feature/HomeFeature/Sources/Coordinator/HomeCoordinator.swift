@@ -48,7 +48,8 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
         let studentIdCardVC = StudentIDCardViewController(
             authType: .onboarding,
             location: location,
-            coordinator: self
+            coordinator: self,
+            viewModel: StudentIdCardViewModel()
         )
         studentIdCardVC.modalPresentationStyle = .overFullScreen
         navigationController.present(studentIdCardVC, animated: false)
@@ -68,7 +69,8 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
     public func showAuthStudentID() {
         let studentIdCardVC = StudentIDCardViewController(
             authType: .auth,
-            coordinator: self
+            coordinator: self,
+            viewModel: StudentIdCardViewModel()
         )
         
         studentIdCardVC.modalPresentationStyle = .overFullScreen
