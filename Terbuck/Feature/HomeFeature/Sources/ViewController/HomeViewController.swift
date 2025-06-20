@@ -101,13 +101,18 @@ private extension HomeViewController {
         output.studentIDCardButtonResult
             .receive(on: DispatchQueue.main)
             .sink { [weak self] authResult in
-                self?.setupStyle(authResult)
+                guard let self else { return }
                 
                 if authResult == true {
-                    self?.coordinator?.showAuthStudentID()
+                    self.coordinator?.showAuthStudentID()
+                } else if authResult == false && !UserDefaultsManager.shared.bool(for: .isOnboarding) {
+                    guard let holeLocation = self.holeLocation else { return }
+                    self.coordinator?.showOnboardiing(location: holeLocation)
+                    UserDefaultsManager.shared.set(true, for: .isOnboarding)
                 } else {
-                    guard let holeLocation = self?.holeLocation else { return }
-                    self?.coordinator?.showOnboardiing(location: holeLocation)
+                    ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
+                        self.coordinator?.registerStudentID()
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -118,12 +123,6 @@ private extension HomeViewController {
             .sink { [weak self] authResult in
                 guard let self else { return }
 
-                if authResult == false {
-                    ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
-                        self.coordinator?.registerStudentID()
-                    }
-                }
-                
                 studentIDCardButton.setImage(authResult ? .authIdCard : .notAuthIdCard, for: .normal)
             }
             .store(in: &cancellables)
