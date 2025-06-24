@@ -32,6 +32,10 @@ public final class UniversityListView: UIView {
         self.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         self.layer.cornerRadius = 6
         
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(listTapped))
+        self.addGestureRecognizer(tapGesture)
+        self.isUserInteractionEnabled = true
+        
         setupStyle(type)
         setupHierarchy()
         setupLayout()
@@ -80,6 +84,10 @@ private extension UniversityListView {
     }
     
     @objc private func buttonTapped() {
+        tapPublisher.send(checkButton.getButtonState())
+    }
+    
+    @objc private func listTapped() {
         tapPublisher.send(checkButton.getButtonState())
     }
 }
