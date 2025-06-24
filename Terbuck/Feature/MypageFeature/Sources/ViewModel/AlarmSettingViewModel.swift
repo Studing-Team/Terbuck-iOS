@@ -15,7 +15,7 @@ public final class AlarmSettingViewModel {
     
     // MARK: - Combine Publishers Properties
     
-    
+    public var isAlarmOnSubject = CurrentValueSubject<Bool, Never>(false)
     
     // MARK: - Input
     
@@ -56,7 +56,6 @@ private extension AlarmSettingViewModel {
         return Future<Bool, Never> { promise in
             UNUserNotificationCenter.current().getNotificationSettings { settings in
                 let isEnabled = (settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional)
-
                 promise(.success(isEnabled))
             }
         }
