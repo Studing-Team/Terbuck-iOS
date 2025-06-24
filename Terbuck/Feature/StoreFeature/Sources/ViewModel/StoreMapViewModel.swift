@@ -177,6 +177,7 @@ public final class StoreMapViewModel {
         searchListStoreTappedSubject
             .sink { [weak self] storeData in
                 print("store 탭됨", storeData.storeName)
+                self?.storeMapTypeSubject.send(.searchResult)
                 self?.addSearchKeyword(storeModel: storeData)
             }
             .store(in: &cancellables)

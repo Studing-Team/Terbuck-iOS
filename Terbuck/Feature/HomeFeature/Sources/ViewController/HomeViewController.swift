@@ -8,6 +8,7 @@
 
 import UIKit
 import Combine
+import CoreLocation
 
 import DesignSystem
 import Shared
@@ -25,6 +26,8 @@ final class HomeViewController: UIViewController {
     private var holeLocation: CGRect?
     
     private var dataSource: UICollectionViewDiffableDataSource<HomeSection, HomeItem>!
+    
+    private let locationManager = CLLocationManager()
     
     // MARK: - Combine Properties
     
@@ -69,8 +72,10 @@ final class HomeViewController: UIViewController {
         bindViewModel()
         setupCollectionView()
         setupDataSource()
-        
+        setupLocationManager()
         viewLifeCycleSubject.send(.viewDidLoad)
+        
+        requestLocation()
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -84,6 +89,12 @@ final class HomeViewController: UIViewController {
         
         // 버튼의 frame을 전체 화면 기준으로 변환 (ex. window 좌표계 기준)
         holeLocation = studentIDCardButton.convert(studentIDCardButton.bounds, to: view)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        
+        self.locationManager.stopUpdatingLocation()
     }
 }
 
@@ -184,6 +195,47 @@ private extension HomeViewController {
     
     func setupDelegate() {
         collectionView.delegate = self
+    }
+    
+    func setupLocationManager() {
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+    }
+    
+    func requestLocation() {
+        switch self.locationManager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            self.locationManager.startUpdatingLocation()
+        case .notDetermined:
+            self.locationManager.requestWhenInUseAuthorization()
+        case .restricted, .denied:
+            print("❌ 위치 권한 거부됨 - 설정에서 권한 변경 필요")
+        default:
+            break
+        }
+    }
+}
+
+// MARK: - CLLocationManagerDelegate
+   
+extension HomeViewController: CLLocationManagerDelegate {
+   public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+       guard let location = locations.last else { return }
+       
+       let latitude = location.coordinate.latitude
+       let longitude = location.coordinate.longitude
+
+       homeViewModel.updateMyLocation(latitude: latitude, longitude: longitude)
+   }
+   
+   public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+       if status == .authorizedWhenInUse || status == .authorizedAlways {
+           locationManager.startUpdatingLocation()
+       }
+   }
+    
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("❌ 위치 업데이트 실패: \(error.localizedDescription)")
     }
 }
 
