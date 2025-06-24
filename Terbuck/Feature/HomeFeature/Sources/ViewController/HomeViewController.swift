@@ -90,12 +90,6 @@ final class HomeViewController: UIViewController {
         // 버튼의 frame을 전체 화면 기준으로 변환 (ex. window 좌표계 기준)
         holeLocation = studentIDCardButton.convert(studentIDCardButton.bounds, to: view)
     }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(true)
-        
-        self.locationManager.stopUpdatingLocation()
-    }
 }
 
 // MARK: - Private Bind Extensions
@@ -199,7 +193,7 @@ private extension HomeViewController {
     
     func setupLocationManager() {
         locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters//kCLLocationAccuracyBest
     }
     
     func requestLocation() {
@@ -226,6 +220,7 @@ extension HomeViewController: CLLocationManagerDelegate {
        let longitude = location.coordinate.longitude
 
        homeViewModel.updateMyLocation(latitude: latitude, longitude: longitude)
+       self.locationManager.stopUpdatingLocation()
    }
    
    public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -245,6 +240,7 @@ private extension HomeViewController {
     @objc private func refreshData() {
         // 🔄 데이터 갱신 로직 실행
         self.homeViewModel.selectedFilterSubject.send(homeViewModel.selectedFilterSubject.value)
+        self.homeViewModel.myLocationSubject.send(homeViewModel.myLocationSubject.value)
 
         // 📉 애니메이션 종료
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

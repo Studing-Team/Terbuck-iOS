@@ -42,6 +42,8 @@ public final class CustomAlertViewController: UIViewController {
         }
     }
     
+    private var isSubTitleForHidden: Bool
+    
     // MARK: - UI Properties
     
     private let alertBackgroundView = UIView()
@@ -49,6 +51,7 @@ public final class CustomAlertViewController: UIViewController {
     private let bottomStackView = UIStackView()
     private let mainTitleLabel = UILabel()
     private let subTitleLabel = UILabel()
+    private let subTitleTextView = UITextView()
     
     // MARK: - Init
     
@@ -70,7 +73,7 @@ public final class CustomAlertViewController: UIViewController {
         self.leftButtonHandler = leftButtonHandler
         self.rightButtonHandler = rightButtonHandler
         self.centerButtonHandler = centerButtonHandler
-        
+        self.isSubTitleForHidden = subTitle == nil ? true : false
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -93,103 +96,127 @@ public final class CustomAlertViewController: UIViewController {
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(cancelBackgroundAction)))
         
         setupStyle()
-        setupHierarchy()
-        setupLayout()
+        setupHierarchy(isHidden: isSubTitleForHidden)
+        setupLayout(isHidden: isSubTitleForHidden)
         setupButtonActions()
+        
+        if !isSubTitleForHidden {
+            let targetWidth = UIScreen.main.bounds.width - 38 * 2 - 25 * 2
+            let size = subTitleTextView.sizeThatFits(CGSize(width: targetWidth, height: .greatestFiniteMagnitude))
+         
+            if size.height > 114 {
+                subTitleTextView.isScrollEnabled = true
+            } else {
+                subTitleTextView.isScrollEnabled = false
+            }
+            
+            // SnapKit 업데이트
+            subTitleTextView.snp.remakeConstraints {
+                $0.top.equalTo(mainTitleLabel.snp.bottom).offset(16)
+                $0.leading.trailing.equalToSuperview().inset(20)
+                $0.height.equalTo(min(size.height, 114))
+            }
+            
+            view.layoutIfNeeded()
+        }
     }
 }
 
 // MARK: - Private Extensions
 
 private extension CustomAlertViewController {
-     func setupStyle() {
-         alertBackgroundView.do {
-             $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
-             $0.layer.cornerRadius = 16
-         }
-         
-         titleStackView.do {
-             $0.axis = .vertical
-             $0.spacing = 20
-             $0.distribution = .fillProportionally
-         }
-         
-         bottomStackView.do {
-             $0.axis = .horizontal
-             $0.spacing = alertStyle == .twoButton ? 10 : 0
-             $0.distribution = .fillEqually
-         }
-         
-         mainTitleLabel.do {
-             $0.text = mainTitle
-             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
-             $0.font = DesignSystem.Font.uiFont(.textSemi16)
-             $0.textAlignment = .center
-             $0.numberOfLines = 0
-         }
-         
-         subTitleLabel.do {
-             $0.numberOfLines = 0
-             $0.textAlignment = .center
-             
-             let paragraph = NSMutableParagraphStyle()
-             paragraph.lineSpacing = 3
-             paragraph.alignment = .center
-             
-             let attrText = NSAttributedString(
-                string: subTitle ?? "",
-                 attributes: [
-                     .font: DesignSystem.Font.uiFont(.textRegular14),
-                     .foregroundColor: DesignSystem.Color.uiColor(.terbuckBlack40),
-                     .paragraphStyle: paragraph
-                 ]
-             )
-             
-             $0.attributedText = attrText
-             $0.isHidden = subTitleLabel.text?.isEmpty ?? true
-         }
-     }
-     
-     func setupHierarchy() {
-         view.addSubview(alertBackgroundView)
-         alertBackgroundView.addSubviews(titleStackView, bottomStackView)
-         titleStackView.addArrangedSubviews(mainTitleLabel, subTitleLabel)
-         
-         switch alertStyle {
-         case .twoButton:
-             if let leftButton, let rightButton {
-                 bottomStackView.addArrangedSubviews(leftButton, rightButton)
-             }
-         case .oneButton:
-             if let centerButton {
-                 bottomStackView.addArrangedSubview(centerButton)
-             }
-         }
-     }
-     
-     func setupLayout() {
-         alertBackgroundView.snp.makeConstraints {
-             $0.center.equalToSuperview()
-             $0.horizontalEdges.equalToSuperview().inset(38)
-         }
-         
-         titleStackView.snp.makeConstraints {
-             $0.top.equalToSuperview().inset(35)
-             $0.horizontalEdges.equalToSuperview().inset(20)
-         }
-         
-         bottomStackView.snp.makeConstraints {
-             $0.top.equalTo(titleStackView.snp.bottom).offset(34)
-             $0.horizontalEdges.equalToSuperview().inset(20)
-             $0.bottom.equalToSuperview().inset(15)
-         }
-         
-         [leftButton, rightButton, centerButton].forEach {
-             $0?.snp.makeConstraints {
-                 $0.height.equalTo(39)
-             }
-         }
-     }
+    func setupStyle() {
+        alertBackgroundView.do {
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
+            $0.layer.cornerRadius = 16
+        }
+        
+        mainTitleLabel.do {
+            $0.text = mainTitle
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
+            $0.font = DesignSystem.Font.uiFont(.textSemi16)
+            $0.textAlignment = .center
+            $0.numberOfLines = 0
+        }
+        
+        subTitleTextView.do {
+            $0.text = subTitle
+            $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack40)
+            $0.font = DesignSystem.Font.uiFont(.textRegular14)
+            $0.textAlignment = .center
+            $0.isEditable = false
+            $0.isScrollEnabled = false   // 여기서 자체 스크롤 가능
+            $0.isHidden = (subTitle?.isEmpty ?? true)
+            $0.textContainerInset = .zero
+            $0.textContainer.lineFragmentPadding = 0
+        }
+        
+        bottomStackView.do {
+            $0.axis = .horizontal
+            $0.spacing = alertStyle == .twoButton ? 10 : 0
+            $0.distribution = .fillEqually
+        }
+    }
+
+    func setupHierarchy(isHidden: Bool) {
+        view.addSubview(alertBackgroundView)
+        
+        if isHidden {
+            alertBackgroundView.addSubviews(mainTitleLabel, bottomStackView)
+        } else {
+            alertBackgroundView.addSubviews(mainTitleLabel, subTitleTextView, bottomStackView)
+        }
+
+        switch alertStyle {
+        case .twoButton:
+            if let leftButton, let rightButton {
+                bottomStackView.addArrangedSubviews(leftButton, rightButton)
+            }
+        case .oneButton:
+            if let centerButton {
+                bottomStackView.addArrangedSubview(centerButton)
+            }
+        }
+    }
+    
+    func setupLayout(isHidden: Bool) {
+        alertBackgroundView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(38)
+        }
+        
+        mainTitleLabel.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(25)
+            $0.horizontalEdges.equalToSuperview().inset(20)
+        }
+        
+        if isHidden {
+            bottomStackView.snp.makeConstraints {
+                $0.top.equalTo(mainTitleLabel.snp.bottom).offset(35)
+                $0.leading.trailing.equalToSuperview().inset(20)
+                $0.bottom.equalToSuperview().inset(15)
+            }
+        } else {
+            subTitleTextView.snp.makeConstraints {
+                $0.top.equalTo(mainTitleLabel.snp.bottom).offset(16)
+                $0.leading.trailing.equalToSuperview().inset(20)
+                $0.height.greaterThanOrEqualTo(40)
+                $0.height.lessThanOrEqualTo(114)
+            }
+            
+            bottomStackView.snp.makeConstraints {
+                $0.top.equalTo(subTitleTextView.snp.bottom).offset(16)
+                $0.leading.trailing.equalToSuperview().inset(20)
+                $0.bottom.equalToSuperview().inset(15)
+            }
+        }
+        
+        [leftButton, rightButton, centerButton].forEach {
+            $0?.snp.makeConstraints {
+                $0.height.equalTo(39)
+            }
+        }
+    }
      
      func setupButtonActions() {
          leftButton?.buttonAction = { [weak self] in
