@@ -30,6 +30,7 @@ public final class HomeViewModel {
     
     private var searchStoreUseCase: SearchStoreUseCase
     private var searchPartnershipUseCase: SearchPartnershipUseCase
+    private var myLocation: (latitude: Double?, longitude: Double?)
     
     // MARK: - Private Combine Publishers Properties
     
@@ -164,6 +165,28 @@ public final class HomeViewModel {
     }
 }
 
+// MARK: - Public Func Extension
+
+public extension HomeViewModel {
+    func updateMyLocation(latitude: Double?, longitude: Double?) {
+        myLocation = (latitude, longitude)
+    }
+}
+
+// MARK: - Private Function Extension
+
+private extension HomeViewModel {
+    func convertLocationToString() -> (latitude: String?, longitude: String?) {
+        
+        let latitude = myLocation.latitude.map { String($0) }
+        let longitude = myLocation.longitude.map { String($0) }
+        
+        return (latitude, longitude)
+    }
+}
+
+// MARK: - Private API Extension
+
 private extension HomeViewModel {
     func postNearStorePublisher() -> AnyPublisher<[NearStoreModel], HomeError> {
         return Future { [weak self] promise in
@@ -174,7 +197,12 @@ private extension HomeViewModel {
             
             Task {
                 do {
-                    let result = try await self.searchStoreUseCase.execute(category: self.selectedFilterSubject.value.title)
+                    let (latitude, longitude) = self.convertLocationToString()
+                    let result = try await self.searchStoreUseCase.execute(
+                        category: self.selectedFilterSubject.value.title,
+                        latitude: latitude,
+                        longitude: longitude
+                    )
                     promise(.success(result))
                 } catch {
                     promise(.failure(.serverFailed))
