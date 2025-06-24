@@ -38,7 +38,9 @@ public final class DetailStoreInfoViewModel: PreviewImageDisplayable {
             onUseagesListModalChanged?(isUseagesListModal)
         }
     }
-
+    
+    public var selectedBenefitIndex: Int? = nil
+    public var isShowModal = false
     public var onUseagesListModalChanged: ((Bool) -> Void)?
     
     private let searchDetailStoreUseCase: SearchDetailStoreUseCase

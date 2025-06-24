@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import CoreLocation
 
 import Shared
 
@@ -28,6 +29,7 @@ public final class HomeViewModel {
     
     // MARK: - Properties
     
+    private let locationManager = CLLocationManager()
     private var searchStoreUseCase: SearchStoreUseCase
     private var searchPartnershipUseCase: SearchPartnershipUseCase
     
@@ -36,11 +38,13 @@ public final class HomeViewModel {
     private let isAuthStudentSubject = CurrentValueSubject<Bool?, Never>(nil)
     private(set) var selectedFilterSubject = CurrentValueSubject<StoreFilterType, Never>(.restaurent)
     private let homeErrorSubject = PassthroughSubject<HomeError, Never>()
+    
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Public Combine Publishers Properties
     
     var sectionDataSubject = CurrentValueSubject<[HomeSection: [HomeItem]], Never>([:])
+    public let myLocationSubject = CurrentValueSubject<(latitude: Double?, longitude: Double?), Never>((nil, nil))
     
     // MARK: - Input
     
@@ -85,24 +89,59 @@ public final class HomeViewModel {
             .eraseToAnyPublisher()
         
         selectedFilterSubject
-            .flatMap { [weak self] filter -> AnyPublisher<[HomeItem], Never> in
+            .combineLatest(myLocationSubject)
+            .flatMap { [weak self] filter, location -> AnyPublisher<[HomeItem], Never> in
                 guard let self else { return Empty().eraseToAnyPublisher() }
+                
+                // 위치 인증 여부 확인
+                var isLocationAuthorized = false
+                
+                switch self.locationManager.authorizationStatus {
+                case .authorizedWhenInUse, .authorizedAlways:
+                    isLocationAuthorized = true
+                default:
+                    isLocationAuthorized = false
+                }
+                
                 switch filter {
                 case .restaurent:
-                    return self.postNearStorePublisher()
-                        .handleEvents(receiveCompletion: { [weak self] completion in
-                            if case .failure(let error) = completion {
-                                self?.homeErrorSubject.send(error)
-                            }
-                        })
-                        .map { stores in
-                            stores.map { HomeItem.restaurant($0) }
-                        }
-                        .catch { _ in Empty() }
-                        .eraseToAnyPublisher()
+                    if isLocationAuthorized == false {
+                       // 권한 X : 위치 nil 로 호출
+                       return self.postNearStorePublisher(latitude: nil, longitude: nil)
+                           .handleEvents(receiveCompletion: { [weak self] completion in
+                               if case .failure(let error) = completion {
+                                   self?.homeErrorSubject.send(error)
+                               }
+                           })
+                           .map { stores in
+                               stores.map { filter == .restaurent ? HomeItem.restaurant($0) : HomeItem.convenient($0) }
+                           }
+                           .catch { _ in Empty() }
+                           .eraseToAnyPublisher()
+                   } else {
+                       // 권한 O : 위치 값 들어온 경우에만 호출
+                       guard let latitude = location.latitude, let longitude = location.longitude else {
+                           // 위치 값 아직 없음 → 빈 스트림 리턴
+                           return Empty().eraseToAnyPublisher()
+                       }
+                       
+                       return self.postNearStorePublisher(latitude: latitude, longitude: longitude)
+                           .handleEvents(receiveCompletion: { [weak self] completion in
+                               if case .failure(let error) = completion {
+                                   self?.homeErrorSubject.send(error)
+                               }
+                           })
+                           .map { stores in
+                               stores.map { filter == .restaurent ? HomeItem.restaurant($0) : HomeItem.convenient($0) }
+                           }
+                           .catch { _ in Empty() }
+                           .eraseToAnyPublisher()
+                   }
                     
                 case .convenient:
-                    return self.postNearStorePublisher()
+                    let location = myLocationSubject.value
+                    
+                    return self.postNearStorePublisher(latitude: location.latitude, longitude: location.longitude)
                         .handleEvents(receiveCompletion: { [weak self] completion in
                             if case .failure(let error) = completion {
                                 self?.homeErrorSubject.send(error)
@@ -164,8 +203,18 @@ public final class HomeViewModel {
     }
 }
 
+// MARK: - Public Func Extension
+
+public extension HomeViewModel {
+    func updateMyLocation(latitude: Double?, longitude: Double?) {
+        myLocationSubject.send((latitude, longitude))
+    }
+}
+
+// MARK: - Private API Extension
+
 private extension HomeViewModel {
-    func postNearStorePublisher() -> AnyPublisher<[NearStoreModel], HomeError> {
+    func postNearStorePublisher(latitude: Double?, longitude: Double?) -> AnyPublisher<[NearStoreModel], HomeError> {
         return Future { [weak self] promise in
             guard let self else {
                 promise(.failure(.unknown))
@@ -174,7 +223,14 @@ private extension HomeViewModel {
             
             Task {
                 do {
-                    let result = try await self.searchStoreUseCase.execute(category: self.selectedFilterSubject.value.title)
+                    let latitudeString = latitude.map { String($0) }
+                    let longitudeString = longitude.map { String($0) }
+                    
+                    let result = try await self.searchStoreUseCase.execute(
+                        category: self.selectedFilterSubject.value.title,
+                        latitude: latitudeString,
+                        longitude: longitudeString
+                    )
                     promise(.success(result))
                 } catch {
                     promise(.failure(.serverFailed))

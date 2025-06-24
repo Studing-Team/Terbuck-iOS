@@ -9,7 +9,7 @@ import Foundation
 import CoreNetwork
 
 public protocol HomeRepository {
-    func getSearchStore(university: String, category: String) async throws -> [SearchStoreEntity]
+    func getSearchStore(university: String, category: String, latitude: String?, longitude: String?) async throws -> [SearchStoreEntity]
     func getSearchPartner(university: String) async throws -> [SearchPartnershipEntity]
     func getSearchNewPartner(university: String) async throws -> [SearchPartnershipEntity]
     func getDetailPartner(partnershipId: Int) async throws -> DetailPartnershipEntity
@@ -18,8 +18,8 @@ public protocol HomeRepository {
 struct HomeRepositoryImpl: HomeRepository {
     private let networkManager = NetworkManager.shared
     
-    func getSearchStore(university: String, category: String) async throws -> [SearchStoreEntity] {
-        let requestDTO = SearchStoreRequestDTO(university: university, category: category)
+    func getSearchStore(university: String, category: String, latitude: String?, longitude: String?) async throws -> [SearchStoreEntity] {
+        let requestDTO = SearchStoreRequestDTO(university: university, category: category, latitude: latitude, longitude: longitude)
         let dto: StoreBenefitResponseDTO = try await networkManager.request(StoreAPIEndpoint.getHomeStore(requestDTO))
         
         return dto.list.map { $0.toEntity() }

@@ -177,6 +177,7 @@ public final class StoreMapViewModel {
         searchListStoreTappedSubject
             .sink { [weak self] storeData in
                 print("store 탭됨", storeData.storeName)
+                self?.storeMapTypeSubject.send(.searchResult)
                 self?.addSearchKeyword(storeModel: storeData)
             }
             .store(in: &cancellables)
@@ -292,7 +293,10 @@ private extension StoreMapViewModel {
     
     func updateStoreList(to selectRow: Int) {
         let categoryData = categoryItemsSubject.value
-        guard let categoryStoreList = categoryStoreData[categoryData[selectRow].type] else { return }
+        guard let categoryStoreList = categoryStoreData[categoryData[selectRow].type] else {
+            self.storeListSubject.send([])
+            return
+        }
         self.storeListSubject.send(categoryStoreList)
     }
     

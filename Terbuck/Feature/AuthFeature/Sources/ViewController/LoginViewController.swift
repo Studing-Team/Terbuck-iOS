@@ -7,8 +7,10 @@
 
 import UIKit
 import Combine
+import CoreLocation
 
 import DesignSystem
+import Shared
 
 import SnapKit
 import Then
@@ -21,6 +23,7 @@ public final class LoginViewController: UIViewController {
     
     // MARK: - Properties
     
+    private let locationManager = CLLocationManager()
     private var viewModel: LoginViewModel
     weak var coordinator: AuthCoordinator?
     
@@ -56,6 +59,9 @@ public final class LoginViewController: UIViewController {
         setupLayout()
         setupDelegate()
         bindViewModel()
+        
+        requestLocation()
+        requestNotificationPermission()
     }
 }
 
@@ -144,8 +150,37 @@ private extension LoginViewController {
         }
     }
     
+    func requestLocation() {
+        switch self.locationManager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            self.locationManager.startUpdatingLocation()
+        case .notDetermined:
+            self.locationManager.requestWhenInUseAuthorization()
+        case .restricted, .denied:
+            print("❌ 위치 권한 거부됨 - 설정에서 권한 변경 필요")
+        default:
+            break
+        }
+    }
+    
     func setupDelegate() {
         
+    }
+    
+    // MARK: - 원격 알림 권한 요청
+    
+    func requestNotificationPermission() {
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, error in
+            if let error = error {
+                print("알림 권한 요청 실패: \(error.localizedDescription)")
+                return
+            }
+
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
     }
 }
 

@@ -21,9 +21,14 @@ public enum StoreListType {
 
 public final class StoreListModalViewController: UIViewController {
     
+    enum Section: Int {
+       case storeList
+       case empty
+   }
+    
     // MARK: - Properties
     
-    private var dataSource: UICollectionViewDiffableDataSource<Int, StoreListModel.ID>?
+    private var dataSource: UICollectionViewDiffableDataSource<Section, StoreListModel.ID>?
     private var cateoryDataSource: UICollectionViewDiffableDataSource<Int, CategoryModel>?
     private let storeMapViewModel: StoreMapViewModel
     
@@ -363,6 +368,7 @@ private extension StoreListModalViewController {
         categoryCollectionView.register(StoreCategoryCollectionVieCell.self, forCellWithReuseIdentifier: StoreCategoryCollectionVieCell.className)
         
         storeCollectionView.register(StoreListModelCollectionViewCell.self, forCellWithReuseIdentifier: StoreListModelCollectionViewCell.className)
+        storeCollectionView.register(EmptyCollectionViewCell.self, forCellWithReuseIdentifier: EmptyCollectionViewCell.className)
     }
     
     func setupDelegate() {
@@ -394,21 +400,42 @@ extension StoreListModalViewController: UICollectionViewDelegate {
 
 extension StoreListModalViewController {
     func setupStoreDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Int, StoreListModel.ID>(collectionView: storeCollectionView) { [weak self] collectionView, indexPath, itemId in
+        dataSource = UICollectionViewDiffableDataSource<Section, StoreListModel.ID>(collectionView: storeCollectionView) { [weak self] collectionView, indexPath, itemId in
             
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: StoreListModelCollectionViewCell.className, for: indexPath) as! StoreListModelCollectionViewCell
+            guard let self = self else { return UICollectionViewCell() }
             
-            let item = self?.storeMapViewModel.item(forId: itemId)
+            guard let sectionType = self.dataSource?.sectionIdentifier(for: indexPath.section) else {
+                return UICollectionViewCell()
+            }
             
-            cell.configureCell(forModel: item ?? StoreListModel(id: 0, imageURL: "", storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 49 지층", category: .restaurant, benefitCount: 2, latitude: 37.52015323931828, longitude: 126.67337768520443))
-            return cell
+            switch sectionType {
+            case .storeList:
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: StoreListModelCollectionViewCell.className, for: indexPath) as! StoreListModelCollectionViewCell
+                
+                let item = self.storeMapViewModel.item(forId: itemId)
+                
+                cell.configureCell(forModel: item ?? StoreListModel(id: 0, imageURL: "", storeName: "터벅터벅 공릉점", storeAddress: "서울 노원구 동이로190길 49 지층", category: .restaurant, benefitCount: 2, latitude: 37.52015323931828, longitude: 126.67337768520443))
+                return cell
+                
+            case .empty:
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmptyCollectionViewCell.className, for: indexPath) as! EmptyCollectionViewCell
+                
+                return cell
+            }
         }
     }
     
     func applyStoreSnapshot(items: [StoreListModel], animatingDifferences: Bool = true) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, StoreListModel.ID>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(items.map { $0.id })
+        var snapshot = NSDiffableDataSourceSnapshot<Section, StoreListModel.ID>()
+        
+        if items.isEmpty {
+            snapshot.appendSections([.empty])
+            snapshot.appendItems([0])
+        } else {
+            snapshot.appendSections([.storeList])
+            snapshot.appendItems(items.map { $0.id })
+        }
+        
         dataSource?.apply(snapshot, animatingDifferences: animatingDifferences)
     }
 }
@@ -417,7 +444,7 @@ extension StoreListModalViewController {
 
 extension StoreListModalViewController {
     func setupCategoryDataSource() {
-        cateoryDataSource = UICollectionViewDiffableDataSource<Int, CategoryModel>(collectionView: categoryCollectionView) { [weak self] collectionView, indexPath, item in
+        cateoryDataSource = UICollectionViewDiffableDataSource<Int, CategoryModel>(collectionView: categoryCollectionView) { collectionView, indexPath, item in
             
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: StoreCategoryCollectionVieCell.className, for: indexPath) as! StoreCategoryCollectionVieCell
             

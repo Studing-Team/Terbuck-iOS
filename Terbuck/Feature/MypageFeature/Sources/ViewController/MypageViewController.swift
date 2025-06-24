@@ -64,8 +64,6 @@ public final class MypageViewController: UIViewController {
         setupDelegate()
         setupCollectionView()
         bindViewModel()
-        
-        viewLifeCycleSubject.send(.viewDidLoad)
     }
     
     public override func viewWillAppear(_ animated: Bool) {

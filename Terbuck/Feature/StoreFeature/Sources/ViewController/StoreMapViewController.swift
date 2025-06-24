@@ -24,6 +24,7 @@ final class StoreMapViewController: UIViewController {
     weak var coordinator: StoreCoordinator?
     private let locationManager = CLLocationManager()
     private var bottomSheetTopConstraint: NSLayoutConstraint?
+    private var isFindMyLocation: Bool = false
     
     // MARK: - Marker Properties
     
@@ -79,10 +80,11 @@ final class StoreMapViewController: UIViewController {
         setupHierarchy()
         setupLayout()
         setupDelegate()
-        setupLocationManager()
         setupPresentModal()
         bindViewModel()
-        updateMyLocation()
+        
+        setupLocationManager()
+        requestLocation()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -90,6 +92,20 @@ final class StoreMapViewController: UIViewController {
         
         storeMapViewModel.viewLifeCycleSubject.send(.viewWillAppear)
         print("StoreMapViewController viewWillAppear")
+        
+        switch storeMapViewModel.storeMapTypeSubject.value {
+        case .search:
+            tabBarController?.tabBar.isHidden = false
+            searchBarView.configureSearchType(.search)
+        case .searchResult:
+            tabBarController?.tabBar.isHidden = true
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        
+        self.locationManager.stopUpdatingLocation()
     }
 }
 
@@ -115,9 +131,9 @@ private extension StoreMapViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] tappedStore in
                 guard let self else { return }
- 
+                self.searchBarView.configureSearchType(.search)
                 self.storeInfoBottomView.configureData(forModel: tappedStore)
-                self.updateSearchLayout(tappedStore)
+                self.updateSearchLayout(tappedStore, isHidden: false)
             }
             .store(in: &cancellables)
         
@@ -140,12 +156,13 @@ private extension StoreMapViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] type in
                 guard let self else { return }
+                
                 bottomSheetVC.view.isHidden = type == .search ? false : true
                 tabBarController?.tabBar.isHidden = type == .search ? false : true
-                storeInfoBottomView.isHidden = true
-                searchBarView.configureSearchType(type)
+                storeInfoBottomView.isHidden = type == .searchResult ? false : true
                 
                 if type == .search {
+                    searchBarView.configureSearchType(.search)
                     let index = storeMapViewModel.storeCategoryPublisher.value
                     let type = CategoryType.allCases[index]
                     filterToCategoryTypeMarker(category: type)
@@ -160,7 +177,7 @@ private extension StoreMapViewController {
                 self?.storeInfoBottomView.configureData(forModel: searchStore)
                 self?.searchBarView.configureSearchResultType(storeName: searchStore.storeName)
                 self?.makeSingleMarker(store: searchStore)
-                self?.updateSearchLayout(searchStore)
+                self?.updateSearchLayout(searchStore, isHidden: true)
             }
             .store(in: &cancellables)
     }
@@ -185,19 +202,19 @@ private extension StoreMapViewController {
             marker.touchHandler = { [weak self] (overlay) -> Bool in
                 if let store = overlay.userInfo["store"] as? StoreListModel,
                    let tappedMarker = overlay as? NMFMarker {
-                    
-                    print("마커가 눌린 가게: \(store.storeName)")
-                    self?.moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
-                    self?.storeMapViewModel.markerTappedSubject.send(store)
-                    
-                    self?.changeMarkerSize(tappedMarker: tappedMarker)
-                    
-                    self?.selectedMarker = tappedMarker
+                    if self?.storeMapViewModel.storeMapTypeSubject.value == .search {
+                        self?.moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
+                        self?.storeMapViewModel.markerTappedSubject.send(store)
+                        
+                        self?.changeMarkerSize(tappedMarker: tappedMarker)
+                        
+                        self?.selectedMarker = tappedMarker
+                    }
                 }
                 
                 return true
             }
-
+            
             allMarkersDic[$0.category, default: []].append(marker)
             currentCategoryMarkers.append(marker)
         }
@@ -261,7 +278,7 @@ private extension StoreMapViewController {
 
         // 2. 카메라 업데이트로 이동 (padding 포함)
         let cameraUpdate = NMFCameraUpdate(fit: bounds, paddingInsets: UIEdgeInsets(
-            top: 250, left: 50, bottom: CGFloat(height[currentIndex] + 50), right: 50)
+            top: 220, left: 30, bottom: CGFloat(height[currentIndex] + 50), right: 30)
         )
         
         cameraUpdate.animation = .linear
@@ -400,10 +417,12 @@ private extension StoreMapViewController {
     }
     
     @objc func myLocationButtonTapped() {
+        locationManager.startUpdatingLocation()
         myLocationButton.isSelected.toggle()
-        updateMyLocation()
+        isFindMyLocation = true
+        locationManager.stopUpdatingLocation()
     }
-    
+
     @objc func searchBarTapped() {
         if storeMapViewModel.storeMapTypeSubject.value == .search {
             self.coordinator?.searchStore()
@@ -417,26 +436,36 @@ private extension StoreMapViewController {
         self.coordinator?.showDetailStoreInfo(storeId: store.id)
     }
     
-    func updateMyLocation() {
-        // 위치 권한 확인
-        switch locationManager.authorizationStatus {
+    func requestLocation() {
+        switch self.locationManager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            locationManager.startUpdatingLocation()
+            self.locationManager.startUpdatingLocation()
         case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
+            self.locationManager.requestWhenInUseAuthorization()
+        case .restricted, .denied:
+            print("❌ 위치 권한 거부됨 - 설정에서 권한 변경 필요")
         default:
-            // 권한 없음 알림
-//            showLocationPermissionAlert()
             break
         }
     }
     
-    func updateSearchLayout(_ store: StoreListModel) {
+    func updateSearchLayout(_ store: StoreListModel, isHidden: Bool) {
         bottomSheetVC.view.isHidden = true
-        tabBarController?.tabBar.isHidden = true
+        tabBarController?.tabBar.isHidden = isHidden
+        
+        storeInfoBottomView.snp.remakeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(15)
+            $0.height.equalTo(112)
+            if isHidden {
+                $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(15)
+            } else {
+                $0.bottom.equalToSuperview().inset(92)
+            }
+        }
         
         moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
         storeMapViewModel.searchResultStoreTappedSubject.send(store)
+        
         storeInfoBottomView.isHidden = false
     }
 }
@@ -471,8 +500,12 @@ extension StoreMapViewController: NMFMapViewCameraDelegate {
     }
     
     private func updateMapToCurrentLocation(_ coordinate: CLLocationCoordinate2D) {
-        // 현재 위치로 카메라 이동
-        let cameraUpdate = NMFCameraUpdate(scrollTo: NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude))
+        let cameraPosition = NMFCameraPosition(
+            NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude),
+            zoom: 15.0
+        )
+        
+        let cameraUpdate = NMFCameraUpdate(position: cameraPosition)
         cameraUpdate.animation = .easeIn
         mapView.moveCamera(cameraUpdate)
 
@@ -489,14 +522,33 @@ extension StoreMapViewController: NMFMapViewCameraDelegate {
     }
 }
 
+extension StoreMapViewController: NMFMapViewTouchDelegate {
+    public func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
+        if storeMapViewModel.storeMapTypeSubject.value == .search {
+            selectedMarker?.width = 34
+            selectedMarker?.height = 42
+            self.selectedMarker = nil
+            self.bottomSheetVC.view.isHidden = false
+            self.storeInfoBottomView.isHidden = true
+            self.tabBarController?.tabBar.isHidden = false
+        }
+    }
+}
+
 // MARK: - CLLocationManagerDelegate
     
 extension StoreMapViewController: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print("새로운 위치로 업데이트")
         guard let location = locations.last else { return }
-        updateMapToCurrentLocation(location.coordinate)
-        locationManager.stopUpdatingLocation()
+        
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
+
+        if isFindMyLocation {
+            updateMapToCurrentLocation(location.coordinate)
+        }
+        
+        isFindMyLocation = false
     }
     
     public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -504,16 +556,9 @@ extension StoreMapViewController: CLLocationManagerDelegate {
             locationManager.startUpdatingLocation()
         }
     }
-}
-
-extension StoreMapViewController: NMFMapViewTouchDelegate {
-    public func mapView(_ mapView: NMFMapView, didTapMap latlng: NMGLatLng, point: CGPoint) {
-        selectedMarker?.width = 34
-        selectedMarker?.height = 42
-        self.selectedMarker = nil
-        self.bottomSheetVC.view.isHidden = false
-        self.storeInfoBottomView.isHidden = true
-        self.tabBarController?.tabBar.isHidden = false
+    
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("❌ 위치 업데이트 실패: \(error.localizedDescription)")
     }
 }
 

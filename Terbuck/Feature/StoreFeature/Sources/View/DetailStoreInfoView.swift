@@ -18,6 +18,7 @@ struct DetailStoreInfoView: View {
     
     let type: SectionType
     let onImageTapped: (Int) -> Void
+    let onMoreBenefitTapped: ([String]) -> Void
     
     // MARK: - Body
     
@@ -98,21 +99,35 @@ private extension DetailStoreInfoView {
             .padding(.vertical, 15)
             .padding(.bottom, 3)
             
-            ForEach(benefitModel, id: \.self) { model in
-                Text(model.benefitTitle)
-                    .font(DesignSystem.Font.swiftUIFont(.textRegular14))
-                    .foregroundStyle(DesignSystem.Color.swiftUIColor(.terbuckBlack50))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 18)
-                    .padding(.horizontal, 15)
-                    .background {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(DesignSystem.Color.swiftUIColor(.terbuckWhite3))
+            ForEach(benefitModel.indices, id: \.self) { index in
+                HStack(spacing: 0) {
+                    Text(benefitModel[index].benefitTitle)
+                        .font(DesignSystem.Font.swiftUIFont(.textRegular14))
+                        .foregroundStyle(DesignSystem.Color.swiftUIColor(.terbuckBlack50))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 18)
+                        .padding(.trailing, 20)
+                    
+                    if !benefitModel[index].detailList.isEmpty {
+                        Button(action: {
+                            viewModel.selectedBenefitIndex = index
+                            viewModel.isShowModal = true
+                            onMoreBenefitTapped(benefitModel[index].detailList)
+                        }) {
+                            Text("클릭")
+                                .font(DesignSystem.Font.swiftUIFont(.textSemi14))
+                                .foregroundStyle(DesignSystem.Color.swiftUIColor(.terbuckGreen50))
+                        }
                     }
-                    .padding(.bottom, 8)
-                    .onAppear {
-                        print(model.benefitTitle)
-                    }
+                }
+                .padding(.horizontal, 15)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(DesignSystem.Color.swiftUIColor(.terbuckWhite3))
+                        .stroke(DesignSystem.Color.swiftUIColor(.terbuckGreen10), lineWidth: viewModel.selectedBenefitIndex == index ? 1 : 0)
+                }
+                .padding(.bottom, 8)
             }
         }
     }

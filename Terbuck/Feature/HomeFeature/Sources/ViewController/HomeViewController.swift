@@ -8,6 +8,7 @@
 
 import UIKit
 import Combine
+import CoreLocation
 
 import DesignSystem
 import Shared
@@ -25,6 +26,8 @@ final class HomeViewController: UIViewController {
     private var holeLocation: CGRect?
     
     private var dataSource: UICollectionViewDiffableDataSource<HomeSection, HomeItem>!
+    
+    private let locationManager = CLLocationManager()
     
     // MARK: - Combine Properties
     
@@ -69,8 +72,10 @@ final class HomeViewController: UIViewController {
         bindViewModel()
         setupCollectionView()
         setupDataSource()
-        
+        setupLocationManager()
         viewLifeCycleSubject.send(.viewDidLoad)
+        
+        requestLocation()
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -101,13 +106,18 @@ private extension HomeViewController {
         output.studentIDCardButtonResult
             .receive(on: DispatchQueue.main)
             .sink { [weak self] authResult in
-                self?.setupStyle(authResult)
+                guard let self else { return }
                 
                 if authResult == true {
-                    self?.coordinator?.showAuthStudentID()
+                    self.coordinator?.showAuthStudentID()
+                } else if authResult == false && !UserDefaultsManager.shared.bool(for: .isOnboarding) {
+                    guard let holeLocation = self.holeLocation else { return }
+                    self.coordinator?.showOnboardiing(location: holeLocation)
+                    UserDefaultsManager.shared.set(true, for: .isOnboarding)
                 } else {
-                    guard let holeLocation = self?.holeLocation else { return }
-                    self?.coordinator?.showOnboardiing(location: holeLocation)
+                    ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
+                        self.coordinator?.registerStudentID()
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -118,12 +128,6 @@ private extension HomeViewController {
             .sink { [weak self] authResult in
                 guard let self else { return }
 
-                if authResult == false {
-                    ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
-                        self.coordinator?.registerStudentID()
-                    }
-                }
-                
                 studentIDCardButton.setImage(authResult ? .authIdCard : .notAuthIdCard, for: .normal)
             }
             .store(in: &cancellables)
@@ -186,6 +190,48 @@ private extension HomeViewController {
     func setupDelegate() {
         collectionView.delegate = self
     }
+    
+    func setupLocationManager() {
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters//kCLLocationAccuracyBest
+    }
+    
+    func requestLocation() {
+        switch self.locationManager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            self.locationManager.startUpdatingLocation()
+        case .notDetermined:
+            self.locationManager.requestWhenInUseAuthorization()
+        case .restricted, .denied:
+            print("❌ 위치 권한 거부됨 - 설정에서 권한 변경 필요")
+        default:
+            break
+        }
+    }
+}
+
+// MARK: - CLLocationManagerDelegate
+   
+extension HomeViewController: CLLocationManagerDelegate {
+   public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+       guard let location = locations.last else { return }
+       
+       let latitude = location.coordinate.latitude
+       let longitude = location.coordinate.longitude
+
+       homeViewModel.updateMyLocation(latitude: latitude, longitude: longitude)
+       self.locationManager.stopUpdatingLocation()
+   }
+   
+   public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+       if status == .authorizedWhenInUse || status == .authorizedAlways {
+           locationManager.startUpdatingLocation()
+       }
+   }
+    
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("❌ 위치 업데이트 실패: \(error.localizedDescription)")
+    }
 }
 
 // MARK: - CollectionView Extension
@@ -194,6 +240,7 @@ private extension HomeViewController {
     @objc private func refreshData() {
         // 🔄 데이터 갱신 로직 실행
         self.homeViewModel.selectedFilterSubject.send(homeViewModel.selectedFilterSubject.value)
+        self.homeViewModel.myLocationSubject.send(homeViewModel.myLocationSubject.value)
 
         // 📉 애니메이션 종료
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

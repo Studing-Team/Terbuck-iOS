@@ -17,6 +17,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+        // UNUserNotificationCenter delegate 설정
+        UNUserNotificationCenter.current().delegate = self
+        
         // MARK: - 카카오 로그인 설정
         
         KakaoSDK.initSDK(appKey: Config.kakaoNativeAppKey)
@@ -52,4 +55,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    // Foreground 상태에서 알림 받았을 때 - 알림 표시만 설정
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        
+        let userInfo = notification.request.content.userInfo
+        print("포그라운드 알림 수신: \(userInfo)")
+        
+        completionHandler([[.banner, .badge, .sound]])
+    }
+    
+    // 알림 눌렀을 때 처리
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        // 여기서 알림 클릭 처리
+        completionHandler()
+    }
 }

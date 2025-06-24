@@ -88,24 +88,7 @@ public final class MypageViewModel {
                     return Empty().eraseToAnyPublisher()
                 }
                 
-                switch event {
-                case .viewDidLoad:
-                    return self.performSearchMyInfo()
-                    
-                case .viewWillAppear:
-                    let savedUniversityName = UserDefaultsManager.shared.string(for: .university)
-                    let currentUniversityName = self.userInfoModelSubject.value?.university
-
-                    guard let currentUniversityName else { return Empty().eraseToAnyPublisher() }
-                    
-                    if savedUniversityName != currentUniversityName {
-                        toasterMessageSubject.send(.changeUniversity)
-                        
-                        return self.performSearchMyInfo()
-                    } else {
-                        return Empty().eraseToAnyPublisher()
-                    }
-                }
+                return self.performSearchMyInfo()
             }
             .eraseToAnyPublisher()
         
@@ -167,6 +150,11 @@ private extension MypageViewModel {
                     let result = try await self.searchStudentInfoUseCase.execute()
                     UserDefaultsManager.shared.set(result.isAuthenticated, for: .isStudentIDAuthenticated)
                     UserDefaultsManager.shared.set(result.university, for: .university)
+                    
+                    if result.imageUrl != "" {
+                        UserDefaultsManager.shared.set(result.imageUrl, for: .studentIdCardImageURL)
+                    }
+                    
                     promise(.success(result))
                 } catch {
                     promise(.failure(.studentInfoFailed))

@@ -9,7 +9,7 @@ import Foundation
 import Shared
 
 public protocol SearchStoreUseCase {
-    func execute(category: String) async throws -> [NearStoreModel]
+    func execute(category: String, latitude: String?, longitude: String?) async throws -> [NearStoreModel]
 }
 
 public struct SearchStoreUseCaseImpl: SearchStoreUseCase {
@@ -19,11 +19,14 @@ public struct SearchStoreUseCaseImpl: SearchStoreUseCase {
         self.repository = repository
     }
 
-    public func execute(category: String) async throws -> [NearStoreModel] {
-        
+    public func execute(category: String, latitude: String?, longitude: String?) async throws -> [NearStoreModel] {
         let universityName = UserDefaultsManager.shared.string(for: .university) ?? ""
-        
-        let entity = try await repository.getSearchStore(university: universityName, category: category)
+        let entity = try await repository.getSearchStore(
+            university: universityName,
+            category: category,
+            latitude: latitude,
+            longitude: longitude
+        )
         
         return entity.map {
             NearStoreModel(

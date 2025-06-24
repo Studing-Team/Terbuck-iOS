@@ -83,6 +83,13 @@ private extension SplashViewController {
         do {
             let dto: SearchStudentInfoResponseDTO = try await NetworkManager.shared.request(MemberAPIEndpoint.getStudentId)
             
+            UserDefaultsManager.shared.set(dto.isRegistered, for: .isStudentIDAuthenticated)
+            UserDefaultsManager.shared.set(dto.university, for: .university)
+            
+            if let imageURL = dto.imageURL {
+                UserDefaultsManager.shared.set(imageURL, for: .studentIdCardImageURL)
+            }
+            
             self.shouldShowLogin = false
         } catch {
             self.shouldShowLogin = true

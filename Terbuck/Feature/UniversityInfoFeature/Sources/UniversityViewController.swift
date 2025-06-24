@@ -60,7 +60,7 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
         self.type = type
         self.viewModel = viewModel
         self.customNavBar = CustomNavigationView(type: .nomal, title: type.title)
-        self.terbuckBottomButton = TerbuckBottomButton(type: .save, isEnabled: false)
+        self.terbuckBottomButton = TerbuckBottomButton(type:  type == .register ? .enter : .save, isEnabled: false)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -98,46 +98,6 @@ private extension UniversityViewController {
             bottomButtonTapped: terbuckBottomButton.tapPublisher
         )
         
-        kwUniversityView.tapPublisher
-            .sink { [weak self] value in
-                if value {
-                    self?.terbuckBottomButton.isUserInteractionEnabled = true
-                } else {
-                    self?.terbuckBottomButton.isUserInteractionEnabled = false
-                }
-            }
-            .store(in: &cancellables)
-        
-        ssUniversityView.tapPublisher
-            .sink { [weak self] value in
-                if value {
-                    self?.terbuckBottomButton.isUserInteractionEnabled = true
-                } else {
-                    self?.terbuckBottomButton.isUserInteractionEnabled = false
-                }
-            }
-            .store(in: &cancellables)
-        
-        samUniversityView.tapPublisher
-            .sink { [weak self] value in
-                if value {
-                    self?.terbuckBottomButton.isUserInteractionEnabled = true
-                } else {
-                    self?.terbuckBottomButton.isUserInteractionEnabled = false
-                }
-            }
-            .store(in: &cancellables)
-        
-        sungUniversityView.tapPublisher
-            .sink { [weak self] value in
-                if value {
-                    self?.terbuckBottomButton.isUserInteractionEnabled = true
-                } else {
-                    self?.terbuckBottomButton.isUserInteractionEnabled = false
-                }
-            }
-            .store(in: &cancellables)
-        
         let output = viewModel.transform(input: input)
         
         output.selectedUniversity
@@ -146,23 +106,30 @@ private extension UniversityViewController {
                 
                 switch selected {
                 case .kw:
+                    self.kwUniversityView.changeButtonState(isSelect: true)
                     self.ssUniversityView.changeButtonState(isSelect: false)
                     self.samUniversityView.changeButtonState(isSelect: false)
                     self.sungUniversityView.changeButtonState(isSelect: false)
                 case .ss:
                     self.kwUniversityView.changeButtonState(isSelect: false)
+                    self.ssUniversityView.changeButtonState(isSelect: true)
                     self.samUniversityView.changeButtonState(isSelect: false)
                     self.sungUniversityView.changeButtonState(isSelect: false)
                 case .sam:
                     self.ssUniversityView.changeButtonState(isSelect: false)
                     self.kwUniversityView.changeButtonState(isSelect: false)
+                    self.samUniversityView.changeButtonState(isSelect: true)
                     self.sungUniversityView.changeButtonState(isSelect: false)
                 case .sung:
                     self.ssUniversityView.changeButtonState(isSelect: false)
                     self.kwUniversityView.changeButtonState(isSelect: false)
                     self.samUniversityView.changeButtonState(isSelect: false)
+                    self.sungUniversityView.changeButtonState(isSelect: true)
                 default:
-                    break
+                    self.ssUniversityView.changeButtonState(isSelect: false)
+                    self.kwUniversityView.changeButtonState(isSelect: false)
+                    self.samUniversityView.changeButtonState(isSelect: false)
+                    self.sungUniversityView.changeButtonState(isSelect: false)
                 }
 
                 self.terbuckBottomButton.isUserInteractionEnabled = selected != nil

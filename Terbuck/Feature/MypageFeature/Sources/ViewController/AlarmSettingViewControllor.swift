@@ -83,6 +83,14 @@ private extension AlarmSettingViewControllor {
         output.viewLifeCycleEventResult
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
+                self?.alarmSettingViewModel.isAlarmOnSubject.send(result)
+                self?.alarmInfomationView.changeAlarmState(isAlarm: result)
+            }
+            .store(in: &cancellables)
+        
+        alarmSettingViewModel.isAlarmOnSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
                 self?.alarmInfomationView.changeAlarmState(isAlarm: result)
             }
             .store(in: &cancellables)
@@ -97,6 +105,19 @@ private extension AlarmSettingViewControllor {
         
         customNavBar.setupBackButtonAction { [weak self] in
             self?.navigationController?.popViewController(animated: true)
+        }
+        
+        alarmInfomationView.setAlarmSettingAction {
+            if self.alarmSettingViewModel.isAlarmOnSubject.value {
+                self.alarmSettingViewModel.isAlarmOnSubject.send(false)
+            } else {
+                // 알림이 꺼져 있을 때 → 설정으로 이동
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    if UIApplication.shared.canOpenURL(url) {
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                    }
+                }
+            }
         }
     }
     
