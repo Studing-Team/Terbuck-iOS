@@ -19,6 +19,7 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
     // MARK: - Properties
     
     private let detailStoreViewModel: DetailStoreInfoViewModel
+    private var isShowModal: Bool = false
     weak var coordinator: StoreCoordinator?
     
     // MARK: - UI Properties
@@ -28,6 +29,7 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
     private var hostingController: UIHostingController<DetailStoreInfoView>!
     
     private let backgroundView = UIView()
+    private var bottomSheetVC: DetailBenefitListModalViewController?
     
     // MARK: - Init
     
@@ -53,9 +55,7 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
         setupHierarchy()
         setupLayout()
         setupDelegate()
-        
-        ToastManager.shared.showToast(from: self, type: .moreBenefit)
-        
+
         Task {
             await detailStoreViewModel.fetchDetailStoreBenefitData()
         }
@@ -63,6 +63,8 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+        ToastManager.shared.showToast(from: self, type: .moreBenefit)
         
         detailStoreViewModel.onUseagesListModalChanged = { [weak self] isPresented in
             if isPresented {
@@ -126,6 +128,28 @@ private extension DetailStoreInfoViewController {
                     
                     detailStoreViewModel.tappendImageSection(index: index)
                     self.coordinator?.showPreviewImage(vm: self.detailStoreViewModel)
+                },
+                onMoreBenefitTapped: { [weak self] moreBenefit in
+                    self?.bottomSheetVC = DetailBenefitListModalViewController(moreBenefitListData: moreBenefit)
+                    
+                    guard let self, let bottomSheetVC else { return }
+                    addChild(bottomSheetVC)
+                    view.addSubview(bottomSheetVC.view)
+                    bottomSheetVC.didMove(toParent: self)
+                    
+                    bottomSheetVC.delegate = self
+                    
+                    bottomSheetVC.view.frame = CGRect(
+                        x: 0,
+                        y: view.bounds.height,  // 아래에서 시작
+                        width: view.bounds.width,
+                        height: view.bounds.height
+                    )
+
+                    // 올라오는 애니메이션
+                    UIView.animate(withDuration: 0.3) {
+                        bottomSheetVC.view.frame.origin.y = 0
+                    }
                 }
             )
         )
@@ -170,6 +194,22 @@ private extension DetailStoreInfoViewController {
         guard let url = URL(string: detailStoreViewModel.storeURL ?? ""),
               UIApplication.shared.canOpenURL(url) else { return }
         UIApplication.shared.open(url, options: [:])
+    }
+}
+
+extension DetailStoreInfoViewController: BottomSheetDelegate {
+    func didRequestDismissBottomSheet() {
+        guard let bottomSheetVC else { return }
+        
+        UIView.animate(withDuration: 0.3) {
+            bottomSheetVC.view.frame.origin.y = self.view.bounds.height
+        } completion: { [weak self] _ in
+            self?.detailStoreViewModel.isShowModal = false
+            self?.detailStoreViewModel.selectedBenefitIndex = nil
+            bottomSheetVC.willMove(toParent: nil)
+            bottomSheetVC.view.removeFromSuperview()
+            bottomSheetVC.removeFromParent()
+        }
     }
 }
 
