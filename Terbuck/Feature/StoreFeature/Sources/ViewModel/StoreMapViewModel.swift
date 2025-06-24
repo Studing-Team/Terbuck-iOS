@@ -293,7 +293,10 @@ private extension StoreMapViewModel {
     
     func updateStoreList(to selectRow: Int) {
         let categoryData = categoryItemsSubject.value
-        guard let categoryStoreList = categoryStoreData[categoryData[selectRow].type] else { return }
+        guard let categoryStoreList = categoryStoreData[categoryData[selectRow].type] else {
+            self.storeListSubject.send([])
+            return
+        }
         self.storeListSubject.send(categoryStoreList)
     }
     
