@@ -115,6 +115,7 @@ private extension HomeViewController {
                     self.coordinator?.showOnboardiing(location: holeLocation)
                     UserDefaultsManager.shared.set(true, for: .isOnboarding)
                 } else {
+                    MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonInToastMessage)
                     ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
                         self.coordinator?.registerStudentID()
                     }
@@ -414,6 +415,7 @@ extension HomeViewController: UICollectionViewDelegate {
         switch item {
         case .partnership(let model):
             self.coordinator?.showPartnership(partnershipId: model.id)
+            MixpanelManager.shared.track(eventType: TrackEventType.Home.moveDetailPartnership)
         default:
             break
         }

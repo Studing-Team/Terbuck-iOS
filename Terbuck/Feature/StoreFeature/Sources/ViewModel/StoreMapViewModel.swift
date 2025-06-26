@@ -65,7 +65,7 @@ public final class StoreMapViewModel {
     public let storeListSubject = CurrentValueSubject<[StoreListModel], Never>([])
     public let categoryItemsSubject = CurrentValueSubject<[CategoryModel], Never>([])
     public let storeItemsTappedResult = PassthroughSubject<Int, Never>()
-    public let filteredStoreListSubject = PassthroughSubject<[StoreListModel], Never>()
+    public let filteredSearchResultStoreListSubject = PassthroughSubject<[StoreListModel], Never>()
 
     private var cancellables = Set<AnyCancellable>()
     
@@ -100,6 +100,7 @@ public final class StoreMapViewModel {
         
         let sharedPublisher = storeCategoryPublisher
             .handleEvents(receiveOutput: { [weak self] index in
+                self?.sendMixpanelData(CategoryType.allCases[index])
                 self?.updateCategorySelection(to: index)
             })
             .share()
@@ -162,14 +163,16 @@ public final class StoreMapViewModel {
                     self.storeSearchKeywordSubject.send(currentData)
                 } else {
                     // 입력값이 있을 때
-                    let searchResult = self.storeListSubject.value.filter { store in
+                    let allStoreListData = self.categoryStoreData.values.flatMap { $0 }
+                    
+                    let searchResult = allStoreListData.filter { store in
                         let storeName = store.storeName
                         let consonants = self.extractInitialConsonants(from: storeName)
 
                         return storeName.contains(searchText) || consonants.contains(searchText)
                     }
 
-                    self.filteredStoreListSubject.send(searchResult)
+                    self.filteredSearchResultStoreListSubject.send(searchResult)
                 }
             }
             .store(in: &cancellables)
@@ -336,5 +339,26 @@ private extension StoreMapViewModel {
         storeSearchKeywordSubject.send(currentSearchKeyword)
 
         let _ = FileStorageManager.shared.saveJSON(currentSearchKeyword, type: .recentSearchKeywords)
+    }
+    
+    func sendMixpanelData(_ type: CategoryType) {
+        switch type {
+        case .all:
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.allCategoryButtonTapped)
+        case .restaurant:
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.foodCategoryButtonTapped)
+        case .cafe:
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.cafeCategoryButtonTapped)
+        case .bar:
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.drinkCategoryButtonTapped)
+        case .hospital:
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.hospitalCategoryButtonTapped)
+        case .gym:
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.exerciseCategoryButtonTapped)
+        case .culture:
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.cultureCategoryButtonTapped)
+        case .study:
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.studyCategoryButtonTapped)
+        }
     }
 }

@@ -94,6 +94,9 @@ public final class RegisterStudentCardViewModel {
             .store(in: &cancellables)
         
         let registerBottomButtonResult = input.bottomButtonTapped
+            .handleEvents(receiveOutput:  { _ in
+                MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
+            })
             .flatMap { [weak self] in
                 guard let self else {
                     return Just(false).eraseToAnyPublisher()

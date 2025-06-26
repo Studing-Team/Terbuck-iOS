@@ -88,6 +88,7 @@ private extension DetailStoreInfoView {
                 if !storeUsagesList.isEmpty {
                     Button(action: {
                         viewModel.isUseagesListModal = true
+                        MixpanelManager.shared.track(eventType: TrackEventType.DetailStore.moreUseInfoTapped)
                     }) {
                         Text("이용방법")
                             .font(DesignSystem.Font.swiftUIFont(.textSemi14))
@@ -113,6 +114,7 @@ private extension DetailStoreInfoView {
                             viewModel.selectedBenefitIndex = index
                             viewModel.isShowModal = true
                             onMoreBenefitTapped(benefitModel[index].detailList)
+                            MixpanelManager.shared.track(eventType: TrackEventType.DetailStore.moreBenefitButtonTapped)
                         }) {
                             Text("클릭")
                                 .font(DesignSystem.Font.swiftUIFont(.textSemi14))

@@ -99,7 +99,7 @@ final class SearchStoreViewController: UIViewController {
 
 private extension SearchStoreViewController {
     func bindViewModel() {
-        storeMapViewModel.filteredStoreListSubject
+        storeMapViewModel.filteredSearchResultStoreListSubject
             .receive(on: RunLoop.main)
             .sink { [weak self] result in
                 guard let self else { return }
@@ -301,6 +301,7 @@ extension SearchStoreViewController: UICollectionViewDelegate {
 
         case .searchResult(let model):
             // 검색 결과 항목을 눌렀을 때의 처리)
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.searchResultTapped)
             storeMapViewModel.storeMapTypeSubject.send(.searchResult)
             storeMapViewModel.searchListStoreTappedSubject.send(model)
             view.endEditing(true)

@@ -10,6 +10,7 @@ import CoreNetwork
 
 public struct SocialLoginResultEntity {
     let showSignup: Bool
+    let id: Int
     let accessToken: String
     let refreshToken: String
 }
@@ -18,6 +19,7 @@ extension SocialLoginResponseDTO {
     func toEntity() -> SocialLoginResultEntity {
         return SocialLoginResultEntity(
             showSignup: redirect,
+            id: id,
             accessToken: accessToken,
             refreshToken: refreshToken
         )

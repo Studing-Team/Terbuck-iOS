@@ -205,10 +205,10 @@ private extension StoreMapViewController {
                     if self?.storeMapViewModel.storeMapTypeSubject.value == .search {
                         self?.moveCameraToMarker(NMGLatLng(lat: store.latitude, lng: store.longitude))
                         self?.storeMapViewModel.markerTappedSubject.send(store)
-                        
                         self?.changeMarkerSize(tappedMarker: tappedMarker)
-                        
                         self?.selectedMarker = tappedMarker
+                        
+                        MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.mapMarkerButtonTapped)
                     }
                 }
                 
@@ -417,6 +417,7 @@ private extension StoreMapViewController {
     }
     
     @objc func myLocationButtonTapped() {
+        MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.myLocationButtonTapped)
         locationManager.startUpdatingLocation()
         myLocationButton.isSelected.toggle()
         isFindMyLocation = true
@@ -425,6 +426,7 @@ private extension StoreMapViewController {
 
     @objc func searchBarTapped() {
         if storeMapViewModel.storeMapTypeSubject.value == .search {
+            MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.searchBarTapped)
             self.coordinator?.searchStore()
         } else {
             storeMapViewModel.storeMapTypeSubject.send(.search)

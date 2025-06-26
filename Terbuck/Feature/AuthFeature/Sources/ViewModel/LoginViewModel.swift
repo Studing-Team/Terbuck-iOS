@@ -10,6 +10,7 @@ import CoreAppleLogin
 import CoreKakaoLogin
 
 import CoreKeyChain
+import Shared
 import Foundation
 
 
@@ -75,6 +76,9 @@ public class LoginViewModel {
     
     func transform(input: Input) -> Output {
         let appleResult = input.appleLoginButtonTapped
+            .handleEvents(receiveOutput:  { _ in
+                MixpanelManager.shared.track(eventType: TrackEventType.Onboarding.appleLogin)
+            })
             .flatMap { [weak self] _ -> AnyPublisher<Result<LoginResultModel, LoginError>, Never> in
                 guard let self else {
                     return Just(.failure(.unknown))
@@ -93,6 +97,8 @@ public class LoginViewModel {
                         if case let .success(loginResult) = result {
                             KeychainManager.shared.save(key: .accessToken, value: loginResult.accessToken)
                             KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
+                            
+                            MixpanelManager.shared.setupUser(userId: loginResult.userId)
                         }
                     })
                     .eraseToAnyPublisher()
@@ -100,6 +106,9 @@ public class LoginViewModel {
             .eraseToAnyPublisher()
         
         let kakaoResult = input.kakaoLoginButtonTapped
+            .handleEvents(receiveOutput:  { _ in
+                MixpanelManager.shared.track(eventType: TrackEventType.Onboarding.kakaoLogin)
+            })
             .flatMap { [weak self] _ -> AnyPublisher<Result<LoginResultModel, LoginError>, Never> in
                 guard let self else {
                     return Just(.failure(.unknown))
@@ -117,6 +126,8 @@ public class LoginViewModel {
                         if case let .success(loginResult) = result {
                             KeychainManager.shared.save(key: .accessToken, value: loginResult.accessToken)
                             KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
+                            
+                            MixpanelManager.shared.setupUser(userId: loginResult.userId)
                         }
                     })
                     .eraseToAnyPublisher()

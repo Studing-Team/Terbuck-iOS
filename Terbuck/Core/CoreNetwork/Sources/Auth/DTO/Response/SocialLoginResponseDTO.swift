@@ -9,6 +9,7 @@ import Foundation
 
 public struct SocialLoginResponseDTO: Decodable {
     public let redirect: Bool
+    public let id: Int
     public let accessToken: String
     public let refreshToken: String
 }

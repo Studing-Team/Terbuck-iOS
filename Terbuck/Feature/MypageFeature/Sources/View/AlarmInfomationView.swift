@@ -8,6 +8,7 @@
 import UIKit
 
 import DesignSystem
+import Shared
 
 import SnapKit
 import Then
@@ -70,6 +71,7 @@ public final class AlarmInfomationView: UIView {
 
     @objc private func buttonTapped() {
         alarmButtonAction?()
+        MixpanelManager.shared.track(eventType: TrackEventType.Mypage.alarmSettingButtonTapped)
     }
 }
 

@@ -26,7 +26,6 @@ final class PartnershipViewController: UIViewController, UIGestureRecognizerDele
     // MARK: - UI Properties
     
     private let customNavBar = CustomNavigationView(type: .nomal, title: "파트너십 혜택")
-    private let bottomButton = TerbuckBottomButton(type: .moveInstar)
     
     // MARK: - Init
     

@@ -8,6 +8,7 @@
 import SwiftUI
 
 import DesignSystem
+import Shared
 
 struct PartnershipView: View {
     @State var viewModel: PartnershipViewModel
@@ -52,6 +53,8 @@ struct PartnershipView: View {
                         
                         ZStack {
                             Button(action: {
+                                MixpanelManager.shared.track(eventType: TrackEventType.Home.moveInstagram)
+                                
                                 guard let url = URL(string: viewModel.instarURL ?? ""),
                                       UIApplication.shared.canOpenURL(url) else { return }
                                 UIApplication.shared.open(url, options: [:])

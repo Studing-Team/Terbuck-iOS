@@ -95,6 +95,11 @@ public class UniversityViewModel {
                 
                 if let _ = self.signupUseCase, let universityName = self.universityName {
                     return self.signupPublisher(universityName)
+                        .handleEvents(receiveOutput:  { _ in
+                            MixpanelManager.shared.track(eventType: TrackEventType.Signup.secondSignupButtonTapped)
+                            
+                            MixpanelManager.shared.setupUniversity(universityName: universityName)
+                        })
                         .map { _ in
                             UserDefaultsManager.shared.set(universityName, for: .university)
                             return true
@@ -108,6 +113,7 @@ public class UniversityViewModel {
                         .map { _ in
                             UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
                             UserDefaultsManager.shared.set(universityName, for: .university)
+                            MixpanelManager.shared.setupUniversity(universityName: universityName)
                             FileStorageManager.shared.delete(type: .studentIdCard)
                             return true
                         }
