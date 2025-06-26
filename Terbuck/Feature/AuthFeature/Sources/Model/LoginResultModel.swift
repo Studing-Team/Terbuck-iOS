@@ -9,6 +9,7 @@ import Foundation
 
 public struct LoginResultModel {
     let showSignup: Bool
+    let userId: Int
     let accessToken: String
     let refreshToken: String
 }

@@ -46,6 +46,7 @@ public final class CustomTabBar: UITabBar {
     
     public func updateSelectedIndex(to index: Int) {
         selectedIndex = index
+        sendMixpanalData(index)
         
         buttons.forEach { button in
             guard let type = TabBarType(rawValue: button.tag) else { return }
@@ -119,5 +120,18 @@ private extension CustomTabBar {
         button.tag = type.rawValue
 
         return button
+    }
+    
+    func sendMixpanalData(_ index: Int) {
+        guard let tab = TabBarType(rawValue: index) else { return }
+
+         switch tab {
+         case .home:
+             MixpanelManager.shared.track(eventType: TrackEventType.Home.homeTabBarButtonTapped)
+         case .store:
+             MixpanelManager.shared.track(eventType: TrackEventType.Home.terbuckTabBarButtonTapped)
+         case .mypage:
+             MixpanelManager.shared.track(eventType: TrackEventType.Home.mypageTabBarButtonTapped)
+         }
     }
 }

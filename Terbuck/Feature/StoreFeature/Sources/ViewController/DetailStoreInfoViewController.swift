@@ -108,6 +108,7 @@ private extension DetailStoreInfoViewController {
         }
         
         customNavBar.setupRightButtonAction {
+            MixpanelManager.shared.track(eventType: TrackEventType.DetailStore.studentCardButtonTapped)
             if UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated) {
                 self.coordinator?.showAuthStudentID()
             } else {
@@ -191,6 +192,8 @@ private extension DetailStoreInfoViewController {
     }
     
     @objc func buttonTapped() {
+        MixpanelManager.shared.track(eventType: TrackEventType.DetailStore.moveNaver)
+        
         guard let url = URL(string: detailStoreViewModel.storeURL ?? ""),
               UIApplication.shared.canOpenURL(url) else { return }
         UIApplication.shared.open(url, options: [:])

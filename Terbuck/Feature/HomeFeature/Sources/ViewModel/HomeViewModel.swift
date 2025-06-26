@@ -82,6 +82,9 @@ public final class HomeViewModel {
             .store(in: &cancellables)
         
         let studentIDCardButtonResult = input.studentIDCardButtonTap
+            .handleEvents(receiveOutput : { _ in
+                MixpanelManager.shared.track(eventType: TrackEventType.Home.studentCardButtonTapped)
+            })
             .map { [weak self] _ -> Bool in
                 guard let self, let result = isAuthStudentSubject.value else { return false }
                 return result
@@ -89,6 +92,18 @@ public final class HomeViewModel {
             .eraseToAnyPublisher()
         
         selectedFilterSubject
+            .handleEvents(receiveOutput: { type in
+                MixpanelManager.shared.track(eventType: TrackEventType.Home.eatingButtonTapped)
+                
+                switch type {
+                case .restaurent:
+                    MixpanelManager.shared.track(eventType: TrackEventType.Home.eatingButtonTapped)
+                case .convenient:
+                    MixpanelManager.shared.track(eventType: TrackEventType.Home.usingButtonTapped)
+                case .partnership:
+                    MixpanelManager.shared.track(eventType: TrackEventType.Home.partnershipButtonTapped)
+                }
+            })
             .combineLatest(myLocationSubject)
             .flatMap { [weak self] filter, location -> AnyPublisher<[HomeItem], Never> in
                 guard let self else { return Empty().eraseToAnyPublisher() }

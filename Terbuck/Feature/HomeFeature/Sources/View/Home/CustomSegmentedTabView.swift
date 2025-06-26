@@ -26,6 +26,7 @@ public final class SegmentedTabView: UIView {
         selectedFilterSubject.eraseToAnyPublisher()
     }
     private var didInitialLayout = false
+    
     // MARK: - UI Properties
     
     private let stackView = UIStackView()
@@ -153,7 +154,7 @@ private extension SegmentedTabView {
 
     func selectSegment(type: StoreFilterType, animated: Bool = true) {
         guard let index = StoreFilterType.allCases.firstIndex(of: type) else { return }
-        print("현재 인덱스", index)
+        
         let button = buttons[index]
         selectedType = type
 

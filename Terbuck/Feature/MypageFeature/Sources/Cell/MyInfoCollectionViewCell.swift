@@ -139,5 +139,6 @@ private extension MyInfoCollectionViewCell {
     
     @objc func authAction() {
         buttonAction?()
+        MixpanelManager.shared.track(eventType: TrackEventType.Mypage.editUniversityButtonTapped)
     }
 }

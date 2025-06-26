@@ -108,35 +108,43 @@ private extension MypageViewController {
             .sink { [weak self] event in
                 switch event {
                 case .alarmSetting:
+                    MixpanelManager.shared.track(eventType: TrackEventType.Mypage.alarmMenuButtonTapped)
                     self?.coordinator?.startAlarmSetting()
                     
                 case .inquiry:
-//                    self?.moveWebpage("https://terbuck.notion.site/11905c1258e080ee91cecfb7ff633bab")
+                    MixpanelManager.shared.track(eventType: TrackEventType.Mypage.askMenuButtonTapped)
+                    self?.moveWebpage("http://pf.kakao.com/_BzmZn")
                     break
                     
                 case .privacyPolicy:
+                    MixpanelManager.shared.track(eventType: TrackEventType.Mypage.personalMenuButtonTapped)
                     self?.moveWebpage("https://terbuck.notion.site/11905c1258e08063bba2f82d320de454")
                     
                 case .serviceGuide:
+                    MixpanelManager.shared.track(eventType: TrackEventType.Mypage.serviceMenuButtonTapped)
                     self?.moveWebpage("https://terbuck.notion.site/11905c1258e080ee91cecfb7ff633bab")
                     
                 case .showLogout:
+                    MixpanelManager.shared.track(eventType: TrackEventType.Mypage.logoutMenuButtonTapped)
                     self?.showConfirmCancelAlert(
                         mainTitle: "로그아웃 하시겠습니까?",
                         leftButton: TerbuckBottomButton(type: .cancel),
                         rightButton: TerbuckBottomButton(type: .logout),
                         rightButtonHandler: {
+                            MixpanelManager.shared.track(eventType: TrackEventType.Mypage.logoutConfirmButtonTapped)
                             self?.logoutButtonSubject.send()
                         }
                     )
                     
                 case .withdraw:
+                    MixpanelManager.shared.track(eventType: TrackEventType.Mypage.signoutMenuButtonTapped)
                     self?.showConfirmCancelAlert(
                         mainTitle: "정말 탈퇴하시겠습니까?",
                         subTitle: "탈퇴 회원의 정보는 완전히 삭제되며\n터벅을 떠나면 회원가입부터 다시 해야해요",
                         leftButton: TerbuckBottomButton(type: .cancel),
                         rightButton: TerbuckBottomButton(type: .draw),
                         rightButtonHandler: {
+                            MixpanelManager.shared.track(eventType: TrackEventType.Mypage.signoutConfirmButtonTapped)
                             self?.withdrawButtonSubject.send()
                         }
                     )

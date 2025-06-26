@@ -225,10 +225,10 @@ private extension StudentIDCardViewController {
     func setupButtonAction() {
         switch authType {
         case .auth:
-            closeButton.addTarget(self, action: #selector(cancelAction), for: .touchUpInside)
+            closeButton.addTarget(self, action: #selector(cancelAction(_:)), for: .touchUpInside)
             
         case .onboarding:
-            nextTimeButton.addTarget(self, action: #selector(cancelAction), for: .touchUpInside)
+            nextTimeButton.addTarget(self, action: #selector(cancelAction(_:)), for: .touchUpInside)
             registerButton.addTarget(self, action: #selector(registerAction), for: .touchUpInside)
         }
     }
@@ -239,11 +239,16 @@ private extension StudentIDCardViewController {
         }
     }
     
-    @objc func cancelAction() {
+    @objc func cancelAction(_ sender: UIButton) {
+        if sender == nextTimeButton {
+            MixpanelManager.shared.track(eventType: TrackEventType.Onboarding.laterButtonTapped)
+        }
+
         dismiss(animated: false)
     }
     
     @objc func registerAction() {
+        MixpanelManager.shared.track(eventType: TrackEventType.Onboarding.registerButtonTapped)
         self.coordinator?.dismissAuthStudentID()
     }
 }

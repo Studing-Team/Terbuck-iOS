@@ -9,6 +9,7 @@ import UIKit
 import Combine
 
 import DesignSystem
+import Shared
 
 import SnapKit
 import Then
@@ -119,7 +120,7 @@ private extension TermsOfServiceViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-
+                MixpanelManager.shared.track(eventType: TrackEventType.Signup.firstSignupButtonTapped)
                 self.coordinator?.startUniversity()
             }
             .store(in: &cancellables)

@@ -20,6 +20,7 @@ public struct SocialLoginUseCaseImpl: SocialLoginUseCase {
         
         return LoginResultModel(
             showSignup: entity.showSignup,
+            userId: entity.id,
             accessToken: entity.accessToken,
             refreshToken: entity.refreshToken
         )
@@ -30,6 +31,7 @@ public struct SocialLoginUseCaseImpl: SocialLoginUseCase {
         
         return LoginResultModel(
             showSignup: entity.showSignup,
+            userId: entity.id,
             accessToken: entity.accessToken,
             refreshToken: entity.refreshToken
         )

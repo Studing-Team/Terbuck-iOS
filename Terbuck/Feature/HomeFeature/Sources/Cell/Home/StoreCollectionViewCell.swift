@@ -8,6 +8,7 @@
 import UIKit
 
 import DesignSystem
+import Shared
 
 import SnapKit
 import Then
@@ -83,7 +84,6 @@ private extension StoreCollectionViewCell {
         storeAddressLabel.do {
             $0.font = DesignSystem.Font.uiFont(.captionMedium12)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
-//            $0.numberOfLines = 2
         }
         
         mainBenefitLabel.do {
@@ -155,5 +155,6 @@ private extension StoreCollectionViewCell {
     
     @objc private func handleTap() {
         moreBenefitTapHandler?()
+        MixpanelManager.shared.track(eventType: TrackEventType.Home.moreBenefitButtonTapped)
     }
 }
