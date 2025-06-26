@@ -7,10 +7,13 @@
 //
 
 import UIKit
-import KakaoSDKAuth
-import KakaoSDKCommon
 
 import CoreKeyChain
+import Shared
+
+import KakaoSDKAuth
+import KakaoSDKCommon
+import Mixpanel
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,6 +22,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // UNUserNotificationCenter delegate 설정
         UNUserNotificationCenter.current().delegate = self
+        
+        // 사용자 분석 툴 초기화 (Mixpanel)
+        MixpanelManager.shared.initialize(token: Config.mixpanelKey)
         
         // MARK: - 카카오 로그인 설정
         

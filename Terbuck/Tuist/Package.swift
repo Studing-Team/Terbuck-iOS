@@ -13,6 +13,7 @@ import PackageDescription
             "KakaoSDKAuth": .framework,
             "KakaoSDKUser": .framework,
             "NMapsMap": .framework,
+//            "Mixpanel": .framework,
         ]
     )
 #endif
@@ -28,6 +29,7 @@ let package = Package(
         .package(url: "https://github.com/devxoul/Then.git", from: "3.0.0"),
         .package(url: "https://github.com/navermaps/SPM-NMapsMap", from: "3.12.0"),
         .package(url: "https://github.com/kakao/kakao-ios-sdk", from: "2.24.0"),
-        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "10.21.0")
+        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "10.21.0"),
+        .package(url: "https://github.com/mixpanel/mixpanel-swift", from: "2.10.4")
     ]
 )

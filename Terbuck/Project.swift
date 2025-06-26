@@ -44,6 +44,7 @@ let project = Project(
                     "NAVER_MAP_KEY": "$(NAVER_MAP_KEY)",
                     "NMFClientId": "$(NMFClientId)",
                     "KAKAO_NATIVE_APP_KEY": "$(KAKAO_NATIVE_APP_KEY)",
+                    "MIXPANEL_USER_KEY": "$(MIXPANEL_USER_KEY)",
                     "NSLocationWhenInUseUsageDescription": "현재 위치를 사용하려면 허용해주세요.",
                     "CFBundleURLTypes": [
                         [
@@ -75,6 +76,7 @@ let project = Project(
             entitlements: .file(path: "Terbuck/Terbuck.entitlements"),
             dependencies: [
                 .external(name: "FirebaseMessaging"),
+                .external(name: "Mixpanel"),
                 .project(target: "Resource", path: "Resource"),
                 .project(target: "Shared", path: "Shared"),
                 .project(target: "DesignSystem", path: "DesignSystem"),

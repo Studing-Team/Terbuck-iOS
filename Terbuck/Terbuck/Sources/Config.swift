@@ -14,6 +14,7 @@ enum Config {
             static let naverId = "NMFClientId"
             static let naverMap = "NAVER_MAP_KEY"
             static let kakaoNativeAppKey = "KAKAO_NATIVE_APP_KEY"
+            static let mixpanelKey = "MIXPANEL_USER_KEY"
         }
     }
     
@@ -28,21 +29,28 @@ enum Config {
 extension Config {
     static let naverIdKey: String = {
         guard let key = Config.infoDictionary[Keys.Plist.naverId] as? String else {
-            fatalError("⛔️NAVER_MAP_KEY is not set in plist for this configuration⛔️")
+            fatalError("⛔️naverId is not set in plist for this configuration⛔️")
         }
         return key
     }()
     
     static let naverMapKey: String = {
         guard let key = Config.infoDictionary[Keys.Plist.naverMap] as? String else {
-            fatalError("⛔️NAVER_MAP_KEY is not set in plist for this configuration⛔️")
+            fatalError("⛔️naverMap is not set in plist for this configuration⛔️")
         }
         return key
     }()
     
     static let kakaoNativeAppKey: String = {
         guard let key = Config.infoDictionary[Keys.Plist.kakaoNativeAppKey] as? String else {
-            fatalError("⛔️KAKAO_NATIVE_APP_KEY is not set in plist for this configuration⛔️")
+            fatalError("⛔️kakaoNativeAppKey is not set in plist for this configuration⛔️")
+        }
+        return key
+    }()
+    
+    static let mixpanelKey: String = {
+        guard let key = Config.infoDictionary[Keys.Plist.mixpanelKey] as? String else {
+            fatalError("⛔️mixpanelKey is not set in plist for this configuration⛔️")
         }
         return key
     }()
