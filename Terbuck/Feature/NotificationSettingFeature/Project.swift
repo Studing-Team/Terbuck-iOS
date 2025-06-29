@@ -1,13 +1,13 @@
 import ProjectDescription
 
 let project = Project(
-    name: "HomeFeature",
+    name: "NotificationSettingFeature",
     targets: [
         .target(
-            name: "HomeFeature",
+            name: "NotificationSettingFeature",
             destinations: .iOS,
             product: .staticFramework,
-            bundleId: "com.Fouryears.Terbuck",
+            bundleId: "com.Fouryears.NotificationSetting.Terbuck",
             deploymentTargets: .iOS("17.0"),
             infoPlist: .default,
             sources: ["Sources/**"],
@@ -15,11 +15,9 @@ let project = Project(
             dependencies: [
                 .external(name: "SnapKit"),
                 .external(name: "Then"),
-                .project(target: "HomeInterface", path: "../HomeInterface"),
+                .project(target: "NotificationSettingInterface", path: "../NotificationSettingInterface"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),
-                .project(target: "NotificationSettingInterface", path: "../NotificationSettingInterface"),
-                .project(target: "RegisterStudentCardFeature", path: "../RegisterStudentCardFeature")
             ]
         )
     ]

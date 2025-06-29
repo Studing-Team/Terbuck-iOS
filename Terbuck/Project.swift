@@ -1,22 +1,21 @@
 import ProjectDescription
 
-//let infoPlist: [String: Plist.Value] = [
-//    "NAVER_MAP_KEY": "$(NAVER_MAP_KEY)",
-//    "NAVER_MAP_ClientId": "$(NAVER_MAP_ClientId)",
-//    "NSLocationWhenInUseUsageDescription": "현재 위치를 사용하려면 허용해주세요."
-//]
+let settings: Settings = .settings(
+    base: [
+        "DEVELOPMENT_TEAM": "N3H27N59VG",
+        "CODE_SIGN_STYLE": "Automatic",
+        "OTHER_LDFLAGS": ["-all_load -Objc"]
+    ],
+    configurations: [
+        .debug(name: "Debug", xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig"))
+//        .release(name: "Release")
+    ]
+)
 
 let project = Project(
     name: "Terbuck",
     organizationName: "Fouryears",
-    settings: .settings(
-        base: [
-            "DEVELOPMENT_TEAM": "9KHXTZ4SZ9"
-        ],
-        configurations: [
-            .debug(name: "Debug", xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig"))
-        ]
-    ),
+    settings: settings,
     targets: [
         .target(
             name: "Terbuck",
@@ -73,7 +72,7 @@ let project = Project(
             ),
             sources: ["Terbuck/Sources/**"],
             resources: ["Terbuck/Resources/**"],
-            entitlements: .file(path: "Terbuck/Terbuck.entitlements"),
+            entitlements: "Terbuck/Terbuck.entitlements",
             dependencies: [
                 .external(name: "FirebaseMessaging"),
                 .external(name: "Mixpanel"),
@@ -89,6 +88,8 @@ let project = Project(
                 .project(target: "StoreFeature", path: "Feature/StoreFeature"),
                 .project(target: "StoreInterface", path: "Feature/StoreInterface"),
                 .project(target: "MypageFeature", path: "Feature/MypageFeature"),
+                .project(target: "NotificationSettingInterface", path: "Feature/NotificationSettingInterface"),
+                .project(target: "NotificationSettingFeature", path: "Feature/NotificationSettingFeature"),
             ]
         ),
         .target(

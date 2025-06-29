@@ -15,7 +15,8 @@ let project = Project(
             dependencies: [
                 .external(name: "KakaoSDKCommon"),
                 .external(name: "KakaoSDKAuth"),
-                .external(name: "KakaoSDKUser")
+                .external(name: "KakaoSDKUser"),
+                .project(target: "Shared", path: "../../Shared"),
             ]
         )
     ]
