@@ -47,7 +47,7 @@ public extension UIViewController {
         present(customAlertViewController, animated: false)
     }
     
-    func showStoreBenefitAlert(storeName: String, address: String, category: CategoryType, benefitData: [String]) {
+    func showStoreBenefitAlert(storeName: String, address: String, category: CategoryType, benefitData: [StoreBenefitsModel]) {
         let customStoreBenefitAlertViewController = CustomBenefitAlertViewController(
             name: storeName,
             address: address,

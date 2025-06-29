@@ -97,7 +97,7 @@ public enum ToastType {
                 return 16
             }
             
-        case .noticeStudentCard, .alarmStudentCard, .moreBenefit:
+        case .noticeStudentCard, .moreBenefit:
             return 68
             
         case .partnership:
