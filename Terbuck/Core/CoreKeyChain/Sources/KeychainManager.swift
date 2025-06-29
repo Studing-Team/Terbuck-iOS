@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Shared
 
 // MARK: - KeychainKey
 
@@ -27,6 +28,8 @@ public enum KeychainKey: String {
     case accessToken
     /// 리프레시 토큰을 저장하기 위한 키
     case refreshToken
+    /// Firebase 토큰ㅇ르 저장하기 위한 키
+    case fcmToken
     
     /// Info.plist에서 정의된 실제 키체인 키 값을 반환합니다.
         /// - Returns: Info.plist에 정의된 실제 키 문자열
@@ -36,6 +39,8 @@ public enum KeychainKey: String {
             return Config.accessTokenKey
         case .refreshToken:
             return Config.refreshTokenKey
+        case .fcmToken:
+            return Config.fcmTokenKey
         }
     }
 }
@@ -85,9 +90,13 @@ public final class KeychainManager {
         
         // 기존 데이터 삭제 후 새로운 데이터 저장
         SecItemDelete(query as CFDictionary)
-        SecItemAdd(query as CFDictionary, nil)
+        let status = SecItemAdd(query as CFDictionary, nil)
         
-        print("KeyChain - \(key) 저장 완료")
+        if status == errSecSuccess {
+            AppLogger.log("\(key.rawValue) 저장 성공", .info, .manager)
+        } else {
+            AppLogger.log("\(key.rawValue) 저장 실패. OSStatus: \(status)", .error, .manager)
+        }
     }
     
     /// 키체인에서 데이터를 조회하는 메서드
@@ -106,10 +115,13 @@ public final class KeychainManager {
         
         if status == errSecSuccess {
             if let data = dataTypeRef as? Data {
-                
-                print("KeyChain - \(key) 불러오기 완료")
+                AppLogger.log("\(key.rawValue) 불러오기 성공", .info, .manager)
                 return String(data: data, encoding: .utf8)
             }
+        } else if status == errSecItemNotFound {
+            AppLogger.log("\(key.rawValue)에 해당하는 값이 키체인에 없음", .debug, .manager)
+        } else {
+            AppLogger.log("\(key.rawValue) 불러오기 실패. OSStatus: \(status)", .error, .manager)
         }
         return nil
     }
@@ -122,14 +134,19 @@ public final class KeychainManager {
             kSecAttrAccount as String: key.rawValue
         ]
         
-        SecItemDelete(query as CFDictionary)
+        let status = SecItemDelete(query as CFDictionary)
         
-        print("KeyChain - \(key) 삭제 완료")
+        if status == errSecSuccess || status == errSecItemNotFound {
+            AppLogger.log("\(key.rawValue) 삭제 완료", .info, .manager)
+        } else {
+            AppLogger.log("\(key.rawValue) 삭제 실패. OSStatus: \(status)", .error, .manager)
+        }
     }
     
     /// 모든 토큰 관련 데이터를 키체인에서 삭제하는 메서드
     /// - Note: 로그아웃 시 호출하여 모든 인증 관련 데이터를 삭제합니다.
     public func clearTokens() {
+        AppLogger.log("모든 토큰 데이터 삭제 시작", .info, .manager)
         delete(key: .accessToken)
         delete(key: .refreshToken)
     }
@@ -147,11 +164,15 @@ extension KeychainManager {
             ]
             
             SecItemDelete(query as CFDictionary) // 기존 데이터 삭제
-            SecItemAdd(query as CFDictionary, nil) // 새 데이터 저장
-            print("Keychain - \(key) 저장 완료")
-            
+            let status = SecItemAdd(query as CFDictionary, nil)
+                        
+            if status == errSecSuccess {
+                AppLogger.log("Codable 객체(\(key.rawValue)) 저장 성공", .info, .manager)
+            } else {
+                AppLogger.log("Codable 객체(\(key.rawValue)) 저장 실패. OSStatus: \(status)", .error, .manager)
+            }
         } catch {
-            print("Keychain 저장 오류: \(error)")
+           AppLogger.log("Keychain 인코딩 오류: \(error.localizedDescription)", .error, .manager)
         }
     }
     
@@ -168,18 +189,17 @@ extension KeychainManager {
         let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
         
         guard status == errSecSuccess, let data = dataTypeRef as? Data else {
-            print("Keychain에서 \(key) 불러오기 실패")
+            AppLogger.log("Keychain \(key) 불러오기 실패", .error, .manager)
             return nil
         }
         
         do {
             let decodedObject = try JSONDecoder().decode(T.self, from: data)
-            print("Keychain에서 \(key) 불러오기 성공")
+            AppLogger.log("Codable 객체(\(key.rawValue)) 불러오기 성공", .info, .manager)
             return decodedObject
         } catch {
-            print("Keychain 디코딩 오류: \(error)")
+            AppLogger.log("Keychain 디코딩 오류: \(error.localizedDescription)", .error, .manager)
             return nil
         }
     }
 }
-

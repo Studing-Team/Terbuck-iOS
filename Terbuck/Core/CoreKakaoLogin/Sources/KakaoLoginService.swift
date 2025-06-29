@@ -9,6 +9,8 @@ import AuthenticationServices
 import KakaoSDKAuth
 import KakaoSDKUser
 
+import Shared
+
 public final class KakaoLoginService: NSObject {
     public static let shared = KakaoLoginService()
     
@@ -26,7 +28,7 @@ private extension KakaoLoginService {
     func loginWithKakaoAppOrWeb() async throws -> OAuthToken {
         try await withCheckedThrowingContinuation { continuation in
             
-            print("✅ KakaoTalk 설치 여부: \(UserApi.isKakaoTalkLoginAvailable())")
+            AppLogger.log("KakaoTalk 설치 여부: \(UserApi.isKakaoTalkLoginAvailable())", .info, .service)
             // 앱으로 로그인 시도
             if UserApi.isKakaoTalkLoginAvailable() {
                 UserApi.shared.loginWithKakaoTalk { token, error in

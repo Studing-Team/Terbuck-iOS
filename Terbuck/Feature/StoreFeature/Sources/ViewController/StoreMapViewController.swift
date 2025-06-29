@@ -400,9 +400,6 @@ private extension StoreMapViewController {
         bottomSheetVC.didMove(toParent: self)
         let initialSnapPoint = bottomSheetVC.initialSnapPoint
         
-        print("기존 설정 높이", initialSnapPoint)
-        print("바텀 높이", bottomSheetVC.view.frame.height)
-        
         // 기본 제약 조건 설정 (화면 하단에 맞춤)
         bottomSheetVC.view.translatesAutoresizingMaskIntoConstraints = false
         
@@ -441,11 +438,12 @@ private extension StoreMapViewController {
     func requestLocation() {
         switch self.locationManager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
+            AppLogger.log("지도 위치 권한 이미 허용됨. 위치 업데이트 시작.", .info, .service)
             self.locationManager.startUpdatingLocation()
         case .notDetermined:
             self.locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
-            print("❌ 위치 권한 거부됨 - 설정에서 권한 변경 필요")
+            AppLogger.log("위치 권한이 거부되었거나 제한된 상태", .error, .service)
         default:
             break
         }
@@ -542,9 +540,6 @@ extension StoreMapViewController: NMFMapViewTouchDelegate {
 extension StoreMapViewController: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        
-        let latitude = location.coordinate.latitude
-        let longitude = location.coordinate.longitude
 
         if isFindMyLocation {
             updateMapToCurrentLocation(location.coordinate)
@@ -570,7 +565,6 @@ extension StoreMapViewController: StoreBottomSheetDelegate {
     func bottomSheet(_ bottomSheet: StoreListModalViewController, currentPoint: CGFloat, didChangeHeight: CGFloat) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self, let bottomSheetTopConstraint = self.bottomSheetTopConstraint else {
-                print("BottomSheetTopConstraint is nil or self is deallocated")
                 return
             }
             
@@ -581,11 +575,6 @@ extension StoreMapViewController: StoreBottomSheetDelegate {
             
             UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseOut], animations: {
                 self.view.layoutIfNeeded()
-                print("Animated bottomSheet view top constant: \(newTopConstant)\n")
-            }, completion: { _ in
-                
-                print("바텀 애니메이션 완료", currentPoint)
-
             })
         }
     }

@@ -55,7 +55,6 @@ public final class StoreCategoryCollectionVieCell: UICollectionViewCell {
 
 public extension StoreCategoryCollectionVieCell {
     func configureCell(forCase model: CategoryModel) {
-        print("바뀌고 있는 셀:", model.type.title)
         self.contentStackView.backgroundColor = model.isSelected ? DesignSystem.Color.uiColor(.terbuckGreen50) : .white
         self.contentStackView.layer.cornerRadius = 17
         
