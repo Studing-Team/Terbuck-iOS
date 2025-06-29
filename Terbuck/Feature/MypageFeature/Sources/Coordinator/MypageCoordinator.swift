@@ -8,6 +8,7 @@
 import UIKit
 
 import MypageInterface
+import NotificationSettingInterface
 import RegisterStudentCardFeature
 import UniversityInfoFeature
 import Shared
@@ -17,7 +18,7 @@ public class MypageCoordinator: MypageCoordinating {
     
     private let navigationController: UINavigationController
     private let mypageFactory: MypageFactory
-    private let alarmFactory: AlarmSettingFactory
+    private let alarmSettingFactory: AlarmSettingFactory
     
     public weak var delegate: notAuthCoordinatorDelegate?
     
@@ -26,11 +27,11 @@ public class MypageCoordinator: MypageCoordinating {
     public init(
         navigationController: UINavigationController,
         mypageFactory: MypageFactory,
-        alarmFactory: AlarmSettingFactory
+        alarmSettingFactory: AlarmSettingFactory
     ) {
         self.navigationController = navigationController
         self.mypageFactory = mypageFactory
-        self.alarmFactory = alarmFactory
+        self.alarmSettingFactory = alarmSettingFactory
     }
     
     // MARK: - Method
@@ -42,12 +43,6 @@ public class MypageCoordinator: MypageCoordinating {
     public func startMypage() {
         let mypageVC = mypageFactory.makeMypageViewController(coordinator: self)
         navigationController.pushViewController(mypageVC, animated: true)
-    }
-    
-    public func startAlarmSetting() {
-        let alarmSettingVC = alarmFactory.makeAlarmSettingViewController(coordinator: self)
-        alarmSettingVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(alarmSettingVC, animated: true)
     }
     
     public func registerStudentID() {
@@ -74,5 +69,16 @@ public class MypageCoordinator: MypageCoordinating {
     
     public func moveLoginFlow() {
         delegate?.moveLoginFlow()
+    }
+}
+
+// MARK: - 알림 Setting Feature
+
+extension MypageCoordinator: AlarmSettingCoordinating {
+    public func showAlarmSetting() {
+        let alarmSettingVC = alarmSettingFactory.makeAlarmSettingViewController(coordinator: self)
+        
+        alarmSettingVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(alarmSettingVC, animated: true)
     }
 }

@@ -29,6 +29,8 @@ public final class AlarmSettingViewModel {
         let viewLifeCycleEventResult: AnyPublisher<Bool, Never>
     }
     
+    public init() { }
+    
     // MARK: - Public methods
     
     func transform(input: Input) -> Output {

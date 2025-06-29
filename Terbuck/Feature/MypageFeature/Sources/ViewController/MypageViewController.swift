@@ -109,7 +109,7 @@ private extension MypageViewController {
                 switch event {
                 case .alarmSetting:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.alarmMenuButtonTapped)
-                    self?.coordinator?.startAlarmSetting()
+                    self?.coordinator?.showAlarmSetting()
                     
                 case .inquiry:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.askMenuButtonTapped)

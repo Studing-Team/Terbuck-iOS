@@ -18,6 +18,8 @@ import StoreInterface
 import StoreFeature
 import MypageInterface
 import MypageFeature
+import NotificationSettingInterface
+import NotificationSettingFeature
 
 public final class AppDIContainer {
     func makeSplashFactory() -> SplashFactory {
@@ -29,7 +31,7 @@ public final class AppDIContainer {
     }
     
     func makeHomeFactory() -> HomeTabFactory {
-        return HomeTabFactoryImpl()
+        return HomeTabFactoryImpl(alarmSettingFactory: makeAlarmSettingFactory())
     }
     
     func makeStoreFactory() -> StoreTabFactory {
@@ -37,6 +39,10 @@ public final class AppDIContainer {
     }
     
     func makeMypageFactory() -> MypageTabFactory {
-        return MypageTabFactoryImpl()
+        return MypageTabFactoryImpl(alarmSettingFactory: makeAlarmSettingFactory())
+    }
+    
+    func makeAlarmSettingFactory() -> AlarmSettingFactory {
+        return AlarmSettingFactoryImpl()
     }
 }
