@@ -34,6 +34,7 @@ public final class StudentIDCardViewController: UIViewController {
     
     private let studentIdSection = ExampleStudentIDView()
     private lazy var closeButton = UIButton()
+    private lazy var retryRegisterLabel = TerbuckUnderlineLabel()
     
     private lazy var onboardingTitle = UILabel()
     private lazy var studentImageView = UIImageView()
@@ -118,6 +119,16 @@ private extension StudentIDCardViewController {
                 $0.layer.borderColor = DesignSystem.Color.uiColor(.terbuckBlack10).cgColor
             }
             
+            retryRegisterLabel.do {
+                $0.text = "학생증재등록"
+                $0.font = DesignSystem.Font.uiFont(.textRegular14)
+                $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
+                $0.underlineColor = DesignSystem.Color.uiColor(.terbuckBlack10)
+                $0.isUserInteractionEnabled = true
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(registerAction))
+                $0.addGestureRecognizer(tapGesture)
+            }
+            
         case .onboarding:
             studentIdSection.do {
                 $0.layer.cornerRadius = 16
@@ -171,7 +182,7 @@ private extension StudentIDCardViewController {
     func setupHierarchy() {
         switch authType {
         case .auth:
-            view.addSubviews(studentImageView, closeButton)
+            view.addSubviews(studentImageView, closeButton, retryRegisterLabel)
             
         case .onboarding:
             view.addSubviews(onboardingTitle, arrowImage, studentIdSection, registerButton, nextTimeButton)
@@ -189,8 +200,13 @@ private extension StudentIDCardViewController {
             
             closeButton.snp.makeConstraints {
                 $0.centerX.equalToSuperview()
-                $0.bottom.equalToSuperview().inset(view.convertByHeightRatio(70))
                 $0.size.equalTo(view.convertByHeightRatio(52))
+            }
+            
+            retryRegisterLabel.snp.makeConstraints {
+                $0.top.equalTo(closeButton.snp.bottom).offset(view.convertByHeightRatio(12.33))
+                $0.centerX.equalToSuperview()
+                $0.bottom.equalToSuperview().inset(view.convertByHeightRatio(70))
             }
 
         case .onboarding:

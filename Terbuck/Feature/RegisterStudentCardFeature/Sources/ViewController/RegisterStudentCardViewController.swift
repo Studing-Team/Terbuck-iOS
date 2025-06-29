@@ -68,16 +68,8 @@ public final class RegisterStudentCardViewController: UIViewController, UIGestur
         setupKeyboardHandling()
     }
     
-    public override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        print("RegisterStudentCardViewController viewWillAppear")
-    }
-    
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        print("RegisterStudentCardViewController viewDidAppear")
         
         ToastManager.shared.showToast(from: self, type: .noticeStudentCard)
     }
@@ -125,6 +117,7 @@ private extension RegisterStudentCardViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in
                 self?.navigationController?.popViewController(animated: true)
+                NotificationCenter.default.post(name: .userAuthDidUpdate, object: nil)
             }
             .store(in: &cancellables)
     }
