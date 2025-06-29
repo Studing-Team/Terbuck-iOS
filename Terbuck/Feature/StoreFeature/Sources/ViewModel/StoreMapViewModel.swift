@@ -179,7 +179,7 @@ public final class StoreMapViewModel {
         
         searchListStoreTappedSubject
             .sink { [weak self] storeData in
-                print("store 탭됨", storeData.storeName)
+                AppLogger.log("지도 카테고리 탭 됨: \(storeData.storeName)", .debug, .ui)
                 self?.storeMapTypeSubject.send(.searchResult)
                 self?.addSearchKeyword(storeModel: storeData)
             }
@@ -188,7 +188,6 @@ public final class StoreMapViewModel {
         currentSearchTappedSubject
             .sink { [weak self] storeData in
                 guard let filterData = self?.cachedItems[storeData.id] else {
-                    print("CachedItmes 에 데이터 없음")
                     return
                 }
                 
@@ -232,9 +231,9 @@ public final class StoreMapViewModel {
     }
     
     func updateLocationData(lat: Double, lng: Double) {
-        print("위치 업데이트 됐습니다.", lat, lng)
         latitude = lat
         longitude = lng
+        AppLogger.log("위치 업데이트 완료. 위도: \(lat), 경도: \(lng)", .info, .default)
     }
 }
 

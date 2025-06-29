@@ -7,6 +7,8 @@
 
 import AuthenticationServices
 
+import Shared
+
 public final class AppleLoginService: NSObject {
     public static let shared = AppleLoginService()
     
@@ -43,17 +45,15 @@ extension AppleLoginService: ASAuthorizationControllerDelegate {
         
         let authCode = String(data: credential.authorizationCode ?? Data(), encoding: .utf8) ?? ""
         
-        print("애플로그인 결과 반환",authCode, userName)
-        
-        let responseDTO = AppleLoginResponseDTO(
-            authCode: authCode,
-            userName: userName
-        )
+        AppLogger.log("Apple 로그인 성공", .info, .service)
+        AppLogger.log("AuthCode: \(authCode.prefix(10))..., UserName: \(userName)", .debug, .service)
         
         continuation?.resume(returning: (code: authCode, name: userName))
    }
 
    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+       AppLogger.log("Apple 로그인 실패: \(error.localizedDescription)", .error, .service)
+               continuation?.resume(throwing: error)
        continuation?.resume(throwing: error)
    }
 }

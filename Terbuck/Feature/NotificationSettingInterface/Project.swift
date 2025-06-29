@@ -1,19 +1,19 @@
 import ProjectDescription
 
 let project = Project(
-    name: "CoreAppleLogin",
+    name: "NotificationSettingInterface",
     targets: [
         .target(
-            name: "CoreAppleLogin",
+            name: "NotificationSettingInterface",
             destinations: .iOS,
             product: .staticFramework,
-            bundleId: "com.Fouryears.CoreAppleLogin",
+            bundleId: "com.Fouryears.Terbuck",
             deploymentTargets: .iOS("17.0"),
             infoPlist: .default,
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
-                .project(target: "Shared", path: "../../Shared"),
+                .project(target: "Shared", path: "../../Shared")
             ]
         )
     ]

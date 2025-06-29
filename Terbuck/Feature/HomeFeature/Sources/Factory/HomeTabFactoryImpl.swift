@@ -7,10 +7,15 @@
 
 import UIKit
 import HomeInterface
+import NotificationSettingInterface
 
 public final class HomeTabFactoryImpl: HomeTabFactory {
     
-    public init() {}
+    private let alarmSettingFactory: AlarmSettingFactory
+    
+    public init(alarmSettingFactory: AlarmSettingFactory) {
+        self.alarmSettingFactory = alarmSettingFactory
+    }
     
     public func makeHomeCoordinator(navigationController: UINavigationController) -> HomeCoordinating {
         
@@ -20,7 +25,8 @@ public final class HomeTabFactoryImpl: HomeTabFactory {
         return HomeCoordinator(
             navigationController: navigationController,
             homeFactory: homeFactory,
-            partnershipFactory: partnershipFactory
+            partnershipFactory: partnershipFactory,
+            alarmSettingFactory: alarmSettingFactory
         )
     }
 }

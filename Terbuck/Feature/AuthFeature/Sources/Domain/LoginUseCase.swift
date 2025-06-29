@@ -10,6 +10,7 @@ import Foundation
 public protocol SocialLoginUseCase {
     func appleLoginExecute(code: String, name: String) async throws -> LoginResultModel
     func kakaoLoginExecute(token: String) async throws -> LoginResultModel
+    func notificationTokenExecute(token: String) async throws
 }
 
 public struct SocialLoginUseCaseImpl: SocialLoginUseCase {
@@ -35,5 +36,9 @@ public struct SocialLoginUseCaseImpl: SocialLoginUseCase {
             accessToken: entity.accessToken,
             refreshToken: entity.refreshToken
         )
+    }
+    
+    public func notificationTokenExecute(token: String) async throws {
+        let _ = try await repository.postNotificationToken(token: token)
     }
 }

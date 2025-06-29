@@ -17,21 +17,27 @@ public final class MixpanelManager {
 
     public func initialize(token: String) {
         self.mixpanel = Mixpanel.initialize(token: token)
+        AppLogger.log("Mixpanel SDK 초기화 완료", .info, .service)
     }
     
     public func setupUser(userId: Int) {
+        AppLogger.log("유저 식별 시도", .info, .service)
+        AppLogger.log("Mixpanel UserId: \(userId)", .debug, .service)
+        
         mixpanel?.identify(distinctId: "\(userId)")
-        print("👤 Mixpanel UserId 세팅:", userId)
     }
     
     public func setupUniversity(universityName: String) {
+        AppLogger.log("유저 프로퍼티(학교) 설정", .info, .service)
+        AppLogger.log("학교 이름: \(universityName)", .debug, .service)
+        
         mixpanel?.people.set(properties: ["$school" : universityName])
-        print("🏫 Mixpanel university 세팅:", universityName)
     }
 
     public func track(eventType: String, properties: Properties? = nil) {
+        AppLogger.log("이벤트 트래킹: \(eventType)", .info, .service)
+        
         mixpanel?.track(event: eventType, properties: properties)
-        print("📤 Mixpanel TrackEvent 발생:", eventType)
     }
 }
 

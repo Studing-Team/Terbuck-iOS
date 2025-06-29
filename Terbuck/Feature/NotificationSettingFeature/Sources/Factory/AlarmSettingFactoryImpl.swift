@@ -1,22 +1,19 @@
 //
 //  AlarmSettingFactoryImpl.swift
-//  MypageFeature
+//  NotificationSettingFeature
 //
-//  Created by ParkJunHyuk on 4/21/25.
+//  Created by ParkJunHyuk on 6/27/25.
 //
 
 import UIKit
-import MypageInterface
 
-public protocol AlarmSettingFactory {
-    func makeAlarmSettingViewController(coordinator: MypageCoordinator) -> UIViewController
-}
+import NotificationSettingInterface
 
 public final class AlarmSettingFactoryImpl: AlarmSettingFactory {
 
     public init() {}
 
-    public func makeAlarmSettingViewController(coordinator: MypageCoordinator) -> UIViewController {
+    public func makeAlarmSettingViewController(coordinator: AlarmSettingCoordinating) -> UIViewController {
         
         let alarmSettingViewModel = AlarmSettingViewModel()
         

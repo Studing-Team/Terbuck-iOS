@@ -8,6 +8,7 @@
 import UIKit
 
 import HomeInterface
+import NotificationSettingInterface
 import RegisterStudentCardFeature
 import DesignSystem
 import Shared
@@ -18,17 +19,20 @@ public class HomeCoordinator: HomeCoordinating {
     private let navigationController: UINavigationController
     private let homeFactory: HomeFactory
     private let partnershipFactory: PartnershipFactory
+    private let alarmSettingFactory: AlarmSettingFactory
     
     // MARK: - Init
     
     public init(
         navigationController: UINavigationController,
         homeFactory: HomeFactory,
-        partnershipFactory: PartnershipFactory
+        partnershipFactory: PartnershipFactory,
+        alarmSettingFactory: AlarmSettingFactory
     ) {
         self.navigationController = navigationController
         self.homeFactory = homeFactory
         self.partnershipFactory = partnershipFactory
+        self.alarmSettingFactory = alarmSettingFactory
     }
     
     // MARK: - Method
@@ -84,8 +88,23 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
             }
         }
     }
-    
-    public func registerStudentID() {
+}
+
+// MARK: - 알림 Setting Feature
+
+extension HomeCoordinator: AlarmSettingCoordinating {
+    public func showAlarmSetting() {
+        let alarmSettingVC = alarmSettingFactory.makeAlarmSettingViewController(coordinator: self)
+        
+        alarmSettingVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(alarmSettingVC, animated: true)
+    }
+}
+
+// MARK: - 학생증 등록 Feature
+
+public extension HomeCoordinator {
+    func registerStudentID() {
         let viewModel = RegisterStudentCardViewModel(
             registerStudentIDUseCase: RegisterStudentIDUseCaseImpl(repository: RegisterRepositoryImpl())
         )

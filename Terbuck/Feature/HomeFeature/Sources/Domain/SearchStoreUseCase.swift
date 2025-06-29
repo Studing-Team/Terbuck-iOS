@@ -34,8 +34,9 @@ public struct SearchStoreUseCaseImpl: SearchStoreUseCase {
                 storeName: $0.name,
                 category: $0.category,
                 address: $0.address,
-                mainBenefit: $0.benefits[0].title,
-                subBenefit: $0.benefits.dropFirst().map { $0.title }
+                benefitData: $0.benefits.map {
+                    StoreBenefitsModel(title: $0.title, details: $0.details)
+                }
             )
         }
     }

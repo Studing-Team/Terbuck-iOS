@@ -73,6 +73,7 @@ final class HomeViewController: UIViewController {
         setupCollectionView()
         setupDataSource()
         setupLocationManager()
+        observeUserAuthUpdate()
         viewLifeCycleSubject.send(.viewDidLoad)
         
         requestLocation()
@@ -200,14 +201,29 @@ private extension HomeViewController {
     func requestLocation() {
         switch self.locationManager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
+            AppLogger.log("위치 권한 이미 허용됨. 위치 업데이트 시작.", .info, .service)
             self.locationManager.startUpdatingLocation()
         case .notDetermined:
             self.locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
-            print("❌ 위치 권한 거부됨 - 설정에서 권한 변경 필요")
+            AppLogger.log("위치 권한이 거부되었거나 제한된 상태", .error, .service)
         default:
             break
         }
+    }
+    
+    func observeUserAuthUpdate() {
+        NotificationCenter.default.publisher(for: .userAuthDidUpdate)
+            .sink { [weak self] notification in
+                guard let self else { return }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    ToastManager.shared.showToast(from: self, type: .alarmStudentCard) {
+                        self.coordinator?.showAlarmSetting()
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -231,7 +247,7 @@ extension HomeViewController: CLLocationManagerDelegate {
    }
     
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("❌ 위치 업데이트 실패: \(error.localizedDescription)")
+        AppLogger.log("Home 위치 업데이트 실패: \(error.localizedDescription)", .error, .service)
     }
 }
 
@@ -441,7 +457,12 @@ extension HomeViewController {
                 cell.configureCell(forModel: model)
                 
                 cell.onMoreBenefitTapped { [weak self] in
-                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.category, benefitData: model.subBenefit)
+                    self?.showStoreBenefitAlert(
+                        storeName: model.storeName,
+                        address: model.address,
+                        category: model.category,
+                        benefitData: model.benefitData
+                    )
                 }
                 
                 return cell
@@ -455,7 +476,7 @@ extension HomeViewController {
                 cell.configureCell(forModel: model)
                 
                 cell.onMoreBenefitTapped { [weak self] in
-                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.category, benefitData: model.subBenefit)
+//                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.category, benefitData: model.subBenefit)
                 }
                 
                 return cell

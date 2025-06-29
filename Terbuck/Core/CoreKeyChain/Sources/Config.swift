@@ -12,6 +12,7 @@ public enum Config {
         enum Keychain: String {
             case accessToken = "ACCESS_TOKEN_KEY"
             case refreshToken = "REFRESH_TOKEN_KEY"
+            case fcmToken = "FIREBASE_TOKEN_KEY"
         }
     }
     
@@ -26,14 +27,21 @@ public enum Config {
 extension Config {
     static let accessTokenKey: String = {
         guard let key = Config.infoDictionary[Keys.Keychain.accessToken.rawValue] as? String else {
-            fatalError("⛔️ACCESS_TOKEN_KEY is not set in plist for this configuration⛔️")
+            fatalError("⛔️accessTokenKey is not set in plist for this configuration⛔️")
         }
         return key
     }()
     
     static let refreshTokenKey: String = {
         guard let key = Config.infoDictionary[Keys.Keychain.refreshToken.rawValue] as? String else {
-            fatalError("⛔️REFRESH_TOKEN_KEY is not set in plist for this configuration⛔️")
+            fatalError("⛔️refreshTokenKey is not set in plist for this configuration⛔️")
+        }
+        return key
+    }()
+    
+    static let fcmTokenKey: String = {
+        guard let key = Config.infoDictionary[Keys.Keychain.refreshToken.rawValue] as? String else {
+            fatalError("⛔️fcmTokenKey is not set in plist for this configuration⛔️")
         }
         return key
     }()

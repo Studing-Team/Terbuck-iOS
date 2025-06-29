@@ -13,7 +13,8 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
-                .project(target: "CoreKeyChain", path: "../CoreKeyChain")
+                .project(target: "CoreKeyChain", path: "../CoreKeyChain"),
+                .project(target: "Shared", path: "../../Shared"),
             ]
         )
     ]

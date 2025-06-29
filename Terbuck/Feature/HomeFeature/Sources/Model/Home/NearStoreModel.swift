@@ -7,12 +7,12 @@
 
 import Foundation
 import DesignSystem
+import Shared
 
 public struct NearStoreModel: Identifiable, Hashable {
     public var id: Int
     var storeName: String
     var category: CategoryType
     var address: String
-    var mainBenefit: String
-    var subBenefit: [String]
+    var benefitData: [StoreBenefitsModel]
 }

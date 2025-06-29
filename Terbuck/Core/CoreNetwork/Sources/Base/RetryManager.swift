@@ -7,6 +7,8 @@
 
 import Foundation
 
+import Shared
+
 struct RetryPolicy {
     let maxRetryCount: Int
     let delayBeforeRetry: (_ retryCount: Int) -> TimeInterval
@@ -27,17 +29,22 @@ actor RetryManager {
         
         while currentRetryCount < policy.maxRetryCount {
             do {
+                let result = try await endpointExecute()
+                
                 if currentRetryCount > 0 {
-                    print("🚀 토큰 유효기간 지남, Retry 시작")
+                    AppLogger.log("API 호출 성공 (재시도 \(currentRetryCount)번 만에 성공)", .info, .network)
+                } else {
+                    AppLogger.log("API 호출 성공 (첫 시도에 성공)", .info, .network)
                 }
                 
-                return try await endpointExecute()
+                return result
             } catch let error as NetworkError {
                 if currentRetryCount == policy.maxRetryCount {
                     throw NetworkError.maxRetryExceeded
                 }
                 
                 if case .tokenExpiration = error {
+                    AppLogger.log("토큰 만료 확인됨. 토큰 재발급 시도.", .info, .network)
                     try await tokenManager.refreshToken()
                 }
                 

@@ -7,20 +7,24 @@
 
 import UIKit
 import MypageInterface
+import NotificationSettingInterface
 
 public final class MypageTabFactoryImpl: MypageTabFactory {
     
-    public init() {}
+    private let alarmSettingFactory: AlarmSettingFactory
+    
+    public init(alarmSettingFactory: AlarmSettingFactory) {
+        self.alarmSettingFactory = alarmSettingFactory
+    }
     
     public func makeMypageCoordinator(navigationController: UINavigationController) -> MypageCoordinating {
         
         let mypageFactory = MypageFactoryImpl()
-        let alarmFactory = AlarmSettingFactoryImpl()
         
         return MypageCoordinator(
             navigationController: navigationController,
             mypageFactory: mypageFactory,
-            alarmFactory: alarmFactory
+            alarmSettingFactory: alarmSettingFactory
         )
     }
 }

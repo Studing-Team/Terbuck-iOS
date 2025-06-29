@@ -82,16 +82,16 @@ public final class CustomAlertViewController: UIViewController {
     }
     
     deinit {
-        #if DEBUG
-        print("deinit CustomAlertViewController")
-        #endif
+        AppLogger.log("CustomAlertViewController Deinit", .info, .ui)
     }
     
     // MARK: - Life Cycle
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        print("viewDidLoad")
+        
+        AppLogger.log("CustomAlertViewController ViewDidLoad", .info, .ui)
+        
         view.backgroundColor = DesignSystem.Color.uiColor(.terbuckAlertBackground)
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(cancelBackgroundAction)))
         

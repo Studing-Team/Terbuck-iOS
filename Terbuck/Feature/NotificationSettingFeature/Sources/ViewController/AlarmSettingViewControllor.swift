@@ -9,17 +9,18 @@ import UIKit
 import Combine
 
 import DesignSystem
+import NotificationSettingInterface
 import Shared
 
 import SnapKit
 import Then
 
-final class AlarmSettingViewControllor: UIViewController, UIGestureRecognizerDelegate {
+public final class AlarmSettingViewControllor: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
     private let alarmSettingViewModel: AlarmSettingViewModel
-    weak var coordinator: MypageCoordinator?
+    weak var coordinator: AlarmSettingCoordinating?
     
     // MARK: - Combine Publishers Properties
     
@@ -36,7 +37,7 @@ final class AlarmSettingViewControllor: UIViewController, UIGestureRecognizerDel
     
     public init(
         alarmSettingViewModel: AlarmSettingViewModel,
-        coordinator: MypageCoordinator
+        coordinator: AlarmSettingCoordinating
     ) {
         self.alarmSettingViewModel = alarmSettingViewModel
         self.coordinator = coordinator
@@ -49,7 +50,7 @@ final class AlarmSettingViewControllor: UIViewController, UIGestureRecognizerDel
     
     // MARK: - Life Cycle
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         
         self.view.backgroundColor = .white
@@ -62,10 +63,9 @@ final class AlarmSettingViewControllor: UIViewController, UIGestureRecognizerDel
         bindViewModel()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        print("AlarmSettingViewController viewWillAppear")
         viewLifeCycleSubject.send(.viewWillAppear)
     }
 }

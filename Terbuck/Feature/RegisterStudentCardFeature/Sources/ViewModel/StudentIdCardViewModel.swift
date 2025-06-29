@@ -65,8 +65,7 @@ public final class StudentIdCardViewModel {
                     // 없으면 API 호출 후 Data 반환
                     return self.loadStudentIdCardPublisher()
                         .handleEvents(receiveOutput: { imageData in
-                            let result = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-                            print("저장 결과: \(result)")
+                            let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
                         })
                         .catch { _ in Empty() } // 실패하면 빈 스트림 방출
                         .eraseToAnyPublisher()
@@ -84,12 +83,7 @@ public final class StudentIdCardViewModel {
 
 private extension StudentIdCardViewModel {
     func loadStudentIdCardPublisher() -> AnyPublisher<Data, StudentIdCardError> {
-        return Future { [weak self] promise in
-            guard let self else {
-                promise(.failure(.unknown))
-                return
-            }
-            
+        return Future { promise in
             guard let imageURL = UserDefaultsManager.shared.string(for: .studentIdCardImageURL) else {
                 promise(.failure(.studentIdCardFailed))
                 return

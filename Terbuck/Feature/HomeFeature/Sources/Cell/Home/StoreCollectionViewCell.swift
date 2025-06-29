@@ -56,8 +56,15 @@ public extension StoreCollectionViewCell {
         storeNameLabel.text = model.storeName
         storeCategoryImage.image = model.category.colorIcon
         storeAddressLabel.text = model.address
-        mainBenefitLabel.text = model.mainBenefit
-        moreBenefitButton.isHidden = model.subBenefit.isEmpty
+        mainBenefitLabel.text = model.benefitData[0].title
+        
+        var hidden = false
+        
+        if model.benefitData[0].details.isEmpty && model.benefitData.count < 2 {
+            hidden = true
+        }
+        
+        moreBenefitButton.isHidden = hidden
     }
 }
 
