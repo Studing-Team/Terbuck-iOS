@@ -18,6 +18,7 @@ enum LoginError: LocalizedError, Equatable {
     case appleLoginFailed
     case serverLoginFailed(reason: String)
     case kakaoLoginFailed
+    case saveFcmTokenFailed
     case unknown
 
     var errorDescription: String {
@@ -28,6 +29,8 @@ enum LoginError: LocalizedError, Equatable {
             return "서버 로그인에 실패했어요: \(reason)"
         case .kakaoLoginFailed:
             return "카카오 로그인을 실패했어요."
+        case .saveFcmTokenFailed:
+            return "다시 로그인을 시도해주세요."
         case .unknown:
             return "알 수 없는 오류가 발생했어요."
         }
@@ -57,7 +60,7 @@ public class LoginViewModel {
     // MARK: - Output
     
     struct Output {
-        let loginResult: AnyPublisher<Result<Bool, LoginError>, Never>
+        let loginResult: AnyPublisher<Bool, LoginError>
     }
     
     // MARK: - Init
@@ -135,14 +138,52 @@ public class LoginViewModel {
             .eraseToAnyPublisher()
         
         let merged = Publishers.Merge(appleResult, kakaoResult)
-            .map { result -> Result<Bool, LoginError> in
-                result.map { $0.showSignup }
+            .flatMap { [weak self] result -> AnyPublisher<Bool, LoginError> in
+                guard let self else {
+                    return Fail(error: .unknown).eraseToAnyPublisher()
+                }
+                
+                switch result {
+                case .success(let loginResult):
+                    let showSignup = loginResult.showSignup
+                    
+                    return self.postFcmToeknPublisher()
+                        .map { _ in showSignup } // FCM 성공 시 showSignup 반환
+                        .mapError { _ in .saveFcmTokenFailed }
+                        .eraseToAnyPublisher()
+                    
+                case .failure(let error):
+                    return Fail(error: error).eraseToAnyPublisher()
+                }
             }
             .eraseToAnyPublisher()
         
         return Output(
             loginResult: merged
         )
+    }
+}
+
+// MARK: - Fcm Token Function
+
+private extension LoginViewModel {
+    func postFcmToeknPublisher() -> AnyPublisher<Bool, LoginError> {
+        return Future { [weak self] promise in
+            guard let self, let token = KeychainManager.shared.load(key: .fcmToken) else {
+                promise(.failure(.appleLoginFailed))
+                return
+            }
+            
+            Task {
+                do {
+                    let _ = try await self.loginUseCase.notificationTokenExecute(token: token)
+                    promise(.success(true))
+                } catch {
+                    promise(.failure(.saveFcmTokenFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
     }
 }
 
@@ -192,7 +233,6 @@ private extension LoginViewModel {
 
 private extension LoginViewModel {
     func kakaoServiceLoginPublisher() -> AnyPublisher<String, LoginError> {
-        print("kakaoServiceLoginPublisher 실행")
         return Future { [weak self] promise in
             guard let self = self else {
                 promise(.failure(.kakaoLoginFailed))
@@ -202,7 +242,6 @@ private extension LoginViewModel {
             Task {
                 do {
                     let result = try await self.kakaoServiceLoginUseCase.execute()
-                    print("결괏값:", result)
                     promise(.success(result))
                 } catch {
                     promise(.failure(.kakaoLoginFailed))
@@ -213,7 +252,6 @@ private extension LoginViewModel {
     }
     
     func kakaoServerLoginPublisher(token: String) -> AnyPublisher<Result<LoginResultModel, LoginError>, Never> {
-        print("kakaoServerLoginPublisher 실행")
         return Future { [weak self] promise in
             guard let self = self else {
                 promise(.success(.failure(.unknown)))

@@ -15,6 +15,7 @@ public protocol AuthRepository {
     func serverLoginWithApple(code: String, name: String) async throws -> SocialLoginResultEntity
     func loginWithAppleService() async throws -> (code: String, name: String)
     func loginWithKakaoService() async throws -> String
+    func postNotificationToken(token: String) async throws
 }
 
 struct AuthRepositoryImpl: AuthRepository {
@@ -49,5 +50,11 @@ struct AuthRepositoryImpl: AuthRepository {
     
     func loginWithAppleService() async throws -> (code: String, name: String) {
         return try await appleLoginService.login()
+    }
+    
+    func postNotificationToken(token: String) async throws {
+        let requestDTO = NotificationTokenRequestDTO(deviceToken: token)
+        
+        let _: EmptyResponseDTO = try await networkManager.request(AuthAPIEndpoint.postNotificationToken(requestDTO))
     }
 }

@@ -78,32 +78,36 @@ private extension LoginViewController {
         
         output.loginResult
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] result in
-                switch result {
-                case .success(let showSignup):
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    if case let .failure(error) = completion {
+                        switch error {
+                        case .appleLoginFailed:
+                            break
+                        case .kakaoLoginFailed:
+                            break
+                        case .serverLoginFailed:
+                            break
+                        case .unknown:
+                            self?.showConfirmAlert(
+                                mainTitle: error.errorDescription,
+                                subTitle: "잠시 후, 다시 시도해주세요.",
+                                centerButton: TerbuckBottomButton(type: .confirm),
+                                centerButtonHandler: {}
+                            )
+                        case .saveFcmTokenFailed:
+                            break
+                        }
+                    }
+                },
+                receiveValue: { [weak self] showSignup in
                     if showSignup {
                         self?.coordinator?.startTermsOfService()
                     } else {
                         self?.coordinator?.finishAuthFlow()
                     }
-                case .failure(let error):
-                    switch error {
-                    case .appleLoginFailed:
-                        break
-                    case .kakaoLoginFailed:
-                        break
-                    case .serverLoginFailed:
-                        break
-                    case .unknown:
-                        self?.showConfirmAlert(
-                            mainTitle: error.errorDescription,
-                            subTitle: "잠시 후, 다시 시도해주세요.",
-                            centerButton: TerbuckBottomButton(type: .confirm),
-                            centerButtonHandler: {}
-                        )
-                    }
                 }
-            }
+            )
             .store(in: &cancellables)
     }
 }

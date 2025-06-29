@@ -12,6 +12,7 @@ public enum AuthAPIEndpoint {
     case postAuthKakao(KakaoLoginRequestDTO)
     case postAuthApple(AppleLoginRequestDTO)
     case postReissue
+    case postNotificationToken(NotificationTokenRequestDTO)
 }
 
 extension AuthAPIEndpoint: EndpointProtocol {
@@ -27,6 +28,8 @@ extension AuthAPIEndpoint: EndpointProtocol {
             return basePath.rawValue + "/apple"
         case .postReissue:
             return basePath.rawValue + "/reissue"
+        case .postNotificationToken:
+            return "fcm/token"
         }
     }
     
@@ -35,7 +38,12 @@ extension AuthAPIEndpoint: EndpointProtocol {
     }
     
     public var headers: HeaderType? {
-        return nil
+        switch self {
+        case .postNotificationToken:
+            return .accessTokenHeader
+        default:
+            return .defaultHeader
+        }
     }
     
     public var requestBodyType: RequestBodyType {
@@ -58,6 +66,8 @@ extension AuthAPIEndpoint: EndpointProtocol {
             }
             
             return nil
+        case .postNotificationToken(let dto):
+            return dto
         }
     }
     
