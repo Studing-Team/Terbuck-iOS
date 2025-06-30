@@ -7,8 +7,8 @@ let settings: Settings = .settings(
         "OTHER_LDFLAGS": ["-all_load -Objc"]
     ],
     configurations: [
-        .debug(name: "Debug", xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig"))
-//        .release(name: "Release")
+        .debug(name: "Debug", xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig")),
+        .release(name: "Release", xcconfig: .relativeToRoot("Terbuck/Configs/Release.xcconfig"))
     ]
 )
 
@@ -23,7 +23,6 @@ let project = Project(
             product: .app,
             bundleId: "com.Fouryears.Terbuck",
             deploymentTargets: .iOS("17.0"),
-//            infoPlist: .extendingDefault(with: infoPlist),
             infoPlist: .extendingDefault(
                 with: [
                     "UIDeviceFamily": [1],

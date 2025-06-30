@@ -16,6 +16,7 @@ public protocol AuthRepository {
     func loginWithAppleService() async throws -> (code: String, name: String)
     func loginWithKakaoService() async throws -> String
     func postNotificationToken(token: String) async throws
+    func getStudentInfo() async throws -> SearchStudentInfoEntity
 }
 
 struct AuthRepositoryImpl: AuthRepository {
@@ -56,5 +57,10 @@ struct AuthRepositoryImpl: AuthRepository {
         let requestDTO = NotificationTokenRequestDTO(deviceToken: token)
         
         let _: EmptyResponseDTO = try await networkManager.request(AuthAPIEndpoint.postNotificationToken(requestDTO))
+    }
+    
+    func getStudentInfo() async throws -> SearchStudentInfoEntity {
+        let dto: SearchStudentInfoResponseDTO = try await networkManager.request(MemberAPIEndpoint.getStudentId)
+        return dto.toEntity()
     }
 }
