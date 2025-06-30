@@ -33,6 +33,14 @@ public extension UIImage {
         return ResourceAsset.Image.writeIcon.image
     }
     
+    static var notAuthWriteIcon: UIImage {
+        return ResourceAsset.Image.notAuthWriteIcon.image
+    }
+    
+    static var notAuthIdCardInBenefitView: UIImage {
+        return ResourceAsset.Image.notAuthIdCardInBenefitView.image
+    }
+    
     static var notAuthIdCard: UIImage {
         return ResourceAsset.Image.notAuthIdCard.image
     }
@@ -59,10 +67,6 @@ public extension UIImage {
     
     static var selectedPartnership: UIImage {
         return ResourceAsset.Image.selectedPartnership.image
-    }
-    
-    static var dumyPartnership: UIImage {
-        return ResourceAsset.Image.dumyPartnership.image
     }
     
     static var line3: UIImage {

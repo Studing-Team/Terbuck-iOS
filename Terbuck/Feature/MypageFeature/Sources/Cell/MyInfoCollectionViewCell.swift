@@ -94,11 +94,6 @@ private extension MyInfoCollectionViewCell {
             $0.font = DesignSystem.Font.uiFont(.textRegular14)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         }
-        
-        authStudentButton.do {
-            $0.setImage(.writeIcon, for: .normal)
-            $0.imageView?.contentMode = .scaleAspectFit
-        }
     }
     
     func setupHierarchy() {
@@ -120,6 +115,12 @@ private extension MyInfoCollectionViewCell {
     
     func updateStyle(isAuth: Bool) {
         contentView.backgroundColor = DesignSystem.Color.uiColor(isAuth ? .terbuckGreen50 : .terbuckBlack10)
+        
+        authStudentButton.do {
+            let icon: UIImage = isAuth == true ? .writeIcon : .notAuthWriteIcon
+            $0.setImage(icon, for: .normal)
+            $0.imageView?.contentMode = .scaleAspectFit
+        }
         
         if isAuth {
             if !myInfoVerticalStackView.arrangedSubviews.contains(userInfoStackView) {

@@ -93,7 +93,7 @@ private extension CustomNavigationView {
         
         if type == .benefitStore {
             studentIDCardButton.do {
-                $0.setImage(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated) ? .authIdCard : .notAuthIdCard, for: .normal)
+                $0.setImage(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated) ? .authIdCard : .notAuthIdCardInBenefitView, for: .normal)
                 $0.addTarget(self, action: #selector(didStudentButtonTapped), for: .touchUpInside)
             }
         }
