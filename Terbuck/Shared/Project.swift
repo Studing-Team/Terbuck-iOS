@@ -13,6 +13,7 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
+                .external(name: "Mixpanel"),
                 .project(target: "Resource", path: "../Resource")
             ]
         )

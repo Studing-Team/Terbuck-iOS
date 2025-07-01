@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 // MARK: - 화면밖 터치시 키보드를 내려 주는 메서드
 

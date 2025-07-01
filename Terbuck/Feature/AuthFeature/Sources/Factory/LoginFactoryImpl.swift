@@ -19,7 +19,8 @@ public final class LoginFactoryImpl: LoginFactory {
         let viewModel = LoginViewModel(
             loginUseCase: SocialLoginUseCaseImpl(repository: repository),
             appleServiceLoginUseCase: AppleServiceLoginUseCaseImpl(repository: repository),
-            kakaoServiceLoginUseCase: KakaoServiceLoginUseCaseImpl(repository: repository)
+            kakaoServiceLoginUseCase: KakaoServiceLoginUseCaseImpl(repository: repository),
+            searchStudentInfoUseCase: SearchStudentInfoUseCaseImpl(repository: repository)
         )
         
         return LoginViewController(viewModel: viewModel, coordinator: coordinator)

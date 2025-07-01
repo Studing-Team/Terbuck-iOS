@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "notAuthWriteIcon.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

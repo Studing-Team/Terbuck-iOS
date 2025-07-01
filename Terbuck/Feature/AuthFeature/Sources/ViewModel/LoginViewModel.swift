@@ -44,6 +44,7 @@ public class LoginViewModel {
     var loginUseCase: SocialLoginUseCase
     var appleServiceLoginUseCase: AppleServiceLoginUseCase
     var kakaoServiceLoginUseCase: KakaoServiceLoginUseCase
+    private var searchStudentInfoUseCase: SearchStudentInfoUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -68,11 +69,13 @@ public class LoginViewModel {
     public init(
         loginUseCase: SocialLoginUseCase,
         appleServiceLoginUseCase: AppleServiceLoginUseCase,
-        kakaoServiceLoginUseCase: KakaoServiceLoginUseCase
+        kakaoServiceLoginUseCase: KakaoServiceLoginUseCase,
+        searchStudentInfoUseCase: SearchStudentInfoUseCase
     ) {
         self.loginUseCase = loginUseCase
         self.appleServiceLoginUseCase = appleServiceLoginUseCase
         self.kakaoServiceLoginUseCase = kakaoServiceLoginUseCase
+        self.searchStudentInfoUseCase = searchStudentInfoUseCase
     }
     
     // MARK: - Public methods
@@ -147,7 +150,7 @@ public class LoginViewModel {
                 case .success(let loginResult):
                     let showSignup = loginResult.showSignup
                     
-                    return self.postFcmToeknPublisher()
+                    return self.postFcmTokenPublisher()
                         .map { _ in showSignup } // FCM 성공 시 showSignup 반환
                         .mapError { _ in .saveFcmTokenFailed }
                         .eraseToAnyPublisher()
@@ -167,7 +170,7 @@ public class LoginViewModel {
 // MARK: - Fcm Token Function
 
 private extension LoginViewModel {
-    func postFcmToeknPublisher() -> AnyPublisher<Bool, LoginError> {
+    func postFcmTokenPublisher() -> AnyPublisher<Bool, LoginError> {
         return Future { [weak self] promise in
             guard let self, let token = KeychainManager.shared.load(key: .fcmToken) else {
                 promise(.failure(.appleLoginFailed))
@@ -177,6 +180,8 @@ private extension LoginViewModel {
             Task {
                 do {
                     let _ = try await self.loginUseCase.notificationTokenExecute(token: token)
+                    let result = try await self.searchStudentInfoUseCase.execute()
+                    UserDefaultsManager.shared.set(result, for: .university)
                     promise(.success(true))
                 } catch {
                     promise(.failure(.saveFcmTokenFailed))

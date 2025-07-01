@@ -29,6 +29,7 @@ public enum DesignSystem {
             case terbuckToastBackground
             case terbuckStudentBackground
             case terbuckPartnerBlack
+            case terbuckBottomGradient
             
             var info: UIColor {
                 switch self {
@@ -65,6 +66,8 @@ public enum DesignSystem {
                         .withAlphaComponent(0.90)
                 case .terbuckPartnerBlack:
                     return UIColor(asset: ResourceAsset.Color.terbuckPartnerBlack)!
+                case .terbuckBottomGradient:
+                    return UIColor(asset: ResourceAsset.Color.terbuckBottomGradient)!
                 }
             }
             

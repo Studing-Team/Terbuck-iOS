@@ -31,7 +31,7 @@ public struct TitleSectionView<T: TitleSectionDisplayable>: View {
     public var body: some View {
         VStack(spacing: 5) {
             Text(model.titleText)
-                .font(DesignSystem.Font.swiftUIFont(type == .benefitStore ? .titleBold24 : .titleBold20))
+                .font(DesignSystem.Font.swiftUIFont(.titleBold20))
                 .foregroundColor(DesignSystem.Color.swiftUIColor(.terbuckBlack50))
                 .lineLimit(1)
             
@@ -39,8 +39,7 @@ public struct TitleSectionView<T: TitleSectionDisplayable>: View {
                 .font(DesignSystem.Font.swiftUIFont(.textRegular14))
                 .foregroundColor(DesignSystem.Color.swiftUIColor(.terbuckBlack10))
                 .lineLimit(1)
-                .underline(type == .benefitStore, color: DesignSystem.Color.swiftUIColor(.terbuckBlack10))
         }
-        .padding(.vertical, type == .benefitStore ? 15 : 25)
+        .padding(.vertical, 25)
     }
 }

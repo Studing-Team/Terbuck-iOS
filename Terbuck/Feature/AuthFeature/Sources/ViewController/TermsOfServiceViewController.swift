@@ -141,7 +141,7 @@ private extension TermsOfServiceViewController {
         }
         
         allTermsTitleLabel.do {
-            $0.text = "선택약관 모두 동의하기"
+            $0.text = "약관 모두 동의"
             $0.font = DesignSystem.Font.uiFont(.textSemi16)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
         }

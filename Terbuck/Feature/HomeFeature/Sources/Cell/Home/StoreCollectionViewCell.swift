@@ -74,7 +74,7 @@ private extension StoreCollectionViewCell {
     func setupStyle() {
         contentView.backgroundColor = .white
         contentView.layer.cornerRadius = 16
-        contentView.layer.borderWidth = 1
+        contentView.layer.borderWidth = 0.5
         contentView.layer.borderColor = DesignSystem.Color.uiColor(.terbuckBlack5).cgColor
         
         contentView.snp.makeConstraints {
@@ -94,7 +94,7 @@ private extension StoreCollectionViewCell {
         }
         
         mainBenefitLabel.do {
-            $0.font = DesignSystem.Font.uiFont(.textSemi16)
+            $0.font = DesignSystem.Font.uiFont(.textSemi14)
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack50)
             $0.numberOfLines = 2
             $0.textAlignment = .center
@@ -121,14 +121,14 @@ private extension StoreCollectionViewCell {
     
     func setupLayout() {
         storeNameLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(22)
-            $0.leading.equalToSuperview().offset(16)
+            $0.top.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview().offset(20)
             $0.width.lessThanOrEqualTo(self.convertByWidthRatio(195))
         }
         
         storeAddressLabel.snp.makeConstraints {
             $0.top.equalTo(storeNameLabel.snp.bottom).offset(6)
-            $0.leading.equalToSuperview().inset(16)
+            $0.leading.equalToSuperview().offset(20)
             $0.width.equalTo(self.convertByWidthRatio(200))
         }
         

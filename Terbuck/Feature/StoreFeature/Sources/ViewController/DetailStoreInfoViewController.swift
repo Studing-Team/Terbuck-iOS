@@ -84,7 +84,10 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
     public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         backgroundView.applyGradient(
-            colors: [DesignSystem.Color.uiColor(.terbuckWhite), DesignSystem.Color.uiColor(.terbuckGreen50).withAlphaComponent(0.8)],
+            colors: [
+                DesignSystem.Color.uiColor(.terbuckWhite).withAlphaComponent(0),
+                DesignSystem.Color.uiColor(.terbuckBottomGradient)
+            ],
             direction: .topToBottom
         )
     }
@@ -178,7 +181,7 @@ private extension DetailStoreInfoViewController {
         backgroundView.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
-            $0.height.equalTo(80)
+            $0.height.equalTo(125)
         }
 
         naverMovementButton.snp.makeConstraints {

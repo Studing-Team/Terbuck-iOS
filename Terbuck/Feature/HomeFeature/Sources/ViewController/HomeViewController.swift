@@ -195,7 +195,7 @@ private extension HomeViewController {
     
     func setupLocationManager() {
         locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters//kCLLocationAccuracyBest
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
     }
     
     func requestLocation() {
@@ -448,7 +448,7 @@ extension HomeViewController {
             guard let self = self else { return nil }
             
             switch item {
-            case .restaurant(let model):
+            case .restaurant(let model), .convenient(let model):
                 let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: StoreCollectionViewCell.className,
                     for: indexPath
@@ -463,20 +463,6 @@ extension HomeViewController {
                         category: model.category,
                         benefitData: model.benefitData
                     )
-                }
-                
-                return cell
-                
-            case .convenient(let model):
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: StoreCollectionViewCell.className,
-                    for: indexPath
-                ) as! StoreCollectionViewCell
-                
-                cell.configureCell(forModel: model)
-                
-                cell.onMoreBenefitTapped { [weak self] in
-//                    self?.showStoreBenefitAlert(storeName: model.storeName, address: model.address, category: model.category, benefitData: model.subBenefit)
                 }
                 
                 return cell
