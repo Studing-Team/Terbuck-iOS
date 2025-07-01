@@ -4,7 +4,7 @@ let settings: Settings = .settings(
     base: [
         "DEVELOPMENT_TEAM": "N3H27N59VG",
         "CODE_SIGN_STYLE": "Automatic",
-        "OTHER_LDFLAGS": ["-all_load -Objc"]
+        "OTHER_LDFLAGS": ["-all_load"]
     ],
     configurations: [
         .debug(name: "Debug", xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig")),
@@ -19,7 +19,7 @@ let project = Project(
     targets: [
         .target(
             name: "Terbuck",
-            destinations: .iOS,
+            destinations: [.iPhone],
             product: .app,
             bundleId: "com.Fouryears.Terbuck",
             deploymentTargets: .iOS("17.0"),
@@ -57,7 +57,7 @@ let project = Project(
                         "remote-notification"
                     ],
                     "UIApplicationSceneManifest": [
-                        "UIApplicationSupportsMultipleScenes": true,
+                        "UIApplicationSupportsMultipleScenes": false,
                         "UISceneConfigurations": [
                             "UIWindowSceneSessionRoleApplication": [
                                 [
@@ -74,7 +74,6 @@ let project = Project(
             entitlements: "Terbuck/Terbuck.entitlements",
             dependencies: [
                 .external(name: "FirebaseMessaging"),
-                .external(name: "Mixpanel"),
                 .project(target: "Resource", path: "Resource"),
                 .project(target: "Shared", path: "Shared"),
                 .project(target: "DesignSystem", path: "DesignSystem"),

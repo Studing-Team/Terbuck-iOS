@@ -13,12 +13,6 @@ import PackageDescription
             "KakaoSDKAuth": .framework,
             "KakaoSDKUser": .framework,
             "NMapsMap": .framework,
-            "GoogleUtilities": .framework,
-            "FirebaseCore": .framework,
-            "FirebaseAnalytics": .framework,
-            "FirebaseMessaging": .framework,
-            "FirebaseInstallations": .framework,
-            "FirebaseCoreInternal": .framework,
         ]
     )
 #endif
