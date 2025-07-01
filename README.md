@@ -1,6 +1,6 @@
 # Terbuck - 한 걸음마다 있는 우리 학교 제휴 혜택
 
-> 터벅터벅 어디 갈지 고민하지 마세요. <br> 터벅 앱에서 우리 학교 제휴 혜택을 한눈에 확인하세요!
+> 우리 학교 근처 제휴 혜택 한눈에! <br> 우리 학교 제휴 혜택 앱, 터벅
 
 <br>
 
@@ -12,7 +12,9 @@
 
 <br>
 
-- 2025.03 ~ 진행중 - 스튜딩 리브랜딩 및 디자인, 프로젝트 초기 설정
+- 2025.07 ~ 진행중 - 앱 출시 및 1차 스프린트, 리펙토링
+- 2025.04 ~ 06 - UI 설계 및 로직 구현
+- 2025.03 ~ 04 - 스튜딩 리브랜딩 및 디자인, 프로젝트 초기 설정
 
 <br>
 
@@ -26,9 +28,9 @@
 
 | Library | Description | Dependency |
 |:-----:|:-----:|:-----:|
-| [**Firebase**](https://github.com/Moya/Moya](https://github.com/firebase)) | 실시간 푸시 알림을 구현하여 사용자와의 즉각적인 상호작용을 지원합니다 |SPM |
-| [**Alamofire**](https://github.com/Alamofire/Alamofire.git) | RESTful API 호출을 간소화하고 Endpoint 구조와 결합해 네트워크 로직을 최적화합니다 |SPM |
-| [**Amplitude-Swift**](https://github.com/amplitude/Amplitude-Swift) | 사용자 행동 분석을 통해 데이터 기반의 앱 개선을 가능하게 합니다 | SPM |
+| [**Firebase**](https://github.com/firebase) | 실시간 푸시 알림을 구현하여 사용자와의 즉각적인 상호작용을 지원합니다 | SPM |
+| [**KakaoSDK**](https://github.com/kakao/kakao-ios-sdk) | 카카오 계정을 이용한 OAuth 인증 및 사용자 정보 연동 기능을 구현합니다 | SPM |
+| [**Mixpanel-swift**](https://github.com/mixpanel/mixpanel-swift) | 사용자 행동 분석을 통해 데이터 기반의 앱 개선을 가능하게 합니다 | SPM |
 | [**NMapsMap**](https://github.com/navermaps/SPM-NMapsMap) | 네이버 지도 SDK를 활용해 고성능 지도 기능과 위치 기반 서비스를 제공합니다 | SPM |
 | [**SnapKit**](https://github.com/SnapKit/SnapKit) | AutoLayout을 코드 기반으로 간결하게 설정하며 UI 개발 생산성을 높입니다 | SPM |
 | [**Then**](https://github.com/devxoul/Then) | 클로저 기반 인스턴스 초기화를 지원해 코드 가독성과 간결함을 개선합니다 | SPM |
