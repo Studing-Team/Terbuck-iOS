@@ -1,18 +1,26 @@
-# Terbuck - 한 걸음마다 있는 우리 학교 제휴 혜택
+# 터벅 - 한 걸음마다 있는 우리 학교 제휴 혜택
 
 > 우리 학교 근처 제휴 혜택 한눈에! <br> 우리 학교 제휴 혜택 앱, 터벅
 
 <br>
 
-## 🗓️ 프로젝트 특징 및 일정
+## 📱 Download
 
+지금 바로 앱 스토어에서 **터벅**을 다운로드하고 우리 학교 제휴 혜택을 확인해 보세요!
+
+[![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/kr/app/%ED%84%B0%EB%B2%85-%EC%9A%B0%EB%A6%AC-%ED%95%99%EA%B5%90-%EC%A0%9C%ED%9C%B4-%ED%98%9C%ED%83%9D/id6747154359)
+
+<br>
+
+## 🗓️ 프로젝트 특징 및 일정
 
 새로운 프로젝트가 아닌 스튜딩 서비스를 리브랜딩하고 핵심기능을 제휴 혜택로 좁혀 타겟팅을 한 서비스 입니다. <br>
 기존의 스튜딩 서비스에 대한 내용은 다음 [링크](https://github.com/Studing-Team/Studing-iOS) 를 확인해주세요!
 
 <br>
 
-- 2025.07 ~ 진행중 - 앱 출시 및 1차 스프린트, 리펙토링
+- 2025.07 ~ 진행중 - 및 1차 스프린트, 리펙토링
+- 2025.07 - 앱 출시
 - 2025.04 ~ 06 - UI 설계 및 로직 구현
 - 2025.03 ~ 04 - 스튜딩 리브랜딩 및 디자인, 프로젝트 초기 설정
 
