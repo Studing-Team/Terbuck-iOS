@@ -85,6 +85,8 @@ public struct TrackEventType {
         public static let myLocationButtonTapped = "click_map_gps"
         public static let searchBarTapped = "click_map_searchbar"
         public static let searchResultTapped = "click_map_search_result"
+        public static let storelistDataTapped = "move_list_to_detail"
+        public static let storeMapDataTapped = "move_map_to_detail"
     }
     
     public struct DetailStore {
@@ -105,5 +107,10 @@ public struct TrackEventType {
         public static let logoutConfirmButtonTapped = "click_mypage_logout_confirm"
         public static let signoutMenuButtonTapped = "click_mypage_signout"
         public static let signoutConfirmButtonTapped = "click_mypage_signout_confirm"
+    }
+    
+    public struct Alarm {
+        public static let authedPushAlarmTapped = "click_push_alarm_student_card"
+        public static let pushAlarmTapped = "click_push_alarm"
     }
 }

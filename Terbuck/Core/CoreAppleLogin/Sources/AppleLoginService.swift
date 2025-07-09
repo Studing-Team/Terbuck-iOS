@@ -53,8 +53,7 @@ extension AppleLoginService: ASAuthorizationControllerDelegate {
 
    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
        AppLogger.log("Apple 로그인 실패: \(error.localizedDescription)", .error, .service)
-               continuation?.resume(throwing: error)
-       continuation?.resume(throwing: error)
+           continuation?.resume(throwing: error)
    }
 }
 

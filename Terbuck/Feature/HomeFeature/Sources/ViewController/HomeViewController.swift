@@ -219,6 +219,7 @@ private extension HomeViewController {
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     ToastManager.shared.showToast(from: self, type: .alarmStudentCard) {
+                        MixpanelManager.shared.track(eventType: TrackEventType.Home.alarmButtonInToastMessage)
                         self.coordinator?.showAlarmSetting()
                     }
                 }
