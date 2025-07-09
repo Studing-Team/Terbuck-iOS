@@ -92,9 +92,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         
-        let userInfo = notification.request.content.userInfo
+        let content = notification.request.content
+        let title = content.title
+        let body = content.body
+        let userInfo = content.userInfo
+
         AppLogger.log("포그라운드 알림 수신", .info, .default)
-        AppLogger.log("수신 데이터: \(userInfo)", .debug, .default)
+        AppLogger.log("제목: \(title)", .debug, .default)
+        AppLogger.log("내용: \(body)", .debug, .default)
+        AppLogger.log("userInfo: \(userInfo)", .debug, .default)
+
         completionHandler([.banner, .badge, .sound])
     }
     
@@ -102,6 +109,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
+        
+        MixpanelManager.shared.track(eventType: TrackEventType.Alarm.authedPushAlarmTapped)
+        
         // 여기서 알림 클릭 처리
         completionHandler()
     }

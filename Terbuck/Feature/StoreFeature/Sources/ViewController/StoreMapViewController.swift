@@ -90,8 +90,9 @@ final class StoreMapViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        AppLogger.log("StoreMapViewController viewWillAppear", .info, .ui)
+        
         storeMapViewModel.viewLifeCycleSubject.send(.viewWillAppear)
-        print("StoreMapViewController viewWillAppear")
         
         switch storeMapViewModel.storeMapTypeSubject.value {
         case .search:
@@ -140,6 +141,7 @@ private extension StoreMapViewController {
         storeMapViewModel.storeItemsTappedResult
             .receive(on: DispatchQueue.main)
             .sink { [weak self] itemId in
+                MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.storelistDataTapped)
                 self?.coordinator?.showDetailStoreInfo(storeId: itemId)
             }
             .store(in: &cancellables)
@@ -347,9 +349,6 @@ private extension StoreMapViewController {
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(storeBottomTapped))
             $0.addGestureRecognizer(tapGesture)
             $0.isUserInteractionEnabled = true
-        }
-        
-        storeInfoBottomView.do {
             $0.isHidden = true
         }
     }
@@ -432,6 +431,7 @@ private extension StoreMapViewController {
     
     @objc func storeBottomTapped() {
         guard let store = storeMapViewModel.searchResultStoreTappedSubject.value else { return }
+        MixpanelManager.shared.track(eventType: TrackEventType.TerbuckMap.storeMapDataTapped)
         self.coordinator?.showDetailStoreInfo(storeId: store.id)
     }
     
