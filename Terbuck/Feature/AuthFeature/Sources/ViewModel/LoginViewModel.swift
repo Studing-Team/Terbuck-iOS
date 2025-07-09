@@ -95,20 +95,22 @@ public class LoginViewModel {
                     .flatMap { code, name in
                         self.appleServerLoginPublisher(code: code, name: name)
                     }
-                    .catch { error in
-                        Just(.failure(error))
-                            .eraseToAnyPublisher()
+                    .map { loginResult -> Result<LoginResultModel, LoginError> in
+                        return .success(loginResult)
                     }
-                    .handleEvents(receiveOutput: { result in
-                        if case let .success(loginResult) = result {
-                            KeychainManager.shared.save(key: .accessToken, value: loginResult.accessToken)
-                            KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
-                            
-                            MixpanelManager.shared.setupUser(userId: loginResult.userId)
-                        }
-                    })
+                    .catch { error -> Just<Result<LoginResultModel, LoginError>> in
+                        return Just(.failure(error))
+                    }
                     .eraseToAnyPublisher()
             }
+            .handleEvents(receiveOutput: { result in
+                if case let .success(loginResult) = result {
+                    KeychainManager.shared.save(key: .accessToken, value: loginResult.accessToken)
+                    KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
+                    
+                    MixpanelManager.shared.setupUser(userId: loginResult.userId)
+                }
+            })
             .eraseToAnyPublisher()
         
         let kakaoResult = input.kakaoLoginButtonTapped
@@ -125,19 +127,22 @@ public class LoginViewModel {
                     .flatMap { token in
                         self.kakaoServerLoginPublisher(token: token)
                     }
+                    .map { loginResult -> Result<LoginResultModel, LoginError> in
+                        return .success(loginResult)
+                    }
                     .catch { error in
                         Just(.failure(error)).eraseToAnyPublisher()
                     }
-                    .handleEvents(receiveOutput: { result in
-                        if case let .success(loginResult) = result {
-                            KeychainManager.shared.save(key: .accessToken, value: loginResult.accessToken)
-                            KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
-                            
-                            MixpanelManager.shared.setupUser(userId: loginResult.userId)
-                        }
-                    })
                     .eraseToAnyPublisher()
             }
+            .handleEvents(receiveOutput: { result in
+                if case let .success(loginResult) = result {
+                    KeychainManager.shared.save(key: .accessToken, value: loginResult.accessToken)
+                    KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
+                    
+                    MixpanelManager.shared.setupUser(userId: loginResult.userId)
+                }
+            })
             .eraseToAnyPublisher()
         
         let merged = Publishers.Merge(appleResult, kakaoResult)
@@ -150,7 +155,7 @@ public class LoginViewModel {
                 case .success(let loginResult):
                     let showSignup = loginResult.showSignup
                     
-                    return self.postFcmTokenPublisher()
+                    return self.postFcmTokenPublisher(showSignup)
                         .map { _ in showSignup } // FCM 성공 시 showSignup 반환
                         .mapError { _ in .saveFcmTokenFailed }
                         .eraseToAnyPublisher()
@@ -170,18 +175,25 @@ public class LoginViewModel {
 // MARK: - Fcm Token Function
 
 private extension LoginViewModel {
-    func postFcmTokenPublisher() -> AnyPublisher<Bool, LoginError> {
+    func postFcmTokenPublisher(_ showSignup: Bool) -> AnyPublisher<Bool, LoginError> {
         return Future { [weak self] promise in
-            guard let self, let token = KeychainManager.shared.load(key: .fcmToken) else {
+            guard let self,
+                  let token = KeychainManager.shared.load(key: .fcmToken) else {
                 promise(.failure(.appleLoginFailed))
                 return
             }
-            
+
             Task {
                 do {
-                    let _ = try await self.loginUseCase.notificationTokenExecute(token: token)
-                    let result = try await self.searchStudentInfoUseCase.execute()
-                    UserDefaultsManager.shared.set(result, for: .university)
+                    try await self.loginUseCase.notificationTokenExecute(token: token)
+
+                    if !showSignup {
+                        let studentInfo = try await self.searchStudentInfoUseCase.execute()
+                        UserDefaultsManager.shared.set(studentInfo, for: .university)
+                    } else {
+                        AppLogger.log("회원가입 상태이므로 StudentInfo 가져오기 생략", .debug, .viewModel)
+                    }
+
                     promise(.success(true))
                 } catch {
                     promise(.failure(.saveFcmTokenFailed))
@@ -214,19 +226,19 @@ private extension LoginViewModel {
         .eraseToAnyPublisher()
     }
     
-    func appleServerLoginPublisher(code: String, name: String) -> AnyPublisher<Result<LoginResultModel, LoginError>, Never> {
+    func appleServerLoginPublisher(code: String, name: String) -> AnyPublisher<LoginResultModel, LoginError> {
         return Future { [weak self] promise in
             guard let self else {
-                promise(.success(.failure(.unknown)))
+                promise(.failure(.unknown))
                 return
             }
             
             Task {
                 do {
                     let loginResult = try await self.loginUseCase.appleLoginExecute(code: code, name: name)
-                    promise(.success(.success(loginResult)))
+                    promise(.success(loginResult))
                 } catch {
-                    promise(.success(.failure(.serverLoginFailed(reason: ""))))
+                    promise(.failure(.serverLoginFailed(reason: error.localizedDescription)))
                 }
             }
         }
@@ -256,19 +268,19 @@ private extension LoginViewModel {
         .eraseToAnyPublisher()
     }
     
-    func kakaoServerLoginPublisher(token: String) -> AnyPublisher<Result<LoginResultModel, LoginError>, Never> {
+    func kakaoServerLoginPublisher(token: String) -> AnyPublisher<LoginResultModel, LoginError> {
         return Future { [weak self] promise in
             guard let self = self else {
-                promise(.success(.failure(.unknown)))
+                promise(.failure(.unknown))
                 return
             }
             
             Task {
                 do {
                     let loginResult = try await self.loginUseCase.kakaoLoginExecute(token: token)
-                    promise(.success(.success(loginResult)))
+                    promise(.success(loginResult))
                 } catch {
-                    promise(.success(.failure(.serverLoginFailed(reason: ""))))
+                    promise(.failure(.serverLoginFailed(reason: error.localizedDescription)))
                 }
             }
         }
