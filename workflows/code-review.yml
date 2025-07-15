@@ -1,0 +1,33 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+
+      - name: Send to n8n for Review
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            FILE_CONTENT=$(cat "$file")
+            JSON_PAYLOAD=$(jq -n \
+              --arg pr_url "${{ github.event.pull_request.html_url }}" \
+              --arg file_path "$file" \
+              --arg file_content "$FILE_CONTENT" \
+              '{pr_url: $pr_url, file_path: $file_path, code: $file_content}')
+            curl -X POST \
+              -H "Content-Type: application/json" \
+              -d "$JSON_PAYLOAD" \
+              ${{ secrets.N8N_WEBHOOK_URL }}
+          done
