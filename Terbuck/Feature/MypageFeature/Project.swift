@@ -20,7 +20,6 @@ let project = Project(
                 .project(target: "Shared", path: "../../Shared"),
                 .project(target: "UniversityInfoInterface", path: "../UniversityInfoInterface"),
                 .project(target: "NotificationSettingInterface", path: "../NotificationSettingInterface"),
-                .project(target: "RegisterStudentCardFeature", path: "../RegisterStudentCardFeature")
             ]
         )
     ]
