@@ -10,7 +10,7 @@ import UIKit
 import StoreInterface
 import DesignSystem
 import Shared
-import RegisterStudentCardFeature
+import RegisterStudentCardInterface
 
 public class StoreCoordinator: StoreCoordinating {
     public var childCoordinators: [any Shared.Coordinator] = []
@@ -20,6 +20,7 @@ public class StoreCoordinator: StoreCoordinating {
     private let storeModalFactory: StoreModalFactory
     private let detailStoreFactory: DetailStoreFactory
     private let searchStoreFactory: SearchStoreFactory
+    private let registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     
     private var storeMapViewModel = StoreMapViewModel(searchStoreMapUseCase: SearchStoreMapUseCaseImpl(repository: StoreRepositoryImpl()))
     
@@ -30,13 +31,15 @@ public class StoreCoordinator: StoreCoordinating {
         storeMapFactory: StoreMapFactory,
         storeModalFactory: StoreModalFactory,
         detailStoreFactory: DetailStoreFactory,
-        searchStoreFactory: SearchStoreFactory
+        searchStoreFactory: SearchStoreFactory,
+        registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     ) {
         self.navigationController = navigationController
         self.storeMapFactory = storeMapFactory
         self.storeModalFactory = storeModalFactory
         self.detailStoreFactory = detailStoreFactory
         self.searchStoreFactory = searchStoreFactory
+        self.registerStudentCardFactory = registerStudentCardFactory
     }
     
     // MARK: - Method
@@ -62,43 +65,21 @@ public class StoreCoordinator: StoreCoordinating {
         searchStoreVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(searchStoreVC, animated: false)
     }
-}
+    
+    public func startRegisterStudentCard(for type: AuthStudentType, location: CGRect?) {
+        let registerCoordinator = registerStudentCardFactory.makeRegisterStudentCardCoordinator(
+            navigationController: self.navigationController,
+            initialType: type,
+            initialLocation: location
+        )
 
-extension StoreCoordinator: StudentIDCardFlowDelegate {
-    public func showOnboardiing(location: CGRect) {
+        registerCoordinator.delegate = self
         
-    }
-    
-    public func registerStudentID() {
-        let viewModel = RegisterStudentCardViewModel(
-            registerStudentIDUseCase: RegisterStudentIDUseCaseImpl(repository: RegisterRepositoryImpl())
-        )
+        childCoordinators.append(registerCoordinator)
         
-        let registerStudentIDCardVC = RegisterStudentCardViewController(viewModel: viewModel)
-        registerStudentIDCardVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(registerStudentIDCardVC, animated: true)
-    }
-    
-    public func dismissAuthStudentID() {
-        navigationController.dismiss(animated: false) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                self.registerStudentID()
-            }
-        }
-    }
-    
-    public func showAuthStudentID() {
-        let studentIdCardVC = StudentIDCardViewController(
-            authType: .auth,
-            coordinator: self,
-            viewModel: StudentIdCardViewModel()
-        )
-        
-        studentIdCardVC.modalPresentationStyle = .overFullScreen
-        navigationController.present(studentIdCardVC, animated: false)
+        registerCoordinator.start()
     }
 }
-
 
 extension StoreCoordinator: ImagePreviewCoordinating {
     public func showPreviewImage(vm: PreviewImageDisplayable) {
@@ -108,5 +89,13 @@ extension StoreCoordinator: ImagePreviewCoordinating {
         )
         previewImageVC.modalPresentationStyle = .overFullScreen
         navigationController.present(previewImageVC, animated: false)
+    }
+}
+
+// MARK: - 학생증 재등록을 위한 Coordinator
+
+extension StoreCoordinator: RegisterStudentCardCoordinatorDelegate {
+    public func didFinishRegisterStudentCard(coordinator: Coordinator) {
+        childCoordinators = childCoordinators.filter { $0 !== coordinator }
     }
 }

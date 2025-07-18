@@ -19,7 +19,7 @@ let project = Project(
                 .project(target: "StoreInterface", path: "../StoreInterface"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),
-                .project(target: "RegisterStudentCardFeature", path: "../RegisterStudentCardFeature")
+                .project(target: "RegisterStudentCardInterface", path: "../RegisterStudentCardInterface")
             ]
         )
     ]

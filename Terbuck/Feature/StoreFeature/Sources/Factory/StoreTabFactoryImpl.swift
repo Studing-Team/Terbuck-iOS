@@ -7,10 +7,17 @@
 
 import UIKit
 import StoreInterface
+import RegisterStudentCardInterface
 
 public final class StoreTabFactoryImpl: StoreTabFactory {
     
-    public init() {}
+    private let registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
+    
+    public init(
+        registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
+    ) {
+        self.registerStudentCardFactory = registerStudentCardFactory
+    }
     
     public func makeStoreCoordinator(navigationController: UINavigationController) -> StoreCoordinating {
         
@@ -24,7 +31,8 @@ public final class StoreTabFactoryImpl: StoreTabFactory {
             storeMapFactory: storeMapFactory,
             storeModalFactory: storeModalFactory,
             detailStoreFactory: detailStoreFactoryImpl,
-            searchStoreFactory: searchStoreFactory
+            searchStoreFactory: searchStoreFactory,
+            registerStudentCardFactory: registerStudentCardFactory
         )
     }
 }

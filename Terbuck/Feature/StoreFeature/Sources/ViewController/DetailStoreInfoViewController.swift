@@ -113,10 +113,10 @@ private extension DetailStoreInfoViewController {
         customNavBar.setupRightButtonAction {
             MixpanelManager.shared.track(eventType: TrackEventType.DetailStore.studentCardButtonTapped)
             if UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated) {
-                self.coordinator?.showAuthStudentID()
+                self.coordinator?.startRegisterStudentCard(for: .auth, location: nil)
             } else {
                 ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .detailStore)) {
-                    self.coordinator?.registerStudentID()
+                    self.coordinator?.startRegisterStudentCard(for: .register, location: nil)
                 }
             }
         }
