@@ -20,15 +20,28 @@
 <br>
 
 - 2025.07 ~ 진행중 - 및 1차 스프린트, 리펙토링
-- 2025.07 - 앱 출시
+- 2025.07.09 - 앱 출시
 - 2025.04 ~ 06 - UI 설계 및 로직 구현
 - 2025.03 ~ 04 - 스튜딩 리브랜딩 및 디자인, 프로젝트 초기 설정
 
 <br>
 
+<details>
+  <summary>터벅 UI 및 핵심 플로우</summary>
+  
+  <br>
+  
+  ![터벅 UI 및 핵심 플로우](https://github.com/user-attachments/assets/162144c9-b6b1-49ca-883d-5bbfbaae4611)
+  
+</details>
+
+<br>
+
 ## 💻 Development Environment
+![Platform](https://img.shields.io/badge/platform-iOS%20only-lightgrey?logo=apple)
 ![Xcode](https://img.shields.io/badge/Xcode-16.2-skyblue)
 ![iOS](https://img.shields.io/badge/iOS-17.0+-white)
+![Tuist](https://img.shields.io/badge/Built%20with-Tuist-4B4B77)
 
 <br>
 
