@@ -110,15 +110,17 @@ private extension HomeViewController {
                 guard let self else { return }
                 
                 if authResult == true {
-                    self.coordinator?.showAuthStudentID()
+                    self.coordinator?.startRegisterStudentCard(for: .auth, location: nil)
+                    
                 } else if authResult == false && !UserDefaultsManager.shared.bool(for: .isOnboarding) {
                     guard let holeLocation = self.holeLocation else { return }
-                    self.coordinator?.showOnboardiing(location: holeLocation)
+                    self.coordinator?.startRegisterStudentCard(for: .onboarding, location: holeLocation)
                     UserDefaultsManager.shared.set(true, for: .isOnboarding)
+                    
                 } else {
                     MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonInToastMessage)
                     ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
-                        self.coordinator?.registerStudentID()
+                        self.coordinator?.startRegisterStudentCard(for: .register, location: nil)
                     }
                 }
             }
