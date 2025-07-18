@@ -10,23 +10,10 @@ import Combine
 
 import DesignSystem
 import Shared
+import UniversityInfoInterface
 
 import SnapKit
 import Then
-
-public enum UniversityType {
-    case register
-    case edit
-    
-    var title: String {
-        switch self {
-        case .register:
-            return "회원가입"
-        case .edit:
-            return "학교 변경"
-        }
-    }
-}
 
 public final class UniversityViewController: UIViewController, UIGestureRecognizerDelegate {
     
@@ -35,6 +22,7 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
     private var type: UniversityType
     private var viewModel: UniversityViewModel
     public weak var delegate: RegisterUniversityDelegate?
+    weak var coordinator: UniversityInfoCoordinating?
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -55,10 +43,12 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
     
     public init(
         type: UniversityType,
-        viewModel: UniversityViewModel
+        viewModel: UniversityViewModel,
+        coordinator: UniversityInfoCoordinating
     ) {
         self.type = type
         self.viewModel = viewModel
+        self.coordinator = coordinator
         self.customNavBar = CustomNavigationView(type: .nomal, title: type.title)
         self.terbuckBottomButton = TerbuckBottomButton(type:  type == .register ? .enter : .save, isEnabled: false)
         super.init(nibName: nil, bundle: nil)
