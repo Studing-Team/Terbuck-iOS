@@ -8,7 +8,7 @@
 import UIKit
 
 import AuthInterface
-import UniversityInfoFeature
+import UniversityInfoInterface
 import Shared
 
 public final class AuthCoordinator: AuthCoordinating {
@@ -17,6 +17,7 @@ public final class AuthCoordinator: AuthCoordinating {
     private let navigationController: UINavigationController
     private let loginFactory: LoginFactory
     private let termsFactory: TermsFactory
+    private let universityInfoFactory: UniversityInfoFactory
     
     public weak var delegate: AuthCoordinatorDelegate?
     
@@ -27,11 +28,13 @@ public final class AuthCoordinator: AuthCoordinating {
     public init(
         navigationController: UINavigationController,
         loginFactory: LoginFactory,
-        termsFactory: TermsFactory
+        termsFactory: TermsFactory,
+        universityInfoFactory: UniversityInfoFactory
     ) {
         self.navigationController = navigationController
         self.loginFactory = loginFactory
         self.termsFactory = termsFactory
+        self.universityInfoFactory = universityInfoFactory
     }
     
     public func start() {
@@ -53,28 +56,24 @@ public final class AuthCoordinator: AuthCoordinating {
         navigationController.pushViewController(termsOfServiceVC, animated: true)
     }
     
-    public func startUniversity() {
-        let viewModel = UniversityViewModel(
-            signupUseCase: SignupUseCaseImpl(repository: UniversityRepositoryImpl())
-        )
-        
-        let universityVC = UniversityViewController(
-            type: .register,
-            viewModel: viewModel
-        )
-        
-        universityVC.delegate = self
-        universityVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(universityVC, animated: true)
-    }
-
     public func finishAuthFlow() {
         delegate?.didFinishAuthFlow()
     }
 }
 
-extension AuthCoordinator: RegisterUniversityDelegate {
-    public func didFinishAuthFlow() {
-        delegate?.didFinishAuthFlow()
+// MARK: - 대학교 설정을 위한 Coordinator
+
+extension AuthCoordinator: UniversityInfoCoordinating {
+    public func showUniversity() {
+        let universityVC = universityInfoFactory.makeUniversityInfoViewController(
+            type: .register,
+            coordinator: self,
+            onFinish: { [weak self] in
+                self?.finishAuthFlow()
+            }
+        )
+
+        universityVC.hidesBottomBarWhenPushed = true
+        navigationController.pushViewController(universityVC, animated: true)
     }
 }

@@ -87,7 +87,8 @@ extension MypageCoordinator: UniversityInfoCoordinating {
     public func showUniversity() {
         let universityVC = universityInfoFactory.makeUniversityInfoViewController(
             type: .edit,
-            coordinator: self
+            coordinator: self,
+            onFinish: {}
         )
 
         universityVC.hidesBottomBarWhenPushed = true

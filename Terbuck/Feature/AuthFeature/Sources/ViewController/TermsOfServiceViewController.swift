@@ -121,7 +121,7 @@ private extension TermsOfServiceViewController {
             .sink { [weak self] _ in
                 guard let self else { return }
                 MixpanelManager.shared.track(eventType: TrackEventType.Signup.firstSignupButtonTapped)
-                self.coordinator?.startUniversity()
+                self.coordinator?.showUniversity()
             }
             .store(in: &cancellables)
     }

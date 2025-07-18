@@ -13,7 +13,7 @@ public final class UniversityInfoFactoryImpl: UniversityInfoFactory {
     
     public init() {}
 
-    public func makeUniversityInfoViewController(type: UniversityType, coordinator: UniversityInfoCoordinating) -> UIViewController {
+    public func makeUniversityInfoViewController(type: UniversityType, coordinator: UniversityInfoCoordinating, onFinish: @escaping () -> Void) -> UIViewController {
         
         let viewModel: UniversityViewModel
         
@@ -31,7 +31,8 @@ public final class UniversityInfoFactoryImpl: UniversityInfoFactory {
         return UniversityViewController(
             type: type,
             viewModel: viewModel,
-            coordinator: coordinator
+            coordinator: coordinator,
+            onFinish: onFinish
         )
     }
 }

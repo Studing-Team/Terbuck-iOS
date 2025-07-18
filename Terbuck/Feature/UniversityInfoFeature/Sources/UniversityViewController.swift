@@ -25,6 +25,8 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
     weak var coordinator: UniversityInfoCoordinating?
     private var cancellables = Set<AnyCancellable>()
     
+    private var onFinish: (() -> Void)?
+    
     // MARK: - UI Properties
     
     private let customNavBar: CustomNavigationView
@@ -44,13 +46,15 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
     public init(
         type: UniversityType,
         viewModel: UniversityViewModel,
-        coordinator: UniversityInfoCoordinating
+        coordinator: UniversityInfoCoordinating,
+        onFinish: @escaping () -> Void
     ) {
         self.type = type
         self.viewModel = viewModel
         self.coordinator = coordinator
         self.customNavBar = CustomNavigationView(type: .nomal, title: type.title)
         self.terbuckBottomButton = TerbuckBottomButton(type:  type == .register ? .enter : .save, isEnabled: false)
+        self.onFinish = onFinish
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -131,7 +135,7 @@ private extension UniversityViewController {
             .sink { [weak self] result in
                 if result {
                     if self?.type == .register {
-                        self?.delegate?.didFinishAuthFlow()
+                        self?.onFinish?()
                     } else {
                         self?.navigationController?.popViewController(animated: true)
                     }

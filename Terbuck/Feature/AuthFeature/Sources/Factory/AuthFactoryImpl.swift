@@ -7,10 +7,17 @@
 
 import UIKit
 import AuthInterface
+import UniversityInfoInterface
 
 public final class AuthFactoryImpl: AuthFactory {
     
-    public init() {}
+    private let universityInfoFactory: UniversityInfoFactory
+    
+    public init(
+        universityInfoFactory: UniversityInfoFactory
+    ) {
+        self.universityInfoFactory = universityInfoFactory
+    }
 
     public func makeAuthCoordinator(navigationController: UINavigationController) -> AuthCoordinating {
         let loginFactory = LoginFactoryImpl()
@@ -19,7 +26,8 @@ public final class AuthFactoryImpl: AuthFactory {
         return AuthCoordinator(
             navigationController: navigationController,
             loginFactory: loginFactory,
-            termsFactory: termsFactory
+            termsFactory: termsFactory,
+            universityInfoFactory: universityInfoFactory,
         )
     }
 }

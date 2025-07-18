@@ -16,7 +16,7 @@ let project = Project(
                 .external(name: "SnapKit"),
                 .external(name: "Then"),
                 .project(target: "AuthInterface", path: "../AuthInterface"),
-                .project(target: "UniversityInfoFeature", path: "../UniversityInfoFeature"),
+                .project(target: "UniversityInfoInterface", path: "../UniversityInfoInterface"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),
                 .project(target: "CoreNetwork", path: "../../Core/CoreNetwork"),
