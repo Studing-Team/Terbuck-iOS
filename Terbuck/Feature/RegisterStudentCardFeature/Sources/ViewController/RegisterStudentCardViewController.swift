@@ -1,6 +1,6 @@
 //
 //  RegisterStudentCardViewController.swift
-//  DesignSystem
+//  RegisterStudentCardFeature
 //
 //  Created by ParkJunHyuk on 4/25/25.
 //
@@ -15,12 +15,14 @@ import Shared
 
 import SnapKit
 import Then
+import RegisterStudentCardInterface
 
 public final class RegisterStudentCardViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
     private let registerStudentCardViewModel: RegisterStudentCardViewModel
+    weak var coordinator: RegisterStudentCardCoordinating?
     
     // MARK: - Combine Properties
     
@@ -45,14 +47,21 @@ public final class RegisterStudentCardViewController: UIViewController, UIGestur
     // MARK: - Init
     
     public init(
-        viewModel: RegisterStudentCardViewModel
+        viewModel: RegisterStudentCardViewModel,
+        coordinator: RegisterStudentCardCoordinating
     ) {
         self.registerStudentCardViewModel = viewModel
+        self.coordinator = coordinator
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        AppLogger.log("RegisterStudentCardViewController Deinit", .info, .ui)
+        coordinator?.didFinishRegistration()
     }
     
     // MARK: - Life Cycle
