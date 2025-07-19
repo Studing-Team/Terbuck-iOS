@@ -200,12 +200,9 @@ public final class StoreListModalViewController: UIViewController {
     
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: view)
-        let sheetHeight = view.frame.height - 46 //getTabBarHeight()
+        let sheetHeight = view.frame.height - 46
         let threshold: CGFloat = 40 // 제스처 이동 임계값
-        
-        print("현재 위치: \(currentSnapIndex), Y 이동량: \(translation.y)")
-        print("시트 전체 높이:" , sheetHeight + translation.y)
-        
+
         switch gesture.state {
         case .changed:
             
