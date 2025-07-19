@@ -249,7 +249,6 @@ private extension StoreListModalViewController {
         storeMapViewModel.storeListSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] items in
-                print("💡 store list count: \(items.count)")
                 self?.applyStoreSnapshot(items: items)
             }
             .store(in: &cancellables)
@@ -266,9 +265,7 @@ private extension StoreListModalViewController {
             .sink { [weak self] tappedStore in
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     if let data = self?.storeMapViewModel.storeListSubject.value {
-                        print("데이터 있음")
                         if let index = data.firstIndex(where: { $0.id == tappedStore.id }) {
-                            print("인덱스 있음", index)
                             self?.storeCollectionView.scrollToItem(
                                 at: IndexPath(item: index, section: 0),
                                 at: .centeredHorizontally,
