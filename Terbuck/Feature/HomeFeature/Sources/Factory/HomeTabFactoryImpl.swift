@@ -8,13 +8,19 @@
 import UIKit
 import HomeInterface
 import NotificationSettingInterface
+import RegisterStudentCardInterface
 
 public final class HomeTabFactoryImpl: HomeTabFactory {
     
     private let alarmSettingFactory: AlarmSettingFactory
+    private let registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     
-    public init(alarmSettingFactory: AlarmSettingFactory) {
+    public init(
+        alarmSettingFactory: AlarmSettingFactory,
+        registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
+    ) {
         self.alarmSettingFactory = alarmSettingFactory
+        self.registerStudentCardFactory = registerStudentCardFactory
     }
     
     public func makeHomeCoordinator(navigationController: UINavigationController) -> HomeCoordinating {
@@ -26,7 +32,8 @@ public final class HomeTabFactoryImpl: HomeTabFactory {
             navigationController: navigationController,
             homeFactory: homeFactory,
             partnershipFactory: partnershipFactory,
-            alarmSettingFactory: alarmSettingFactory
+            alarmSettingFactory: alarmSettingFactory,
+            registerStudentCardFactory: registerStudentCardFactory
         )
     }
 }

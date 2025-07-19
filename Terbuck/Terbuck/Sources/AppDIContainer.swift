@@ -20,6 +20,10 @@ import MypageInterface
 import MypageFeature
 import NotificationSettingInterface
 import NotificationSettingFeature
+import UniversityInfoInterface
+import UniversityInfoFeature
+import RegisterStudentCardInterface
+import RegisterStudentCardFeature
 
 public final class AppDIContainer {
     func makeSplashFactory() -> SplashFactory {
@@ -27,22 +31,41 @@ public final class AppDIContainer {
     }
     
     func makeAuthFactory() -> AuthFactory {
-        return AuthFactoryImpl()
+        return AuthFactoryImpl(
+            universityInfoFactory: makeUniversityInfoFactory()
+        )
     }
     
     func makeHomeFactory() -> HomeTabFactory {
-        return HomeTabFactoryImpl(alarmSettingFactory: makeAlarmSettingFactory())
+        return HomeTabFactoryImpl(
+            alarmSettingFactory: makeAlarmSettingFactory(),
+            registerStudentCardFactory: registerStudentCardFactory()
+        )
     }
     
     func makeStoreFactory() -> StoreTabFactory {
-        return StoreTabFactoryImpl()
+        return StoreTabFactoryImpl(
+            registerStudentCardFactory: registerStudentCardFactory()
+        )
     }
     
     func makeMypageFactory() -> MypageTabFactory {
-        return MypageTabFactoryImpl(alarmSettingFactory: makeAlarmSettingFactory())
+        return MypageTabFactoryImpl(
+            alarmSettingFactory: makeAlarmSettingFactory(),
+            universityInfoFactory: makeUniversityInfoFactory(),
+            registerStudentCardFactory: registerStudentCardFactory()
+        )
     }
     
     func makeAlarmSettingFactory() -> AlarmSettingFactory {
         return AlarmSettingFactoryImpl()
+    }
+    
+    func makeUniversityInfoFactory() -> UniversityInfoFactory {
+        return UniversityInfoFactoryImpl()
+    }
+    
+    func registerStudentCardFactory() -> RegisterStudentCardCoordinatorFactory {
+        return RegisterStudentCardCoordinatorFactoryImpl(registerStudentCardFactory: RegisterStudentCardFactoryImpl())
     }
 }

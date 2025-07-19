@@ -99,7 +99,7 @@ private extension MypageViewController {
                 guard let self else { return }
                 
                 ToastManager.shared.showToast(from: self, type: type) {
-                    self.coordinator?.registerStudentID()
+                    self.coordinator?.startRegisterStudentCard(for: .register, location: nil)
                 }
             }
             .store(in: &cancellables)
@@ -365,7 +365,7 @@ extension MypageViewController: UICollectionViewDataSource, UICollectionViewDele
             cell.configureCell(forModel: model)
             
             cell.bindingAction(action: { [weak self] in
-                self?.coordinator?.startEditUniversity()
+                self?.coordinator?.showUniversity()
             })
 
             return cell

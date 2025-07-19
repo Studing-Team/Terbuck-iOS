@@ -190,6 +190,12 @@ private extension MypageViewModel {
     func performSearchMyInfo() -> AnyPublisher<Void, Never> {
         return searchMyInfoPublisher()
             .handleEvents(receiveOutput: { [weak self] model in
+                let afterUniversity = self?.userInfoModelSubject.value?.university
+                
+                if (afterUniversity != nil) && (model.university != afterUniversity) {
+                    self?.toasterMessageSubject.send(.changeUniversity)
+                }
+                
                 self?.userInfoModelSubject.send(model)
             }, receiveCompletion: { [weak self] completion in
                 if case .failure(let error) = completion {

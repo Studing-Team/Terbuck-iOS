@@ -175,11 +175,9 @@ private extension DetailBenefitListModalViewController {
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: view)
         let standardContentHeight = currentContentHeight
-        print(translation.y)
+        
         switch gesture.state {
         case .changed:
-            
-            print(standardContentHeight - translation.y)
             contentView.snp.remakeConstraints {
                 $0.horizontalEdges.equalToSuperview()
                 $0.bottom.equalToSuperview()

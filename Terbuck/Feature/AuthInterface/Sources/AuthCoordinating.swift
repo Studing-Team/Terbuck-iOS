@@ -12,6 +12,5 @@ public protocol AuthCoordinating: Coordinator {
     
     func startLogin()
     func startTermsOfService()
-    func startUniversity()
     func finishAuthFlow()
 }
