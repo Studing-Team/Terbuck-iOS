@@ -55,6 +55,7 @@ let appDependencies: [TargetDependency] = [
     .project(target: "NotificationSettingInterface", path: "Feature/NotificationSettingInterface"),
     .project(target: "NotificationSettingFeature", path: "Feature/NotificationSettingFeature"),
     .project(target: "UniversityInfoFeature", path: "Feature/UniversityInfoFeature"),
+    .project(target: "RegisterStudentCardFeature", path: "Feature/RegisterStudentCardFeature"),
 ]
 
 // MARK: - InfoPlist
