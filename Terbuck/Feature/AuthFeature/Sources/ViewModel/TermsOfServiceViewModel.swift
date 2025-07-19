@@ -53,9 +53,7 @@ public class TermsOfServiceViewModel {
         input.serviceTermsTapped
             .sink { [weak self] value in
                 guard let self else { return }
-                
                 self.serviceTermsSubject.send(value)
-                print("isServiceTerms:", self.serviceTermsSubject.value)
             }
             .store(in: &cancellables)
         
@@ -63,8 +61,6 @@ public class TermsOfServiceViewModel {
             .sink { [weak self] value in
                 guard let self else { return }
                 self.userInfoTermsSubject.send(value)
-
-                print("isUserInfoTerms:", self.userInfoTermsSubject.value)
             }
             .store(in: &cancellables)
         
