@@ -579,14 +579,3 @@ extension StoreMapViewController: StoreBottomSheetDelegate {
         }
     }
 }
-
-// MARK: - Show Preview
-
-//#if canImport(SwiftUI) && DEBUG
-//import SwiftUI
-//
-//#Preview("StoreMapViewController") {
-//    StoreMapViewController()
-//        .showPreview()
-//}
-//#endif
