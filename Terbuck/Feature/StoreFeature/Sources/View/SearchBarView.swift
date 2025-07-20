@@ -23,7 +23,6 @@ public final class SearchBarView: UIView {
     
     private var type: SearchBarType {
         didSet {
-            setupStyle()
             updateLayout()
         }
     }
@@ -54,6 +53,7 @@ public final class SearchBarView: UIView {
     
     public func configureSearchType(_ type: SearchBarType) {
         self.type = type
+        placeholderLabel.text = "우리 대학 제휴 업체는?"
     }
     
     public func configureSearchResultType(storeName: String) {
@@ -77,7 +77,6 @@ private extension SearchBarView {
             $0.image = image
             $0.tintColor = DesignSystem.Color.uiColor(.terbuckBlack30)
             $0.contentMode = .scaleAspectFit
-            $0.isHidden = type == .search ? true : false
         }
         
         rightSearchImageView.do {
@@ -116,20 +115,6 @@ private extension SearchBarView {
             $0.size.equalTo(24)
         }
         
-        if type == .search {
-            placeholderLabel.snp.makeConstraints {
-                $0.verticalEdges.equalToSuperview().inset(14.5)
-                $0.leading.equalToSuperview().offset(12)
-                $0.trailing.equalTo(rightSearchImageView.snp.leading).inset(5)
-            }
-        } else {
-            placeholderLabel.snp.makeConstraints {
-                $0.verticalEdges.equalToSuperview().inset(14.5)
-                $0.leading.equalTo(leftMenuImageView.snp.trailing).offset(12)
-                $0.trailing.equalTo(rightSearchImageView.snp.leading).inset(5)
-            }
-        }
-        
         rightSearchImageView.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview().inset(12)
             $0.trailing.equalToSuperview().inset(12)
@@ -138,6 +123,10 @@ private extension SearchBarView {
     }
     
     func updateLayout() {
+        leftMenuImageView.isHidden = type == .search ? true : false
+        
+        placeholderLabel.textColor = DesignSystem.Color.uiColor(type == .search ? .terbuckBlack10 : .terbuckBlack50)
+        
         placeholderLabel.snp.remakeConstraints {
             $0.verticalEdges.equalToSuperview().inset(14.5)
             $0.trailing.equalTo(rightSearchImageView.snp.leading).inset(5)
