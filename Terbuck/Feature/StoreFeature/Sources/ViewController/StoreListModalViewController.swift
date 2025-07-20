@@ -246,6 +246,13 @@ private extension StoreListModalViewController {
     func bindViewModel() {
         storeMapViewModel.viewLifeCycleSubject.send(.viewDidLoad)
         
+        storeMapViewModel.initStoreDataSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] items in
+                self?.applyStoreSnapshot(items: items)
+            }
+            .store(in: &cancellables)
+        
         storeMapViewModel.storeListSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] items in
