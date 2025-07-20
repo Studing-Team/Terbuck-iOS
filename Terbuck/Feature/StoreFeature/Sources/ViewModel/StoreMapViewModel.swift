@@ -11,6 +11,8 @@ import UIKit
 import DesignSystem
 import Shared
 
+import NMapsMap
+
 enum StoreMapError: LocalizedError, Equatable {
     case studentInfoFailed
     case unknown
@@ -51,6 +53,7 @@ public final class StoreMapViewModel {
     public let longitudeSubject = CurrentValueSubject<Double?, Never>(nil)
     public let currentSnapIndex = CurrentValueSubject<Int, Never>(1)
     public let storeSearchKeywordSubject = CurrentValueSubject<[CurrentSearchModel], Never>([])
+    public let currentCategoryMarkersSubject = CurrentValueSubject<[NMFMarker], Never>([])
     
     // MARK: - SearchStore Input Combine Publishers Properties
     
@@ -62,6 +65,7 @@ public final class StoreMapViewModel {
     
     // MARK: - Output Combine Publishers Properties
     
+    public let initStoreDataSubject = PassthroughSubject<[StoreListModel], Never>()
     public let storeListSubject = CurrentValueSubject<[StoreListModel], Never>([])
     public let categoryItemsSubject = CurrentValueSubject<[CategoryModel], Never>([])
     public let storeItemsTappedResult = PassthroughSubject<Int, Never>()
@@ -104,15 +108,16 @@ public final class StoreMapViewModel {
                 self?.updateCategorySelection(to: index)
             })
             .share()
-        
-        // ✅ 전체 카테고리일 경우: 서버 호출
-        let fetchPublisher = sharedPublisher
-            .filter { categoryIndex in categoryIndex == 0 }
-            .flatMap { [weak self] categoryIndex -> AnyPublisher<[StoreListModel], Never> in
-                guard let self else { return Empty().eraseToAnyPublisher() }
 
+        // 1️⃣ 전체 카테고리일 경우: 서버 호출 스트림
+        sharedPublisher
+            .filter { categoryIndex in categoryIndex == 0 }
+            .flatMap { [weak self] _ -> AnyPublisher<[StoreListModel], Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                
                 return self.getStoreDataPublisher(category: "", lat: latitude, lng: longitude)
                     .handleEvents(receiveCompletion: { [weak self] completion in
+                        
                         if case .failure(let error) = completion {
                             self?.storeMapErrorSubject.send(error)
                         }
@@ -120,30 +125,26 @@ public final class StoreMapViewModel {
                     .catch { _ in Just([]) }
                     .eraseToAnyPublisher()
             }
-        
-        // ✅ 특정 카테고리 선택시: 필터링만 수행
-        let filterPublisher = sharedPublisher
-            .filter { categoryIndex in categoryIndex != 0 }
-            .handleEvents(receiveOutput: { [weak self] categoryIndex in
-                self?.updateStoreList(to: categoryIndex)
-            })
-            .map { _ in [StoreListModel]() } // 빈 리스트로 데이터 방출
-
-        // ✅ 병합 후 처리
-        Publishers.Merge(fetchPublisher, filterPublisher)
             .sink { [weak self] storeList in
-                guard !storeList.isEmpty else { return }
                 self?.categoryStoreData.removeAll()
                 
                 storeList.forEach {
                     self?.cachedItems[$0.id] = $0
                     self?.categoryStoreData[$0.category, default: []].append($0)
                 }
-
-                self?.storeListSubject.send(storeList)
+                
+                self?.initStoreDataSubject.send(storeList)
             }
             .store(in: &cancellables)
-        
+
+        // 2️⃣ 특정 카테고리 선택시: 필터링 스트림
+        sharedPublisher
+            .filter { categoryIndex in categoryIndex != 0 }
+            .sink { [weak self] categoryIndex in
+                self?.updateStoreList(to: categoryIndex)
+            }
+            .store(in: &cancellables)
+       
         didSelectItemSubject
             .sink { [weak self] index in
                 guard let data = self?.storeListSubject.value[index] else { return }

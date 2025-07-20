@@ -23,7 +23,7 @@ public final class SearchBarView: UIView {
     
     private var type: SearchBarType {
         didSet {
-            setupStyle()
+            updateLayout()
         }
     }
     
@@ -53,6 +53,7 @@ public final class SearchBarView: UIView {
     
     public func configureSearchType(_ type: SearchBarType) {
         self.type = type
+        placeholderLabel.text = "우리 대학 제휴 업체는?"
     }
     
     public func configureSearchResultType(storeName: String) {
@@ -71,14 +72,10 @@ private extension SearchBarView {
         }
         
         leftMenuImageView.do {
-            if type == .search {
-                $0.image = .line3
-            } else {
-                let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
-                let image = UIImage(systemName: "chevron.left", withConfiguration: config)
-                $0.image = image
-                $0.tintColor = DesignSystem.Color.uiColor(.terbuckBlack30)
-            }
+            let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
+            let image = UIImage(systemName: "chevron.left", withConfiguration: config)
+            $0.image = image
+            $0.tintColor = DesignSystem.Color.uiColor(.terbuckBlack30)
             $0.contentMode = .scaleAspectFit
         }
         
@@ -118,16 +115,27 @@ private extension SearchBarView {
             $0.size.equalTo(24)
         }
         
-        placeholderLabel.snp.makeConstraints {
-            $0.verticalEdges.equalToSuperview().inset(14.5)
-            $0.leading.equalTo(leftMenuImageView.snp.trailing).offset(12)
-            $0.trailing.equalTo(rightSearchImageView.snp.leading).inset(5)
-        }
-        
         rightSearchImageView.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview().inset(12)
             $0.trailing.equalToSuperview().inset(12)
             $0.size.equalTo(24)
+        }
+    }
+    
+    func updateLayout() {
+        leftMenuImageView.isHidden = type == .search ? true : false
+        
+        placeholderLabel.textColor = DesignSystem.Color.uiColor(type == .search ? .terbuckBlack10 : .terbuckBlack50)
+        
+        placeholderLabel.snp.remakeConstraints {
+            $0.verticalEdges.equalToSuperview().inset(14.5)
+            $0.trailing.equalTo(rightSearchImageView.snp.leading).inset(5)
+            
+            if type == .search {
+                $0.leading.equalToSuperview().offset(12)
+            } else {
+                $0.leading.equalTo(leftMenuImageView.snp.trailing).offset(12)
+            }
         }
     }
 }
@@ -137,6 +145,9 @@ import SwiftUI
 
 #Preview("SearchBarView") {
     SearchBarView(type: .search)
+        .showPreview()
+    
+    SearchBarView(type: .searchResult)
         .showPreview()
 }
 #endif

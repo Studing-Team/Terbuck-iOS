@@ -41,11 +41,7 @@ public class TermsOfServiceViewModel {
     
     // MARK: - Init
     
-    public init(
-        
-    ) {
-        
-    }
+    public init() { }
     
     // MARK: - Public methods
     

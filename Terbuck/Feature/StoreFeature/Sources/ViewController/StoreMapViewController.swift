@@ -114,7 +114,7 @@ final class StoreMapViewController: UIViewController {
 
 private extension StoreMapViewController {
     func bindViewModel() {
-        storeMapViewModel.storeListSubject
+        storeMapViewModel.initStoreDataSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] items in
                 guard let self else { return }
@@ -123,6 +123,19 @@ private extension StoreMapViewController {
                 let type = CategoryType.allCases[index]
                 
                 self.initStoreMarkers(with: items)
+                self.filterToCategoryTypeMarker(category: type)
+                self.fitAllMarkers(currentCategoryMarkers, in: mapView, currentIndex: self.storeMapViewModel.currentSnapIndex.value)
+            }
+            .store(in: &cancellables)
+        
+        storeMapViewModel.storeListSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] items in
+                guard let self else { return }
+                
+                let index = storeMapViewModel.storeCategoryPublisher.value
+                let type = CategoryType.allCases[index]
+                
                 self.filterToCategoryTypeMarker(category: type)
                 self.fitAllMarkers(currentCategoryMarkers, in: mapView, currentIndex: self.storeMapViewModel.currentSnapIndex.value)
             }
@@ -267,7 +280,11 @@ private extension StoreMapViewController {
             return storedStore.id == store.id
         }
         
-        storeMarker?.mapView = mapView
+        if let storeMarker {
+            selectedMarker = storeMarker
+            currentCategoryMarkers.append(storeMarker)
+            makeMakerInMapView()
+        }
     }
 
     func fitAllMarkers(_ markers: [NMFMarker], in mapView: NMFMapView, currentIndex: Int) {
