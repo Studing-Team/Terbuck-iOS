@@ -5,14 +5,14 @@ import ProjectDescription
 let settings: Settings = .settings(
     base: [
         "MARKETING_VERSION": "1.0.1",
-        "CURRENT_PROJECT_VERSION": "1",
+        "CURRENT_PROJECT_VERSION": "2",
         "DEVELOPMENT_TEAM": "N3H27N59VG",
         "CODE_SIGN_STYLE": "Automatic",
         "OTHER_LDFLAGS": ["-all_load"],
     ],
     configurations: [
         .debug(name: "Debug", xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig")),
-        .release(name: "Release", xcconfig: .relativeToRoot("Terbuck/Configs/Release.xcconfig"))
+//        .release(name: "Release", xcconfig: .relativeToRoot("Terbuck/Configs/Release.xcconfig"))
     ]
 //    configurations: [
 //        .debug(name: "Debug", settings: ["PRODUCT_NAME": "터벅"], xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig")),

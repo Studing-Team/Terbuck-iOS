@@ -109,6 +109,7 @@ public class LoginViewModel {
                     KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
                     
                     MixpanelManager.shared.setupUser(userId: loginResult.userId)
+                    MixpanelManager.shared.setupPlatform()
                 }
             })
             .eraseToAnyPublisher()
@@ -141,6 +142,7 @@ public class LoginViewModel {
                     KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
                     
                     MixpanelManager.shared.setupUser(userId: loginResult.userId)
+                    MixpanelManager.shared.setupPlatform()
                 }
             })
             .eraseToAnyPublisher()
