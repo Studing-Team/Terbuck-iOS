@@ -263,11 +263,10 @@ private extension HomeViewModel {
             
             Task {
                 do {
-                    async let partnershipResult = self.searchPartnershipUseCase.searchExecute()
-                    async let newPartnershipResult = self.searchPartnershipUseCase.newSearchExecute()
+                    let partnershipResult = try await self.searchPartnershipUseCase.searchExecute()
+                    let newPartnershipResult = try await self.searchPartnershipUseCase.newSearchExecute()
                     
-                    let results = try await (partnershipResult + newPartnershipResult)
-                    promise(.success(results))
+                    promise(.success(partnershipResult + newPartnershipResult))
                 } catch {
                     promise(.failure(.serverFailed))
                 }
