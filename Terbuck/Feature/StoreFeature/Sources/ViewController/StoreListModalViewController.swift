@@ -22,9 +22,9 @@ public enum StoreListType {
 public final class StoreListModalViewController: UIViewController {
     
     enum Section: Int {
-       case storeList
-       case empty
-   }
+        case storeList
+        case empty
+    }
     
     // MARK: - Properties
     
@@ -45,8 +45,8 @@ public final class StoreListModalViewController: UIViewController {
     weak var delegate: StoreBottomSheetDelegate?
     
     public var initialSnapPoint: CGFloat {
-       snapPoints.isEmpty ? 290 : snapPoints[currentSnapIndex]
-   }
+        snapPoints.isEmpty ? 290 : snapPoints[currentSnapIndex]
+    }
     
     private var type: StoreListType
     
@@ -70,7 +70,7 @@ public final class StoreListModalViewController: UIViewController {
     private let storeCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-
+        
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         layout.itemSize = CGSize(width: UIScreen.main.bounds.width, height: 112)
         
@@ -129,10 +129,10 @@ public final class StoreListModalViewController: UIViewController {
         setupStyle()
         setupHierarchy()
         setupLayout()
+        setupGesture()
         setupDelegate()
         setupStoreDataSource()
         bindViewModel()
-        setupGesture()
         setupCategoryDataSource()
         setupCollectionView()
         
@@ -182,7 +182,7 @@ public final class StoreListModalViewController: UIViewController {
             layout.itemSize = CGSize(width: 375, height: 112)
             layout.minimumLineSpacing = 12
             layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-
+            
             storeCollectionView.setCollectionViewLayout(layout, animated: true)
             storeCollectionView.isScrollEnabled = false
             storeCollectionView.isPagingEnabled = false
@@ -200,28 +200,24 @@ public final class StoreListModalViewController: UIViewController {
     
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: view)
-        let sheetHeight = view.frame.height - 46
-        let threshold: CGFloat = 40 // 제스처 이동 임계값
-
+        let threshold: CGFloat = 40
+        
         switch gesture.state {
         case .changed:
-            
-            storeCollectionView.isScrollEnabled = false
-            
             if translation.y < 0 && currentSnapIndex != 3 { // 위로 스크롤
                 delegate?.bottomSheet(self, currentPoint: snapPoints[currentSnapIndex], didChangeHeight: -translation.y)
-
+                
             } else if translation.y > 0 && currentSnapIndex != 0 {
                 delegate?.bottomSheet(self, currentPoint: snapPoints[currentSnapIndex], didChangeHeight: -translation.y)
             }
             
         case .ended, .cancelled:
             var newSnapIndex = currentSnapIndex
-
+            
             // 위로 스와이프 (translation.y < 0)
             if translation.y < 0 && -translation.y > threshold && currentSnapIndex != 3 {
                 newSnapIndex = currentSnapIndex + 1
-                          
+                
                 storeCollectionView.isScrollEnabled = newSnapIndex == 3 ? true : false
             }
             
@@ -229,11 +225,11 @@ public final class StoreListModalViewController: UIViewController {
             else if translation.y > 0 && translation.y > threshold && currentSnapIndex != 0 {
                 newSnapIndex = currentSnapIndex - 1
             }
-
+            
             currentSnapIndex = newSnapIndex
             storeMapViewModel.currentSnapIndex.send(newSnapIndex)
             delegate?.bottomSheet(self, currentPoint: snapPoints[currentSnapIndex], didChangeHeight: 0)
-        
+            
         default:
             break
         }
@@ -331,7 +327,7 @@ private extension StoreListModalViewController {
     
     func setupHierarchy() {
         view.addSubview(containerView)
-        containerView.addSubviews(contentView, categoryCollectionView)//, backgroundView)
+        containerView.addSubviews(contentView, categoryCollectionView)
         contentView.addSubviews(indicator, storeCollectionView)
     }
     
@@ -374,8 +370,9 @@ private extension StoreListModalViewController {
     
     func setupDelegate() {
         storeCollectionView.delegate = self
-
         categoryCollectionView.delegate = self
+        
+        panGesture.delegate = self
     }
 }
 
@@ -384,16 +381,62 @@ private extension StoreListModalViewController {
 extension StoreListModalViewController: UICollectionViewDelegate {
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == storeCollectionView {
-
-            print("storeCollectionView 눌림:", indexPath.row)
             storeMapViewModel.didSelectItemSubject.send(indexPath.row)
-            
         } else if collectionView == self.categoryCollectionView {
-            // 일반 collectionView 관련 처리
-            print("categoryCollectionView 눌림:", indexPath.row)
-            
             storeMapViewModel.storeCategoryPublisher.send(indexPath.row)
         }
+    }
+    
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView == storeCollectionView {
+            if scrollView.contentOffset.y < 0 {
+                scrollView.contentOffset.y = 0
+                storeCollectionView.isScrollEnabled = false
+            } else {
+                storeCollectionView.isScrollEnabled = true
+            }
+        }
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension StoreListModalViewController: UIGestureRecognizerDelegate {
+    /*
+     두 제스처 인식기가 동시에 인식되도록 허용할지 여부를 결정합니다.
+     - 여기서는 containerView의 panGesture와 storeCollectionView의 내장 panGesture가 동시에 작동하도록 허용하여,
+     - 모달 드래그와 컬렉션뷰 스크롤 간의 자연스러운 전환을 구현합니다.
+    */
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // panGesture와 storeCollectionView의 panGesture가 동시에 인식되도록 허용
+        return true
+    }
+    
+    /*
+     제스처 인식기가 터치 이벤트를 받아 분석을 시작해야 하는지 여부를 결정합니다.
+     - 이 메서드를 사용하여 특정 조건에서만 panGesture가 시작되도록 제어합니다.
+     - 예를 들어, 컬렉션 뷰가 스크롤 가능한 상태일 때는 panGesture가 시작되지 않도록 막아, 컬렉션 뷰 스크롤이 우선적으로 처리되게 합니다.
+    */
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 이 로직은 직접 만든 panGesture에만 적용
+        guard gestureRecognizer === self.panGesture else { return true }
+        
+        let velocity = self.panGesture.velocity(in: self.view)
+        let isCollectionViewAtTop = self.storeCollectionView.contentOffset.y <= 0
+        
+        // 사용자가 위로 스크롤(모달 확장)하려는 경우는 항상 허용
+        if velocity.y < 0 {
+            return true
+        }
+        
+        // 사용자가 아래로 스크롤하고, 컬렉션뷰가 최상단에 있을 때만 허용
+        if velocity.y > 0 && isCollectionViewAtTop {
+            return true
+        }
+        
+        // 그 외의 경우(아래로 스크롤 중인데 컬렉션뷰가 최상단이 아님)에는
+        // panGesture가 시작되지 않도록 막아서 컬렉션뷰 스크롤이 되도록 구현
+        return false
     }
 }
 
