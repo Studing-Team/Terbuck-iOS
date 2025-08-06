@@ -202,7 +202,7 @@ private extension MypageViewController {
         }
         
         versionLabel.do {
-            $0.text = "앱 버전  V.1.0.0"
+            $0.text = "앱 버전  V.1.0.1"
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
             $0.font = DesignSystem.Font.uiFont(.textRegular14)
         }
