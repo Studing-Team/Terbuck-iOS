@@ -116,32 +116,20 @@ let project = Project(
         ),
     ],
     schemes: [
-        .scheme(
-            name: "Terbuck_Dev",
-            shared: true,
-            buildAction: .buildAction(targets: [
-                .target("Terbuck")
-            ]),
-            runAction: .runAction(configuration: "Debug"),
-            archiveAction: .archiveAction(configuration: "Debug")
-        ),
-        .scheme(
-            name: "Terbuck_TestFlight",
-            shared: true,
-            buildAction: .buildAction(targets: [
-                .target("Terbuck")
-            ]),
-            runAction: .runAction(configuration: "TestFlight"),
-            archiveAction: .archiveAction(configuration: "TestFlight")
-        ),
-        .scheme(
-            name: "Terbuck_Release",
-            shared: true,
-            buildAction: .buildAction(targets: [
-                .target("Terbuck")
-            ]),
-            runAction: .runAction(configuration: "Release"),
-            archiveAction: .archiveAction(configuration: "Release")
-        ),
-    ],
+        makeScheme(name: "Terbuck_Dev", configuration: "Debug"),
+        makeScheme(name: "Terbuck_TestFlight", configuration: "TestFlight"),
+        makeScheme(name: "Terbuck_Release", configuration: "Release"),
+    ]
 )
+
+private func makeScheme(name: String, configuration: ConfigurationName) -> Scheme {
+    return .scheme(
+        name: name,
+        shared: true,
+        buildAction: .buildAction(targets: [
+            .target("Terbuck")
+        ]),
+        runAction: .runAction(configuration: configuration),
+        archiveAction: .archiveAction(configuration: configuration)
+    )
+}

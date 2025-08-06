@@ -202,7 +202,8 @@ private extension MypageViewController {
         }
         
         versionLabel.do {
-            $0.text = "앱 버전  V.1.0.1"
+            let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "정보없음"
+            $0.text = "앱 버전  V.\(appVersion)"
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
             $0.font = DesignSystem.Font.uiFont(.textRegular14)
         }
