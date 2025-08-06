@@ -5,6 +5,13 @@ import PackageDescription
     import struct ProjectDescription.PackageSettings
 
     let packageSettings = PackageSettings(
+        baseSettings: .settings(
+            configurations: [
+                .debug(name: "Debug"),
+                .release(name: "TestFlight"),
+                .release(name: "Release"),
+            ]
+        )
         // Customize the product types for specific package product
         // Default is .staticFramework
     )
