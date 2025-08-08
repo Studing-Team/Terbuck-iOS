@@ -2,40 +2,19 @@ import ProjectDescription
 
 // MARK: - Settings
 
-let settings: Settings = .settings(
+let projectSettings: Settings = .settings(
     base: [
         "MARKETING_VERSION": "1.0.1",
-        "CURRENT_PROJECT_VERSION": "2",
+        "CURRENT_PROJECT_VERSION": "4",
         "DEVELOPMENT_TEAM": "N3H27N59VG",
         "CODE_SIGN_STYLE": "Automatic",
         "OTHER_LDFLAGS": ["-all_load"],
     ],
     configurations: [
         .debug(name: "Debug", xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig")),
-//        .release(name: "Release", xcconfig: .relativeToRoot("Terbuck/Configs/Release.xcconfig"))
+        .release(name: "TestFlight", xcconfig: .relativeToRoot("Terbuck/Configs/TestFlight.xcconfig")),
+        .release(name: "Release", xcconfig: .relativeToRoot("Terbuck/Configs/Release.xcconfig")),
     ]
-//    configurations: [
-//        .debug(name: "Debug", settings: ["PRODUCT_NAME": "터벅"], xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig")),
-//        .release(name: "Release", settings: ["PRODUCT_NAME": "터벅"], xcconfig: .relativeToRoot("Terbuck/Configs/Release.xcconfig"))
-//    ]
-//    configurations: [
-//        .debug(
-//            name: .debug,
-//            settings: [
-//                "PRODUCT_BUNDLE_IDENTIFIER": "com.Fouryears.Terbuck",
-//                "PRODUCT_NAME": "터벅_Dev"
-//            ],
-//            xcconfig: .relativeToRoot("Terbuck/Configs/Debug.xcconfig")
-//        ),
-//        .release(
-//            name: .release,
-//            settings: [
-//                "PRODUCT_BUNDLE_IDENTIFIER": "com.Fouryears.Terbuck",
-//                "PRODUCT_NAME": "터벅"
-//            ],
-//            xcconfig: .relativeToRoot("Terbuck/Configs/Release.xcconfig")
-//        )
-//    ]
 )
 
 // MARK: - Dependencies
@@ -85,7 +64,7 @@ let appInfoPlist: [String: Plist.Value] = [
         ["CFBundleURLSchemes": ["kakao$(KAKAO_NATIVE_APP_KEY)"]]
     ],
     "LSApplicationQueriesSchemes": [
-        "kakaokompassauth", 
+        "kakaokompassauth",
         "kakaolink"
     ],
     "UIBackgroundModes": [
@@ -111,6 +90,7 @@ let project = Project(
         defaultKnownRegions: ["Ko"],
         developmentRegion: "Ko",
     ),
+    settings: projectSettings,
     targets: [
         .target(
             name: "Terbuck",
@@ -123,7 +103,6 @@ let project = Project(
             resources: ["Terbuck/Resources/**"],
             entitlements: "Terbuck/Terbuck.entitlements",
             dependencies: appDependencies,
-            settings: settings
         ),
         .target(
             name: "TerbuckTests",
@@ -135,5 +114,22 @@ let project = Project(
             resources: [],
             dependencies: [.target(name: "Terbuck")]
         ),
+    ],
+    schemes: [
+        makeScheme(name: "Terbuck_Dev", configuration: "Debug"),
+        makeScheme(name: "Terbuck_TestFlight", configuration: "TestFlight"),
+        makeScheme(name: "Terbuck_Release", configuration: "Release"),
     ]
 )
+
+private func makeScheme(name: String, configuration: ConfigurationName) -> Scheme {
+    return .scheme(
+        name: name,
+        shared: true,
+        buildAction: .buildAction(targets: [
+            .target("Terbuck")
+        ]),
+        runAction: .runAction(configuration: configuration),
+        archiveAction: .archiveAction(configuration: configuration)
+    )
+}
