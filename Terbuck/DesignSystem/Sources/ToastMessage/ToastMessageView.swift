@@ -57,6 +57,7 @@ private extension ToastMessageView {
         iconImageView.do {
             $0.contentMode = .scaleAspectFit
             $0.image = type.image
+            $0.isHidden = type.image == nil ? true : false
         }
 
         titleLabel.do {
