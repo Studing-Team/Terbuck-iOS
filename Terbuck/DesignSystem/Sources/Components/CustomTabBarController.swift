@@ -14,6 +14,8 @@ public final class CustomTabBarController: UITabBarController {
     
     public let customTabBarView = CustomTabBar()
     
+    // MARK: - Life Cycle
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         delegate = self
@@ -34,5 +36,9 @@ private extension CustomTabBarController {
 extension CustomTabBarController: UITabBarControllerDelegate {
     public func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         self.customTabBarView.updateSelectedIndex(to: selectedIndex)
+        
+        // 햅틱 피드백
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
     }
 }

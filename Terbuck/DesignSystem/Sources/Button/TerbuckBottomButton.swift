@@ -27,6 +27,7 @@ public enum TerbuckButtonType {
     case close(type: ButtonType)
     case moveNaver
     case moveInstar
+    case requestPartner
     
     var title: String {
         switch self {
@@ -41,6 +42,7 @@ public enum TerbuckButtonType {
         case .close: return "닫기"
         case .moveNaver: return "네이버 플레이스로 이동"
         case .moveInstar: return "인스타그램 게시물 보기"
+        case .requestPartner: return "제휴혜택 정보 요청하기"
         }
     }
     
