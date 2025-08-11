@@ -65,7 +65,7 @@ public final class StoreMapViewModel {
     
     // MARK: - Output Combine Publishers Properties
     
-    public let initStoreDataSubject = PassthroughSubject<[StoreListModel], Never>()
+    public let initStoreDataSubject = CurrentValueSubject<[StoreListModel], Never>([])
     public let storeListSubject = CurrentValueSubject<[StoreListModel], Never>([])
     public let categoryItemsSubject = CurrentValueSubject<[CategoryModel], Never>([])
     public let storeItemsTappedResult = PassthroughSubject<Int, Never>()
@@ -147,8 +147,19 @@ public final class StoreMapViewModel {
        
         didSelectItemSubject
             .sink { [weak self] index in
-                guard let data = self?.storeListSubject.value[index] else { return }
-                self?.storeItemsTappedResult.send(data.id)
+                guard let self else { return }
+                let categoryIndex = self.storeCategoryPublisher.value
+                
+                // 전체 카테고리
+                if categoryIndex == 0 {
+                    let data = self.initStoreDataSubject.value[index]
+                    self.storeItemsTappedResult.send(data.id)
+                } else {
+                    let category = self.categoryItemsSubject.value[categoryIndex]
+                    guard let datas = self.categoryStoreData[category.type] else { return }
+
+                    self.storeItemsTappedResult.send(datas[index].id)
+                }
             }
             .store(in: &cancellables)
         

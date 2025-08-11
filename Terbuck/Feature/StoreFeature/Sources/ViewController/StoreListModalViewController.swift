@@ -391,9 +391,6 @@ extension StoreListModalViewController: UICollectionViewDelegate {
         if scrollView == storeCollectionView {
             if scrollView.contentOffset.y < 0 {
                 scrollView.contentOffset.y = 0
-                storeCollectionView.isScrollEnabled = false
-            } else {
-                storeCollectionView.isScrollEnabled = true
             }
         }
     }
@@ -425,8 +422,12 @@ extension StoreListModalViewController: UIGestureRecognizerDelegate {
         let isCollectionViewAtTop = self.storeCollectionView.contentOffset.y <= 0
         
         // 사용자가 위로 스크롤(모달 확장)하려는 경우는 항상 허용
-        if velocity.y < 0 {
+        if velocity.y < 0 && currentSnapIndex != 3 {
+            storeCollectionView.isScrollEnabled = false
             return true
+        } else if velocity.y < 0 && currentSnapIndex == 3 {
+            storeCollectionView.isScrollEnabled = true
+            return false
         }
         
         // 사용자가 아래로 스크롤하고, 컬렉션뷰가 최상단에 있을 때만 허용
