@@ -80,6 +80,10 @@ public extension UIImage {
     static var closeXIcon: UIImage {
         return ResourceAsset.Image.closeX.image
     }
+    
+    static var noDataBackground: UIImage {
+        return ResourceAsset.Image.noDataBackground.image
+    }
 }
 
 // MARK: - Select Marker Image
