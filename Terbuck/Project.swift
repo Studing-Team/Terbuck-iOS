@@ -4,7 +4,7 @@ import ProjectDescription
 
 let projectSettings: Settings = .settings(
     base: [
-        "MARKETING_VERSION": "1.0.2",
+        "MARKETING_VERSION": "1.0.3",
         "CURRENT_PROJECT_VERSION": "1",
         "DEVELOPMENT_TEAM": "N3H27N59VG",
         "CODE_SIGN_STYLE": "Automatic",
