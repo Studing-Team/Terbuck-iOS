@@ -13,6 +13,7 @@ import Then
 public final class CustomTabBarController: UITabBarController {
     
     public let customTabBarView = CustomTabBar()
+    private let hapticGenerator = UIImpactFeedbackGenerator(style:  .soft)
     
     // MARK: - Life Cycle
     
@@ -38,7 +39,6 @@ extension CustomTabBarController: UITabBarControllerDelegate {
         self.customTabBarView.updateSelectedIndex(to: selectedIndex)
         
         // 햅틱 피드백
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        hapticGenerator.impactOccurred()
     }
 }

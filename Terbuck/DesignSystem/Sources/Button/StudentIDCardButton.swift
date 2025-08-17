@@ -14,6 +14,7 @@ public class StudentIDCardButton: UIButton {
     var originalColor: UIColor?
 
     var buttonAction: (() -> Void)?
+    private let hapticGenerator = UIImpactFeedbackGenerator(style:  .soft)
     
     // MARK: - Init
     
@@ -43,8 +44,7 @@ private extension StudentIDCardButton {
 
     @objc private func animateTouchUp() {
         // 햅틱 피드백
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        hapticGenerator.impactOccurred()
         
         UIView.animate(withDuration: 0.1) {
             self.transform = .identity
