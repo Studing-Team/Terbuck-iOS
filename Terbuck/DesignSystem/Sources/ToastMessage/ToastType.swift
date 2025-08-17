@@ -77,7 +77,7 @@ public enum ToastType {
             return "등록하기"
         
         case .alarmStudentCard, .requestPartnership:
-            return "알림받기"
+            return "알림켜기"
             
         case .changeUniversity:
             return "학생증 재등록"
