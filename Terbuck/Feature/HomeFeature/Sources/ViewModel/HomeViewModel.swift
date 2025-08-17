@@ -49,7 +49,7 @@ public final class HomeViewModel {
     
     // MARK: - Public Combine Publishers Properties
     
-    public var homeDataStateSubject = CurrentValueSubject<HomeDataStateType?, Never>(.noData)
+    public var homeDataStateSubject = CurrentValueSubject<HomeDataStateType?, Never>(nil)
     public var sectionDataSubject = CurrentValueSubject<[HomeSection: [HomeItem]], Never>([:])
     public let myLocationSubject = CurrentValueSubject<(latitude: Double?, longitude: Double?), Never>((nil, nil))
     public let emptyStateButtonTapSubject = PassthroughSubject<Void, Never>()
@@ -145,12 +145,12 @@ public final class HomeViewModel {
                     }
                 }
                 
-//                if sectionData.isEmpty {
-//                    self.homeDataStateSubject.send(.noData)
-//                } else {
-//                    self.homeDataStateSubject.send(.existData)
-//                    self.sectionDataSubject.send(sectionData)
-//                }
+                if sectionData.isEmpty {
+                    self.homeDataStateSubject.send(.noData)
+                } else {
+                    self.homeDataStateSubject.send(.existData)
+                    self.sectionDataSubject.send(sectionData)
+                }
             }
             .store(in: &cancellables)
         
