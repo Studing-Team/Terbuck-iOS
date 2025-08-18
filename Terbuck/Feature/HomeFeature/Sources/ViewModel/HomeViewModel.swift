@@ -25,6 +25,12 @@ enum HomeError: LocalizedError, Equatable {
     }
 }
 
+public enum HomeDataStateType {
+    case noData
+    case requestPartner
+    case existData
+}
+
 public final class HomeViewModel {
     
     // MARK: - Properties
@@ -43,8 +49,10 @@ public final class HomeViewModel {
     
     // MARK: - Public Combine Publishers Properties
     
-    var sectionDataSubject = CurrentValueSubject<[HomeSection: [HomeItem]], Never>([:])
+    public var homeDataStateSubject = CurrentValueSubject<HomeDataStateType?, Never>(nil)
+    public var sectionDataSubject = CurrentValueSubject<[HomeSection: [HomeItem]], Never>([:])
     public let myLocationSubject = CurrentValueSubject<(latitude: Double?, longitude: Double?), Never>((nil, nil))
+    public let emptyStateButtonTapSubject = PassthroughSubject<Void, Never>()
     
     // MARK: - Input
     
@@ -137,7 +145,18 @@ public final class HomeViewModel {
                     }
                 }
                 
-                self.sectionDataSubject.send(sectionData)
+                if sectionData.isEmpty {
+                    self.homeDataStateSubject.send(.noData)
+                } else {
+                    self.homeDataStateSubject.send(.existData)
+                    self.sectionDataSubject.send(sectionData)
+                }
+            }
+            .store(in: &cancellables)
+        
+        emptyStateButtonTapSubject
+            .sink { [weak self] _ in
+                self?.homeDataStateSubject.send(.requestPartner)
             }
             .store(in: &cancellables)
         

@@ -38,12 +38,15 @@ final class HomeViewController: UIViewController {
     
     private let titleLogo = TerbuckLogoLabel(type: .medium)
     private let studentIDCardButton = DesignSystem.Button.studentIDCardButton()
-    private let segmentedTabView = SegmentedTabView()
-    private let refreshControl = UIRefreshControl()
+    private lazy var segmentedTabView = SegmentedTabView()
+    private lazy var refreshControl = UIRefreshControl()
     
     private lazy var collectionView: UICollectionView = {
         return UICollectionView(frame: .zero, collectionViewLayout: createLayout())
     }()
+    
+    private lazy var emptyStateView = EmptyStateView(type: .notRequest)
+    private lazy var emptyStateBottomButton = TerbuckBottomButton(type: .requestPartner)
     
     // MARK: - Init
     
@@ -138,12 +141,21 @@ private extension HomeViewController {
         
         homeViewModel.sectionDataSubject
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] sectionData in
+
                 self?.applySnapshot()
                 self?.collectionView.setContentOffset(.zero, animated: true)
             }
             .store(in: &cancellables)
         
+        homeViewModel.homeDataStateSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                guard let state else { return }
+                
+                self?.updateLayoutToDataExist(state)
+            }
+            .store(in: &cancellables)
         
         segmentedTabView
             .selectedFilterPublisher
@@ -165,7 +177,7 @@ private extension HomeViewController {
     }
     
     func setupHierarchy() {
-        self.view.addSubviews(titleLogo, studentIDCardButton, segmentedTabView, collectionView)
+        self.view.addSubviews(titleLogo, studentIDCardButton)
     }
     
     func setupLayout() {
@@ -177,17 +189,6 @@ private extension HomeViewController {
         studentIDCardButton.snp.makeConstraints {
             $0.centerY.equalTo(titleLogo)
             $0.trailing.equalToSuperview().inset(25)
-        }
-        
-        segmentedTabView.snp.makeConstraints {
-            $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(35))
-            $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(48)
-        }
-
-        collectionView.snp.makeConstraints {
-            $0.top.equalTo(segmentedTabView.snp.bottom).offset(16)
-            $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
     
@@ -227,6 +228,67 @@ private extension HomeViewController {
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    func updateLayoutToDataExist(_ state: HomeDataStateType) {
+        switch state {
+        case .noData:
+            [segmentedTabView, collectionView].forEach {
+                $0.removeFromSuperview()
+            }
+            
+            view.addSubviews(emptyStateView, emptyStateBottomButton)
+            
+            emptyStateView.snp.makeConstraints {
+                $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
+                $0.horizontalEdges.equalToSuperview()
+            }
+            
+            emptyStateBottomButton.snp.makeConstraints {
+                $0.horizontalEdges.equalToSuperview().inset(20)
+                $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(15)
+            }
+            
+            if emptyStateBottomButton.actions(forTarget: self, forControlEvent: .touchUpInside) == nil {
+                emptyStateBottomButton.addTarget(self, action: #selector(emptyStateBottomButtonTapped), for: .touchUpInside)
+            }
+            
+        case .requestPartner:
+            emptyStateBottomButton.removeFromSuperview()
+            emptyStateView.changeState(.completeRequest)
+            
+            emptyStateView.snp.remakeConstraints {
+                $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
+                $0.horizontalEdges.equalToSuperview()
+                $0.bottom.lessThanOrEqualToSuperview()
+            }
+            
+            ToastManager.shared.showToast(from: self, type: .requestPartnership) {
+                self.coordinator?.showAlarmSetting()
+            }
+            
+        case .existData:
+            [emptyStateView, emptyStateBottomButton].forEach {
+                $0.removeFromSuperview()
+            }
+            
+            view.addSubviews(segmentedTabView, collectionView)
+            
+            segmentedTabView.snp.makeConstraints {
+                $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(35))
+                $0.horizontalEdges.equalToSuperview().inset(20)
+                $0.height.equalTo(48)
+            }
+
+            collectionView.snp.makeConstraints {
+                $0.top.equalTo(segmentedTabView.snp.bottom).offset(16)
+                $0.horizontalEdges.bottom.equalToSuperview()
+            }
+        }
+    }
+    
+    @objc private func emptyStateBottomButtonTapped() {
+        homeViewModel.emptyStateButtonTapSubject.send()
     }
 }
 
