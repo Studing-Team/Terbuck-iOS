@@ -233,23 +233,23 @@ private extension HomeViewController {
     func updateLayoutToDataExist(_ state: HomeDataStateType) {
         switch state {
         case .noData:
-            if emptyStateView.superview == nil && emptyStateBottomButton.superview == nil {
-                [segmentedTabView, collectionView].forEach {
-                    $0.removeFromSuperview()
-                }
-                
-                view.addSubviews(emptyStateView, emptyStateBottomButton)
-                
-                emptyStateView.snp.makeConstraints {
-                    $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
-                    $0.horizontalEdges.equalToSuperview()
-                }
-                
-                emptyStateBottomButton.snp.makeConstraints {
-                    $0.horizontalEdges.equalToSuperview().inset(20)
-                    $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(15)
-                }
-                
+            [segmentedTabView, collectionView].forEach {
+                $0.removeFromSuperview()
+            }
+            
+            view.addSubviews(emptyStateView, emptyStateBottomButton)
+            
+            emptyStateView.snp.makeConstraints {
+                $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
+                $0.horizontalEdges.equalToSuperview()
+            }
+            
+            emptyStateBottomButton.snp.makeConstraints {
+                $0.horizontalEdges.equalToSuperview().inset(20)
+                $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(15)
+            }
+            
+            if emptyStateBottomButton.actions(forTarget: self, forControlEvent: .touchUpInside) == nil {
                 emptyStateBottomButton.addTarget(self, action: #selector(emptyStateBottomButtonTapped), for: .touchUpInside)
             }
             
