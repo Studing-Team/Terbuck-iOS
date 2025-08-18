@@ -29,8 +29,10 @@ public extension UILabel {
     /// - Parameters:
     ///   - lineSpacing: 적용할 줄 간격 값.
     func setLineSpacing(lineSpacing: CGFloat) {
-        // 1. 레이블에 텍스트가 없으면 아무 작업도 하지 않습니다.
-        guard let text = self.text else { return }
+        // 1. 레이블에 텍스트, 폰트, 텍스트 색상이 없으면 아무 작업도 하지 않습니다.
+        guard let text = self.text,
+              let font = self.font,
+              let textColor = self.textColor else { return }
         
         // 2. 줄 간격과 정렬을 위한 ParagraphStyle을 생성합니다.
         let paragraphStyle = NSMutableParagraphStyle()

@@ -112,8 +112,7 @@ private extension EmptyStateView {
     }
     
     func setupHierarchy() {
-        self.addSubviews(backgroundImage)
-        self.backgroundImage.addSubviews(titleLabel, subTitleLabel)
+        self.addSubviews(backgroundImage, titleLabel, subTitleLabel)
     }
     
     func setupLayout() {
