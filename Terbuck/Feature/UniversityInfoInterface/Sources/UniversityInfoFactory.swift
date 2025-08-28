@@ -8,5 +8,8 @@
 import UIKit
 
 public protocol UniversityInfoFactory {
-    func makeUniversityInfoViewController(type: UniversityType, coordinator: UniversityInfoCoordinating, onFinish: @escaping () -> Void) -> UIViewController
+    func makeUniversityInfoViewController(
+        type: UniversityType,
+        coordinator: UniversityInfoCoordinating
+    ) -> UIViewController
 }
