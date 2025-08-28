@@ -17,14 +17,13 @@ public final class InformationTitleView: UIView {
     public enum InformationViewType {
         case termsView
         case university
+        case major(String)
         
         var title: String {
             switch self {
-            case .termsView:
-                return "약관동의"
-                
-            case .university:
-                return "나의 대학교"
+            case .termsView: return "약관동의"
+            case .university: return "나의 대학교"
+            case .major(let universityName): return universityName
             }
         }
         
@@ -35,6 +34,9 @@ public final class InformationTitleView: UIView {
                 
             case .university:
                 return "재학 중인 대학교에서 알맞는 혜택을 누려봐요!"
+                
+            case .major:
+                return "더 자세한 혜택을 위해 소속 대학을 알려주세요"
             }
         }
     }
@@ -56,6 +58,10 @@ public final class InformationTitleView: UIView {
     
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    public func setupTitleText(_ name: String) {
+        titleLabel.text = name
     }
 }
 

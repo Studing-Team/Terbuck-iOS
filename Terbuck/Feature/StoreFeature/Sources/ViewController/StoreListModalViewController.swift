@@ -116,9 +116,7 @@ public final class StoreListModalViewController: UIViewController {
     }
     
     deinit {
-        #if DEBUG
-        print("deinit StoreListModalViewController")
-        #endif
+        AppLogger.log("StoreListModalViewController Deinit", .info, .ui)
     }
     
     // MARK: - Life Cycle
