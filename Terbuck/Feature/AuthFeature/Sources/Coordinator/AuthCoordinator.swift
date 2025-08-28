@@ -11,13 +11,16 @@ import AuthInterface
 import UniversityInfoInterface
 import Shared
 
-public final class AuthCoordinator: AuthCoordinating {
+public final class AuthCoordinator: NSObject, AuthCoordinating {
+    
     public var childCoordinators: [any Shared.Coordinator] = []
     
     private let navigationController: UINavigationController
+    public var rootViewController: UIViewController?
+    
     private let loginFactory: LoginFactory
     private let termsFactory: TermsFactory
-    private let universityInfoFactory: UniversityInfoFactory
+    private let universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
     
     public weak var delegate: AuthCoordinatorDelegate?
     
@@ -29,12 +32,15 @@ public final class AuthCoordinator: AuthCoordinating {
         navigationController: UINavigationController,
         loginFactory: LoginFactory,
         termsFactory: TermsFactory,
-        universityInfoFactory: UniversityInfoFactory
+        universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
     ) {
         self.navigationController = navigationController
         self.loginFactory = loginFactory
         self.termsFactory = termsFactory
-        self.universityInfoFactory = universityInfoFactory
+        self.universityInfoCoordinatorFactory = universityInfoCoordinatorFactory
+        super.init()
+        
+        self.navigationController.delegate = self
     }
     
     public func start() {
@@ -56,6 +62,18 @@ public final class AuthCoordinator: AuthCoordinating {
         navigationController.pushViewController(termsOfServiceVC, animated: true)
     }
     
+    public func showUniversity() {
+        let universityCoordinator = universityInfoCoordinatorFactory.makeUniversityInfoCoordinator(
+            navigationController: self.navigationController,
+            initialType: .register
+        )
+        
+        universityCoordinator.delegate = self
+        
+        childCoordinators.append(universityCoordinator)
+        universityCoordinator.start()
+    }
+    
     public func finishAuthFlow() {
         delegate?.didFinishAuthFlow()
     }
@@ -63,17 +81,33 @@ public final class AuthCoordinator: AuthCoordinating {
 
 // MARK: - 대학교 설정을 위한 Coordinator
 
-extension AuthCoordinator: UniversityInfoCoordinating {
-    public func showUniversity() {
-        let universityVC = universityInfoFactory.makeUniversityInfoViewController(
-            type: .register,
-            coordinator: self,
-            onFinish: { [weak self] in
-                self?.finishAuthFlow()
-            }
-        )
+extension AuthCoordinator: UniversityInfoCoordinatorDelegate {
+    public func didFinishUniversityInfo(coordinator: Coordinator, initialType: UniversityType) {
+        
+        if initialType == .edit {
+            // 대학교 변경 관련 로직, 이전 화면으로 이동
+            childCoordinators = childCoordinators.filter { $0 !== coordinator }
+        } else {
+            // 회원가입 시 Main 화면으로 이동
+            finishAuthFlow()
+        }
+    }
+}
 
-        universityVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(universityVC, animated: true)
+// MARK: - 뒤로가기 제스쳐 관련 로직 (자식 Coordinator 삭제)
+
+extension AuthCoordinator: UINavigationControllerDelegate {
+    public func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+        guard let fromViewController = navigationController.transitionCoordinator?.viewController(forKey: .from) else {
+            return
+        }
+
+        if navigationController.viewControllers.contains(fromViewController) {
+            return
+        }
+
+        if let coordinator = childCoordinators.first(where: { ($0 as? PoppableCoordinator)?.rootViewController == fromViewController }) {
+            childCoordinators = childCoordinators.filter { $0 !== coordinator }
+        }
     }
 }

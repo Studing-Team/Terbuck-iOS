@@ -10,14 +10,15 @@ import UIKit
 import RegisterStudentCardInterface
 import Shared
 
-final class RegisterStudentCardCoordinator: RegisterStudentCardCoordinating {
+final class RegisterStudentCardCoordinator: RegisterStudentCardCoordinating, PoppableCoordinator {
         
-    var childCoordinators: [any Shared.Coordinator] = []
+    var childCoordinators: [any Coordinator] = []
+    var rootViewController: UIViewController?
     
     weak var delegate: RegisterStudentCardCoordinatorDelegate?
     
     private let registerStudentCardFactory: RegisterStudentCardFactory
-    private let navigationController: UINavigationController
+    var navigationController: UINavigationController
     
     private let initialType: AuthStudentType
     private let initialLocation: CGRect?
@@ -34,6 +35,10 @@ final class RegisterStudentCardCoordinator: RegisterStudentCardCoordinating {
         self.registerStudentCardFactory = registerStudentCardFactory
         self.initialType = initialType
         self.initialLocation = initialLocation
+    }
+    
+    deinit {
+        AppLogger.log("RegisterStudentCardCoordinator Deinit", .info, .ui)
     }
     
     // MARK: - Method
@@ -54,6 +59,7 @@ final class RegisterStudentCardCoordinator: RegisterStudentCardCoordinating {
     
     func showRegisterStudentCard() {
         let registerStudentIDCardVC = registerStudentCardFactory.makeRegisterStudentCardViewController(coordinator: self)
+        self.rootViewController = registerStudentIDCardVC
         registerStudentIDCardVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(registerStudentIDCardVC, animated: true)
     }
