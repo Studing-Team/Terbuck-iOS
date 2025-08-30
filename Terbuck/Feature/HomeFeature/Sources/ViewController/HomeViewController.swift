@@ -331,6 +331,7 @@ private extension HomeViewController {
     }
     
     func setupCollectionView() {
+        collectionView.contentInsetAdjustmentBehavior = .never
         collectionView.backgroundColor = .clear
         collectionView.refreshControl = refreshControl
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)

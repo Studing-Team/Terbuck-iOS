@@ -87,5 +87,9 @@ public enum DesignSystem {
         public static func swiftUIColor(_ name: Name) -> SwiftUI.Color {
             name.swiftUIColor
         }
+        
+        public static func swiftUIColorToDarken(_ name: Name, darkenValue: CGFloat) -> SwiftUI.Color {
+            SwiftUI.Color(uiColor: name.uiColor.darken(by: darkenValue))
+        }
     }
 }

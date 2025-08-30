@@ -36,7 +36,7 @@ final class TermsOfServiceViewController: UIViewController {
     private let allTermsCheckButton = AuthCheckButton(type: .notBorder)
     private let allTermsTitleLabel = UILabel()
     
-    private let terbuckBottomButton = TerbuckBottomButton(type: .next)
+    private let terbuckBottomButton = TerbuckBottomButton(type: .next, isEnabled: false)
     
     // MARK: - Init
     

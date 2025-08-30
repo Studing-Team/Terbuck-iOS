@@ -101,7 +101,7 @@ public enum TerbuckButtonType {
     
     func resolvedBackgroundColor(isEnabled: Bool) -> UIColor {
         switch self {
-        case .enter, .register, .save:
+        case .enter, .register, .save, .next:
             return DesignSystem.Color.uiColor(isEnabled ? .terbuckGreen50 : .terbuckGreen10)
         default:
             return backgroundColor

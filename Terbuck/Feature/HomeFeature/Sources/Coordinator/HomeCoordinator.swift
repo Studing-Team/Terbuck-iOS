@@ -13,10 +13,11 @@ import RegisterStudentCardInterface
 import DesignSystem
 import Shared
 
-public class HomeCoordinator: HomeCoordinating {
+public class HomeCoordinator: HomeCoordinating, PoppableCoordinator {
     public var childCoordinators: [any Shared.Coordinator] = []
+    public var rootViewController: UIViewController?
     
-    private let navigationController: UINavigationController
+    public var navigationController: UINavigationController
     private let homeFactory: HomeFactory
     private let partnershipFactory: PartnershipFactory
     private let alarmSettingFactory: AlarmSettingFactory
@@ -46,6 +47,7 @@ public class HomeCoordinator: HomeCoordinating {
     
     public func startHome() {
         let homeVC = homeFactory.makeHomeViewController(coordinator: self)
+        self.rootViewController = homeVC
         navigationController.pushViewController(homeVC, animated: true)
     }
     

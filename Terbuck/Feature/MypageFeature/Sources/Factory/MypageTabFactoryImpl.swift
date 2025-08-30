@@ -14,16 +14,16 @@ import RegisterStudentCardInterface
 public final class MypageTabFactoryImpl: MypageTabFactory {
     
     private let alarmSettingFactory: AlarmSettingFactory
-    private let universityInfoFactory: UniversityInfoFactory
+    private let universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
     private let registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     
     public init(
         alarmSettingFactory: AlarmSettingFactory,
-        universityInfoFactory: UniversityInfoFactory,
+        universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory,
         registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     ) {
         self.alarmSettingFactory = alarmSettingFactory
-        self.universityInfoFactory = universityInfoFactory
+        self.universityInfoCoordinatorFactory = universityInfoCoordinatorFactory
         self.registerStudentCardFactory = registerStudentCardFactory
     }
     
@@ -35,7 +35,7 @@ public final class MypageTabFactoryImpl: MypageTabFactory {
             navigationController: navigationController,
             mypageFactory: mypageFactory,
             alarmSettingFactory: alarmSettingFactory,
-            universityInfoFactory: universityInfoFactory,
+            universityInfoCoordinatorFactory: universityInfoCoordinatorFactory,
             registerStudentCardFactory: registerStudentCardFactory
         )
     }

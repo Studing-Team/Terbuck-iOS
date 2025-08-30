@@ -11,12 +11,12 @@ import UniversityInfoInterface
 
 public final class AuthFactoryImpl: AuthFactory {
     
-    private let universityInfoFactory: UniversityInfoFactory
+    private let universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
     
     public init(
-        universityInfoFactory: UniversityInfoFactory
+        universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
     ) {
-        self.universityInfoFactory = universityInfoFactory
+        self.universityInfoCoordinatorFactory = universityInfoCoordinatorFactory
     }
 
     public func makeAuthCoordinator(navigationController: UINavigationController) -> AuthCoordinating {
@@ -27,7 +27,7 @@ public final class AuthFactoryImpl: AuthFactory {
             navigationController: navigationController,
             loginFactory: loginFactory,
             termsFactory: termsFactory,
-            universityInfoFactory: universityInfoFactory,
+            universityInfoCoordinatorFactory: universityInfoCoordinatorFactory,
         )
     }
 }

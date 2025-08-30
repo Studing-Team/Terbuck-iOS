@@ -30,7 +30,7 @@ enum UniversityError: LocalizedError, Equatable {
     }
 }
 
-public class UniversityViewModel {
+public class UniversityViewModel: ObservableObject {
     
     // MARK: - Properties
     
@@ -41,23 +41,28 @@ public class UniversityViewModel {
     
     // MARK: - Private Combine Publishers Properties
     
-    private let selectedUniversitySubject = CurrentValueSubject<University?, Never>(nil)
+    private let selectedUniversitySubject = CurrentValueSubject<String?, Never>(nil)
+
     private let errorSubject = PassthroughSubject<UniversityError, Never>()
     private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - SwiftUI Published Properties
+    
+    @Published var selectedItemForUI: String?
     
     // MARK: - Input
     
     struct Input {
-        let universityTapped: AnyPublisher<University, Never>
+//        let universityTapped: AnyPublisher<String?, Never>
         let bottomButtonTapped: AnyPublisher<Void, Never>
     }
     
     // MARK: - Output
     
     struct Output {
-        let selectedUniversity: AnyPublisher<University?, Never>
         let errorResult: AnyPublisher<UniversityError, Never>
-        let bottomButtonResult: AnyPublisher<Bool, Never>
+        let isBottomButtonEnabled: AnyPublisher<Bool, Never>
+        let bottomButtonResult: AnyPublisher<String, Never>
     }
     
     // MARK: - Init
@@ -73,66 +78,37 @@ public class UniversityViewModel {
     // MARK: - Public methods
     
     func transform(input: Input) -> Output {
-        input.universityTapped
-            .sink { [weak self] tapped in
-                guard let self = self else { return }
-
-                if self.selectedUniversitySubject.value == tapped {
-                    self.selectedUniversitySubject.send(nil)
-                    universityName = nil
-                } else {
-                    self.selectedUniversitySubject.send(tapped)
-                    universityName = tapped.title//name
-                }
+        let isBottomButtonEnabled = selectedUniversitySubject
+            .map { selectedItem in
+                selectedItem == nil ? false : true
             }
-            .store(in: &cancellables)
+            .eraseToAnyPublisher()
         
         let bottomButtonResult = input.bottomButtonTapped
-            .flatMap { [weak self] _ -> AnyPublisher<Bool, Never> in
-                guard let self else {
-                    return Just(false).eraseToAnyPublisher()
-                }
-                
-                if let _ = self.signupUseCase, let universityName = self.universityName {
-                    return self.signupPublisher(universityName)
-                        .handleEvents(receiveOutput:  { _ in
-                            MixpanelManager.shared.track(eventType: TrackEventType.Signup.secondSignupButtonTapped)
-                            
-                            MixpanelManager.shared.setupUniversity(universityName: universityName)
-                        })
-                        .map { _ in
-                            UserDefaultsManager.shared.set(universityName, for: .university)
-                            return true
-                        }
-                        .catch { _ in Just(false) }
-                        .eraseToAnyPublisher()
-                }
-                
-                if let _ = self.editUniversityUseCase, let universityName = self.universityName {
-                    return editUniversityPublisher(universityName)
-                        .map { _ in
-                            UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
-                            UserDefaultsManager.shared.set(universityName, for: .university)
-                            MixpanelManager.shared.setupUniversity(universityName: universityName)
-                            FileStorageManager.shared.delete(type: .studentIdCard)
-                            return true
-                        }
-                        .catch { error in
-                            self.errorSubject.send(error)
-                            return Just(false)
-                        }
-                        .eraseToAnyPublisher()
-                }
-                
-                return Just(false).eraseToAnyPublisher()
+            .compactMap { [weak self] _ in
+                self?.selectedItemForUI
             }
             .eraseToAnyPublisher()
         
         return Output(
-            selectedUniversity: selectedUniversitySubject.eraseToAnyPublisher(),
             errorResult: errorSubject.eraseToAnyPublisher(),
+            isBottomButtonEnabled: isBottomButtonEnabled,
             bottomButtonResult: bottomButtonResult
         )
+    }
+}
+
+// MARK: - Public Methods
+
+public extension UniversityViewModel {
+    func selectItem(_ item: String?) {
+        if selectedItemForUI == item {
+            selectedItemForUI = nil
+            selectedUniversitySubject.send(nil)
+        } else {
+            selectedItemForUI = item
+            selectedUniversitySubject.send(item)
+        }
     }
 }
 
