@@ -11,11 +11,8 @@ import AuthInterface
 import UniversityInfoInterface
 import Shared
 
-public final class AuthCoordinator: NSObject, AuthCoordinating {
+public final class AuthCoordinator: BaseCoordinator, AuthCoordinating {
     
-    public var childCoordinators: [any Shared.Coordinator] = []
-    
-    private let navigationController: UINavigationController
     public var rootViewController: UIViewController?
     
     private let loginFactory: LoginFactory
@@ -34,16 +31,13 @@ public final class AuthCoordinator: NSObject, AuthCoordinating {
         termsFactory: TermsFactory,
         universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
     ) {
-        self.navigationController = navigationController
         self.loginFactory = loginFactory
         self.termsFactory = termsFactory
         self.universityInfoCoordinatorFactory = universityInfoCoordinatorFactory
-        super.init()
-        
-        self.navigationController.delegate = self
+        super.init(navigationController: navigationController)
     }
     
-    public func start() {
+    public override func start() {
         startLogin()
     }
     
@@ -90,24 +84,6 @@ extension AuthCoordinator: UniversityInfoCoordinatorDelegate {
         } else {
             // 회원가입 시 Main 화면으로 이동
             finishAuthFlow()
-        }
-    }
-}
-
-// MARK: - 뒤로가기 제스쳐 관련 로직 (자식 Coordinator 삭제)
-
-extension AuthCoordinator: UINavigationControllerDelegate {
-    public func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
-        guard let fromViewController = navigationController.transitionCoordinator?.viewController(forKey: .from) else {
-            return
-        }
-
-        if navigationController.viewControllers.contains(fromViewController) {
-            return
-        }
-
-        if let coordinator = childCoordinators.first(where: { ($0 as? PoppableCoordinator)?.rootViewController == fromViewController }) {
-            childCoordinators = childCoordinators.filter { $0 !== coordinator }
         }
     }
 }

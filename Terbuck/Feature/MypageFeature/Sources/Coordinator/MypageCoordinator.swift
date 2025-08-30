@@ -13,11 +13,8 @@ import RegisterStudentCardInterface
 import UniversityInfoInterface
 import Shared
 
-public class MypageCoordinator: NSObject, MypageCoordinating {
+public class MypageCoordinator: BaseCoordinator, MypageCoordinating {
 
-    public var childCoordinators: [any Shared.Coordinator] = []
-    
-    private let navigationController: UINavigationController
     public var rootViewController: UIViewController?
     
     private let mypageFactory: MypageFactory
@@ -36,19 +33,16 @@ public class MypageCoordinator: NSObject, MypageCoordinating {
         universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory,
         registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     ) {
-        self.navigationController = navigationController
         self.mypageFactory = mypageFactory
         self.alarmSettingFactory = alarmSettingFactory
         self.universityInfoCoordinatorFactory = universityInfoCoordinatorFactory
         self.registerStudentCardFactory = registerStudentCardFactory
-        super.init()
-        
-        self.navigationController.delegate = self
+        super.init(navigationController: navigationController)
     }
     
     // MARK: - Method
     
-    public func start() {
+    public override func start() {
         startMypage()
     }
     
@@ -116,23 +110,5 @@ extension MypageCoordinator: UniversityInfoCoordinatorDelegate {
 extension MypageCoordinator: RegisterStudentCardCoordinatorDelegate {
     public func didFinishRegisterStudentCard(coordinator: Coordinator) {
         childCoordinators = childCoordinators.filter { $0 !== coordinator }
-    }
-}
-
-// MARK: - 뒤로가기 제스쳐 관련 로직 (자식 Coordinator 삭제)
-
-extension MypageCoordinator: UINavigationControllerDelegate {
-    public func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
-        guard let fromViewController = navigationController.transitionCoordinator?.viewController(forKey: .from) else {
-            return
-        }
-
-        if navigationController.viewControllers.contains(fromViewController) {
-            return
-        }
-
-        if let coordinator = childCoordinators.first(where: { ($0 as? PoppableCoordinator)?.rootViewController == fromViewController }) {
-            childCoordinators = childCoordinators.filter { $0 !== coordinator }
-        }
     }
 }
