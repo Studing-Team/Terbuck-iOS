@@ -61,6 +61,7 @@ public class MajorInfoViewModel: ObservableObject {
             .eraseToAnyPublisher()
         
         let bottomButtonResult = input.bottomButtonTapped
+            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
             .flatMap { [weak self] _ -> AnyPublisher<Bool, Never> in
                 guard let self else {
                     return Just(false).eraseToAnyPublisher()

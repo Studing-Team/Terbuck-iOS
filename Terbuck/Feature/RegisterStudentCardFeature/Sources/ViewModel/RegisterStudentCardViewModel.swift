@@ -94,6 +94,7 @@ public final class RegisterStudentCardViewModel {
             .store(in: &cancellables)
         
         let registerBottomButtonResult = input.bottomButtonTapped
+            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
             .handleEvents(receiveOutput:  { _ in
                 MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
             })
