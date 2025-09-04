@@ -96,18 +96,9 @@ public final class HomeViewModel {
                 guard let self else { return Empty().eraseToAnyPublisher() }
 
                 return self.fetchPartnershipDisclosureStatusPublisher()
-                    .catch { _ in Just(false) } // 첫 번째 API 에러 처리
-                    .flatMap { isDisclosed -> AnyPublisher<HomeDataStateType, Never> in
-                        if isDisclosed {
-                            return Just(HomeDataStateType.existData).eraseToAnyPublisher()
-                        } else {
-                            return self.fetchDisclosureRequestStatusPublisher()
-                                .map { isRequested -> HomeDataStateType in
-                                    return isRequested ? .requestPartner : .noData
-                                }
-                                .catch { _ in Just(HomeDataStateType.noData) } // 두 번째 API 에러 처리
-                                .eraseToAnyPublisher()
-                        }
+                    .catch { _ in Just(false) }
+                    .flatMap { isDisclosed in
+                        self.checkRequestStatus(isDisclosed: isDisclosed)
                     }
                     .eraseToAnyPublisher()
             }
@@ -282,6 +273,24 @@ private extension HomeViewModel {
             }
             .catch { _ in Just([]) }
             .eraseToAnyPublisher()
+    }
+    
+    /// 제휴 정보 공개 여부에 따라 홈 화면의 상태를 결정합니다.
+    /// 공개된 경우 `.existData`를, 비공개인 경우 다시 공개 요청 상태를 확인하여 `.requestPartner` 또는 `.noData`를 반환합니다.
+    /// - Parameters:
+    ///   - isDisclosed: 제휴 정보 공개 여부를 나타내는 Bool 값.
+    /// - Returns: 최종 `HomeDataStateType`을 방출하는 `AnyPublisher`를 반환합니다.
+    func checkRequestStatus(isDisclosed: Bool) -> AnyPublisher<HomeDataStateType, Never> {
+        if isDisclosed {
+            return Just(.existData).eraseToAnyPublisher()
+        } else {
+            return self.fetchDisclosureRequestStatusPublisher()
+                .map { isRequested in
+                    return isRequested ? .requestPartner : .noData
+                }
+                .catch { _ in Just(.noData) }
+                .eraseToAnyPublisher()
+        }
     }
     
     // MARK: - Low-Level API Publishers

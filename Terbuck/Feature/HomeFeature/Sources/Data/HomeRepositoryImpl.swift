@@ -52,22 +52,18 @@ struct HomeRepositoryImpl: HomeRepository {
     func getPartnershipDisclosureStatus(universityName: String) async throws -> Bool {
         let requestDTO = MyUniversityRequestDTO(universityName: universityName)
         
-        let result: Bool = try await networkManager.request(UniversityAPIEndpoint.getPartnershipDisclosureStatus(requestDTO))
-        
-        return result
+        return try await networkManager.request(UniversityAPIEndpoint.getPartnershipDisclosureStatus(requestDTO))
     }
     
     func postPartnershipDisclosureRequest(universityName: String) async throws {
         let requestDTO = MyUniversityRequestDTO(universityName: universityName)
         
-        let dto: PartnershipDisclosureRequestResponseDTO = try await networkManager.request(UniversityAPIEndpoint.postPartnershipDisclosureRequest(requestDTO))
+        let _: PartnershipDisclosureRequestResponseDTO = try await networkManager.request(UniversityAPIEndpoint.postPartnershipDisclosureRequest(requestDTO))
     }
     
     func getDisclosureRequestStatus(universityName: String) async throws -> Bool {
         let requestDTO = MyUniversityRequestDTO(universityName: universityName)
         
-        let result: Bool = try await networkManager.request(UniversityAPIEndpoint.getDisclosureRequestStatus(requestDTO))
-        
-        return result
+        return try await networkManager.request(UniversityAPIEndpoint.getDisclosureRequestStatus(requestDTO))
     }
 }
