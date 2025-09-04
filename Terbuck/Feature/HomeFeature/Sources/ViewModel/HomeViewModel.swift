@@ -25,19 +25,16 @@ enum HomeError: LocalizedError, Equatable {
     }
 }
 
-public enum HomeDataStateType {
-    case noData
-    case requestPartner
-    case existData
-}
-
 public final class HomeViewModel {
     
     // MARK: - Properties
     
     private let locationManager = CLLocationManager()
-    private var searchStoreUseCase: SearchStoreUseCase
-    private var searchPartnershipUseCase: SearchPartnershipUseCase
+    private let searchStoreUseCase: SearchStoreUseCase
+    private let searchPartnershipUseCase: SearchPartnershipUseCase
+    private let fetchPartnershipDisclosureStatusUseCase: FetchPartnershipDisclosureStatusUseCase
+    private let requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCase
+    private let fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCase
     
     // MARK: - Private Combine Publishers Properties
     
@@ -49,7 +46,7 @@ public final class HomeViewModel {
     
     // MARK: - Public Combine Publishers Properties
     
-    public var homeDataStateSubject = CurrentValueSubject<HomeDataStateType?, Never>(nil)
+    public var homeDataStateSubject = CurrentValueSubject<HomeDataStateType, Never>(.loading)
     public var sectionDataSubject = CurrentValueSubject<[HomeSection: [HomeItem]], Never>([:])
     public let myLocationSubject = CurrentValueSubject<(latitude: Double?, longitude: Double?), Never>((nil, nil))
     public let emptyStateButtonTapSubject = PassthroughSubject<Void, Never>()
@@ -73,17 +70,50 @@ public final class HomeViewModel {
     
     public init(
         searchStoreUseCase: SearchStoreUseCase,
-        searchPartnershipUseCase: SearchPartnershipUseCase
+        searchPartnershipUseCase: SearchPartnershipUseCase,
+        fetchPartnershipDisclosureStatusUseCase: FetchPartnershipDisclosureStatusUseCase,
+        requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCase,
+        fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCase
     ) {
         self.searchStoreUseCase = searchStoreUseCase
         self.searchPartnershipUseCase = searchPartnershipUseCase
+        self.fetchPartnershipDisclosureStatusUseCase = fetchPartnershipDisclosureStatusUseCase
+        self.requestPartnershipDisclosureUseCase = requestPartnershipDisclosureUseCase
+        self.fetchDisclosureRequestStatusUseCase = fetchDisclosureRequestStatusUseCase
     }
     
     // MARK: - Public methods
     
     func transform(input: Input) -> Output {
         
+        // viewDidLoad 이벤트 처리
         input.viewLifeCycleEventAction
+            .filter { $0 == .viewDidLoad }
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.homeDataStateSubject.send(.loading)
+            })
+            .flatMap { [weak self] _ -> AnyPublisher<HomeDataStateType, Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+
+                return self.fetchPartnershipDisclosureStatusPublisher()
+                    .catch { _ in Just(false) }
+                    .flatMap { isDisclosed in
+                        self.checkRequestStatus(isDisclosed: isDisclosed)
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .delay(for: .seconds(0.7), scheduler: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.homeDataStateSubject.send(state)
+                if state == .existData {
+                    self?.selectedFilterSubject.send(.restaurent)
+                }
+            }
+            .store(in: &cancellables)
+
+        // viewWillAppear 이벤트 처리
+        input.viewLifeCycleEventAction
+            .filter { $0 == .viewWillAppear }
             .sink { [weak self] _ in
                 self?.isAuthStudentSubject.send(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
             }
@@ -100,6 +130,9 @@ public final class HomeViewModel {
             .eraseToAnyPublisher()
         
         selectedFilterSubject
+            .filter { [weak self] _ in
+                return self?.homeDataStateSubject.value == .existData
+            }
             .handleEvents(receiveOutput: { type in
                 switch type {
                 case .restaurent:
@@ -145,18 +178,22 @@ public final class HomeViewModel {
                     }
                 }
                 
-                if sectionData.isEmpty {
-                    self.homeDataStateSubject.send(.noData)
-                } else {
-                    self.homeDataStateSubject.send(.existData)
-                    self.sectionDataSubject.send(sectionData)
-                }
+                self.sectionDataSubject.send(sectionData)
             }
             .store(in: &cancellables)
         
         emptyStateButtonTapSubject
-            .sink { [weak self] _ in
-                self?.homeDataStateSubject.send(.requestPartner)
+            .flatMap { [weak self] _ -> AnyPublisher<Bool, Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                
+                return self.requestPartnershipDisclosurePublisher()
+                    .catch { _ in Just(false) }
+                    .eraseToAnyPublisher()
+            }
+            .sink { [weak self] result in
+                if result {
+                    self?.homeDataStateSubject.send(.requestPartner)
+                }
             }
             .store(in: &cancellables)
         
@@ -238,6 +275,24 @@ private extension HomeViewModel {
             .eraseToAnyPublisher()
     }
     
+    /// 제휴 정보 공개 여부에 따라 홈 화면의 상태를 결정합니다.
+    /// 공개된 경우 `.existData`를, 비공개인 경우 다시 공개 요청 상태를 확인하여 `.requestPartner` 또는 `.noData`를 반환합니다.
+    /// - Parameters:
+    ///   - isDisclosed: 제휴 정보 공개 여부를 나타내는 Bool 값.
+    /// - Returns: 최종 `HomeDataStateType`을 방출하는 `AnyPublisher`를 반환합니다.
+    func checkRequestStatus(isDisclosed: Bool) -> AnyPublisher<HomeDataStateType, Never> {
+        if isDisclosed {
+            return Just(.existData).eraseToAnyPublisher()
+        } else {
+            return self.fetchDisclosureRequestStatusPublisher()
+                .map { isRequested in
+                    return isRequested ? .requestPartner : .noData
+                }
+                .catch { _ in Just(.noData) }
+                .eraseToAnyPublisher()
+        }
+    }
+    
     // MARK: - Low-Level API Publishers
     
     /// `SearchStoreUseCase`를 사용하여 서버에 주변 상점 정보 조회를 요청합니다.
@@ -286,6 +341,78 @@ private extension HomeViewModel {
                     let newPartnershipResult = try await self.searchPartnershipUseCase.newSearchExecute()
                     
                     promise(.success(partnershipResult + newPartnershipResult))
+                } catch {
+                    promise(.failure(.serverFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    /// `FetchPartnershipDisclosureStatusUseCase`를 사용하여 서버에 대학교 제휴업체 공개 여부 조회를 요청합니다.
+    /// - Returns: API 응답으로 받은  Bool 값을 방출하거나, 실패 시 `HomeError`를 방출하는 `AnyPublisher`를 반환합니다.
+    func fetchPartnershipDisclosureStatusPublisher() -> AnyPublisher<Bool, HomeError> {
+        let universityName = UserDefaultsManager.shared.string(for: .university) ?? ""
+        
+        return Future { [weak self] promise in
+            guard let self else {
+                promise(.failure(.unknown))
+                return
+            }
+            
+            Task {
+                do {
+                    let result = try await self.fetchPartnershipDisclosureStatusUseCase.execute(universityName: universityName)
+                    
+                    promise(.success(result))
+                } catch {
+                    promise(.failure(.serverFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    /// `RequestPartnershipDisclosureUseCase`를 사용하여 서버에 대학교 제휴업체 공개를 요청합니다.
+    /// - Returns: API 응답으로 받은  Bool 값을 방출하거나, 실패 시 `HomeError`를 방출하는 `AnyPublisher`를 반환합니다.
+    func requestPartnershipDisclosurePublisher() -> AnyPublisher<Bool, HomeError> {
+        let universityName = UserDefaultsManager.shared.string(for: .university) ?? ""
+        
+        return Future { [weak self] promise in
+            guard let self else {
+                promise(.failure(.unknown))
+                return
+            }
+            
+            Task {
+                do {
+                    let _ = try await self.requestPartnershipDisclosureUseCase.execute(universityName: universityName)
+                    
+                    promise(.success(true))
+                } catch {
+                    promise(.failure(.serverFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    /// `FetchDisclosureRequestStatusUseCase`를 사용하여 서버에 대학교 제휴업체 공개 요청 실행 여부를 요청합니다.
+    /// - Returns: API 응답으로 받은  Bool 값을 방출하거나, 실패 시 `HomeError`를 방출하는 `AnyPublisher`를 반환합니다.
+    func fetchDisclosureRequestStatusPublisher() -> AnyPublisher<Bool, HomeError> {
+        let universityName = UserDefaultsManager.shared.string(for: .university) ?? ""
+        
+        return Future { [weak self] promise in
+            guard let self else {
+                promise(.failure(.unknown))
+                return
+            }
+            
+            Task {
+                do {
+                    let result = try await self.fetchDisclosureRequestStatusUseCase.execute(universityName: universityName)
+                    
+                    promise(.success(result))
                 } catch {
                     promise(.failure(.serverFailed))
                 }
