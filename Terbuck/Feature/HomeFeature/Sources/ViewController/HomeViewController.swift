@@ -1,4 +1,3 @@
-
 //
 //  HomeViewController.swift
 //  MypageFeature
@@ -40,6 +39,8 @@ final class HomeViewController: UIViewController {
     private let studentIDCardButton = DesignSystem.Button.studentIDCardButton()
     private lazy var segmentedTabView = SegmentedTabView()
     private lazy var refreshControl = UIRefreshControl()
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let contentLayoutGuide = UILayoutGuide()
     
     private lazy var collectionView: UICollectionView = {
         return UICollectionView(frame: .zero, collectionViewLayout: createLayout())
@@ -151,8 +152,6 @@ private extension HomeViewController {
         homeViewModel.homeDataStateSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                guard let state else { return }
-                
                 self?.updateLayoutToDataExist(state)
             }
             .store(in: &cancellables)
@@ -172,12 +171,18 @@ private extension HomeViewController {
     func setupStyle(_ isAuth: Bool) {
         self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         navigationItem.backButtonTitle = ""
+        activityIndicator.color = DesignSystem.Color.uiColor(.terbuckGreen50)
         
         studentIDCardButton.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
+        
+        [segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton].forEach {
+            $0.isHidden = true
+        }
     }
     
     func setupHierarchy() {
-        self.view.addSubviews(titleLogo, studentIDCardButton)
+        view.addLayoutGuide(contentLayoutGuide)
+        self.view.addSubviews(titleLogo, studentIDCardButton, segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton, activityIndicator)
     }
     
     func setupLayout() {
@@ -189,6 +194,38 @@ private extension HomeViewController {
         studentIDCardButton.snp.makeConstraints {
             $0.centerY.equalTo(titleLogo)
             $0.trailing.equalToSuperview().inset(25)
+        }
+        
+        contentLayoutGuide.snp.makeConstraints {
+            $0.top.equalTo(titleLogo.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        segmentedTabView.snp.makeConstraints {
+            $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(35))
+            $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(48)
+        }
+
+        collectionView.snp.makeConstraints {
+            $0.top.equalTo(segmentedTabView.snp.bottom).offset(16)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        emptyStateView.snp.makeConstraints {
+            $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
+            $0.horizontalEdges.equalToSuperview()
+        }
+        
+        emptyStateBottomButton.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(15)
+        }
+        
+        activityIndicator.snp.makeConstraints {
+            $0.center.equalTo(contentLayoutGuide)
         }
     }
     
@@ -231,22 +268,24 @@ private extension HomeViewController {
     }
     
     func updateLayoutToDataExist(_ state: HomeDataStateType) {
+        var viewsToShow: [UIView] = []
+        var viewsToHide: [UIView] = []
+        
         switch state {
+        case .loading:
+            viewsToShow = [activityIndicator]
+            viewsToHide = [segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton]
+            activityIndicator.startAnimating()
+            
         case .noData:
-            [segmentedTabView, collectionView].forEach {
-                $0.removeFromSuperview()
-            }
+            viewsToShow = [emptyStateView, emptyStateBottomButton]
+            viewsToHide = [activityIndicator, segmentedTabView, collectionView]
+            activityIndicator.stopAnimating()
             
-            view.addSubviews(emptyStateView, emptyStateBottomButton)
-            
-            emptyStateView.snp.makeConstraints {
+            emptyStateView.changeState(.notRequest)
+            emptyStateView.snp.remakeConstraints {
                 $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
                 $0.horizontalEdges.equalToSuperview()
-            }
-            
-            emptyStateBottomButton.snp.makeConstraints {
-                $0.horizontalEdges.equalToSuperview().inset(20)
-                $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(15)
             }
             
             if emptyStateBottomButton.actions(forTarget: self, forControlEvent: .touchUpInside) == nil {
@@ -254,9 +293,11 @@ private extension HomeViewController {
             }
             
         case .requestPartner:
-            emptyStateBottomButton.removeFromSuperview()
-            emptyStateView.changeState(.completeRequest)
+            viewsToShow = [emptyStateView]
+            viewsToHide = [activityIndicator, segmentedTabView, collectionView, emptyStateBottomButton]
+            activityIndicator.stopAnimating()
             
+            emptyStateView.changeState(.completeRequest)
             emptyStateView.snp.remakeConstraints {
                 $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
                 $0.horizontalEdges.equalToSuperview()
@@ -268,22 +309,23 @@ private extension HomeViewController {
             }
             
         case .existData:
-            [emptyStateView, emptyStateBottomButton].forEach {
-                $0.removeFromSuperview()
-            }
-            
-            view.addSubviews(segmentedTabView, collectionView)
-            
-            segmentedTabView.snp.makeConstraints {
-                $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(35))
-                $0.horizontalEdges.equalToSuperview().inset(20)
-                $0.height.equalTo(48)
-            }
-
-            collectionView.snp.makeConstraints {
-                $0.top.equalTo(segmentedTabView.snp.bottom).offset(16)
-                $0.horizontalEdges.bottom.equalToSuperview()
-            }
+            viewsToShow = [segmentedTabView, collectionView]
+            viewsToHide = [activityIndicator, emptyStateView, emptyStateBottomButton]
+            activityIndicator.stopAnimating()
+        }
+        
+        // 애니메이션 준비: 나타날 뷰들의 isHidden을 false로 설정
+        viewsToShow.forEach { $0.isHidden = false }
+        
+        // 애니메이션 실행
+        UIView.animate(withDuration: 0.3, animations: {
+            viewsToShow.forEach { $0.alpha = 1.0 }
+            viewsToHide.forEach { $0.alpha = 0.0 }
+            self.view.layoutIfNeeded() // 제약조건 변경 애니메이션
+        }) { finished in
+            guard finished else { return }
+            // 애니메이션 종료 후, 사라진 뷰들의 isHidden을 true로 설정
+            viewsToHide.forEach { $0.isHidden = true }
         }
     }
     
