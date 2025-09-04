@@ -19,7 +19,10 @@ public final class HomeFactoryImpl: HomeFactory {
     public func makeHomeViewController(coordinator: HomeCoordinator) -> UIViewController {
         let viewModel = HomeViewModel(
             searchStoreUseCase: SearchStoreUseCaseImpl(repository: HomeRepositoryImpl()),
-            searchPartnershipUseCase: SearchPartnershipUseCaseImpl(repository: HomeRepositoryImpl())
+            searchPartnershipUseCase: SearchPartnershipUseCaseImpl(repository: HomeRepositoryImpl()),
+            fetchPartnershipDisclosureStatusUseCase: FetchPartnershipDisclosureStatusUseCaseImpl(repository: HomeRepositoryImpl()),
+            requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCaseImpl(repository: HomeRepositoryImpl()),
+            fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCaseImpl(repository: HomeRepositoryImpl())
         )
         
         return HomeViewController(
