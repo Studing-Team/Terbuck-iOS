@@ -12,19 +12,13 @@ import Observation
 import Shared
 
 enum UniversityError: LocalizedError, Equatable {
-    case signupFailed
-    case editUniversityFailed
-    case notEditUniversity
+    case fetchFailed
     case unknown
-
+    
     var errorDescription: String? {
         switch self {
-        case .signupFailed:
-            return "회원가입에 실패했습니다."
-        case .editUniversityFailed:
-            return "대학교를 변경하지 못했습니다."
-        case .notEditUniversity:
-            return "대학교를 변경할 수 없습니다"
+        case .fetchFailed:
+            return "대학교 정보를 불러올 수 없습니다."
         case .unknown:
             return "알 수 없는 오류가 발생했어요."
         }
@@ -145,7 +139,7 @@ private extension UniversityViewModel {
                     let result = try await self.fetchUniversityInfoListUseCase.execute()
                     promise(.success(result))
                 } catch {
-                    promise(.failure(.editUniversityFailed))
+                    promise(.failure(.fetchFailed))
                 }
             }
         }
