@@ -8,6 +8,7 @@
 import Foundation
 
 public enum UniversityAPIEndpoint {
+    case getUniversityInfoList
     /// 우리 학교의 제휴 업체 '공개 상태'를 조회
     case getPartnershipDisclosureStatus(MyUniversityRequestDTO)
     /// 제휴 업체 '공개 요청'을 생성
@@ -23,6 +24,8 @@ extension UniversityAPIEndpoint: EndpointProtocol {
     
     public var path: String {
         switch self {
+        case .getUniversityInfoList:
+            return basePath.rawValue + "/by-region"
         case .getPartnershipDisclosureStatus:
             return basePath.rawValue + "/is-registered"
         case .postPartnershipDisclosureRequest, .getDisclosureRequestStatus:
@@ -32,7 +35,7 @@ extension UniversityAPIEndpoint: EndpointProtocol {
     
     public var method: HTTPMethod {
         switch self {
-        case .getPartnershipDisclosureStatus, .getDisclosureRequestStatus:
+        case .getUniversityInfoList, .getPartnershipDisclosureStatus, .getDisclosureRequestStatus:
             return .get
         case .postPartnershipDisclosureRequest:
             return .post
@@ -55,6 +58,8 @@ extension UniversityAPIEndpoint: EndpointProtocol {
             return dto.toQueryItems()
         case .postPartnershipDisclosureRequest(let dto):
             return dto.toQueryItems()
+        default:
+            return nil
         }
     }
     
