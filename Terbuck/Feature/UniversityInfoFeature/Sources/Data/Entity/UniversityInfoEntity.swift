@@ -10,8 +10,8 @@ import CoreNetwork
 
 public struct UniversityInfoEntity {
     let id: Int
-    let regions: String
-    let university: [String]
+    let regionName: String
+    let universityNames: [String]
 }
 
 extension UniversityInfoListResponseDTO {
@@ -23,8 +23,8 @@ extension UniversityInfoListResponseDTO {
         
         return UniversityInfoEntity(
             id: region.id,
-            regions: region.name,
-            university: convertUniversityName
+            regionName: region.name,
+            universityNames: convertUniversityName
         )
     }
 }

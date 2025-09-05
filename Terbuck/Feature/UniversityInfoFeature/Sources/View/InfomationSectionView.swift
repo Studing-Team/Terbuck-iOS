@@ -28,7 +28,6 @@ struct InfomationSectionView: View {
             return nil
         }
         
-        print("선택되어있는 모델", model[selectedSectionIndex])
         return model[selectedSectionIndex]
     }
     

@@ -27,17 +27,12 @@ public struct FetchUniversityInfoListUseCaseImpl: FetchUniversityInfoListUseCase
 
 extension FetchUniversityInfoListUseCaseImpl {
     func convertToModel(_ entity: [UniversityInfoEntity]) -> [UniversityInfoModel] {
-        
-        var convertModel = [UniversityInfoModel]()
-        
-        entity.forEach {
-            convertModel.append(UniversityInfoModel(
+        return entity.map {
+            UniversityInfoModel(
                 id: $0.id,
-                title: $0.regions,
-                items: $0.university)
+                title: $0.regionName,
+                items: $0.universityNames
             )
         }
-        
-        return convertModel
     }
 }
