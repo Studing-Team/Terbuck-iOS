@@ -24,6 +24,10 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
     private var viewModel: UniversityViewModel
     public weak var delegate: RegisterUniversityDelegate?
     weak var coordinator: UniversityInfoCoordinating?
+    
+    // MARK: - Combine Properties
+    
+    private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -68,6 +72,8 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
         setupLayout()
         setupDelegate()
         bindViewModel()
+        
+        viewLifeCycleSubject.send(.viewDidLoad)
     }
 }
 
@@ -76,6 +82,7 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
 private extension UniversityViewController {
     func bindViewModel() {
         let input = UniversityViewModel.Input(
+            viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher(),
             bottomButtonTapped: terbuckBottomButton.tapPublisher
         )
         
@@ -131,10 +138,10 @@ private extension UniversityViewController {
         hostingController.view.snp.makeConstraints {
             $0.top.equalTo(titleView.snp.bottom).offset(view.convertByHeightRatio(120))
             $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(view.convertByHeightRatio(360))
         }
         
         terbuckBottomButton.snp.makeConstraints {
-            $0.top.equalTo(hostingController.view.snp.bottom).offset(view.convertByHeightRatio(20))
             $0.horizontalEdges.equalToSuperview().inset(20)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(view.convertByHeightRatio(8))
         }
