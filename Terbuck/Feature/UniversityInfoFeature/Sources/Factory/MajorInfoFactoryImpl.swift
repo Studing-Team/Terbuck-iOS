@@ -22,10 +22,16 @@ public final class MajorInfoFactoryImpl: MajorInfoFactory {
         
         switch type {
         case .edit:
-            viewModel = MajorInfoViewModel(selectedUniversityName: universityName)
+            viewModel = MajorInfoViewModel(
+                selectedUniversityName: universityName,
+                editUniversityUseCase: EditUniversityUseCaseImpl(repository: UniversityRepositoryImpl())
+            )
             
         case .register:
-            viewModel = MajorInfoViewModel(selectedUniversityName: universityName)
+            viewModel = MajorInfoViewModel(
+                selectedUniversityName: universityName,
+                signupUseCase: SignupUseCaseImpl(repository: UniversityRepositoryImpl())
+            )
         }
         
         return MajorInfoViewController(

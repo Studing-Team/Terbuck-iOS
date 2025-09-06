@@ -17,19 +17,10 @@ public final class UniversityInfoFactoryImpl: UniversityInfoFactory {
         coordinator: UniversityInfoCoordinating
     ) -> UIViewController {
         
-        let viewModel: UniversityViewModel
-        
-        switch type {
-        case .edit:
-            viewModel = UniversityViewModel(
-                editUniversityUseCase: EditUniversityUseCaseImpl(repository: UniversityRepositoryImpl())
-            )
-        case .register:
-            viewModel = UniversityViewModel(
-                signupUseCase: SignupUseCaseImpl(repository: UniversityRepositoryImpl())
-            )
-        }
-        
+        let viewModel = UniversityViewModel(
+            fetchUniversityInfoListUseCase: FetchUniversityInfoListUseCaseImpl(repository: UniversityRepositoryImpl())
+        )
+
         return UniversityViewController(
             type: type,
             viewModel: viewModel,

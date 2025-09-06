@@ -24,18 +24,14 @@ public final class TermsListView: UIView {
     public enum TermsType {
         case service
         case userInfo
-        case marketing
         
         var title: String {
             switch self {
             case .service:
-                return "[필수]  서비스 이용약관"
+                return "[필수] 서비스 이용약관"
                 
             case .userInfo:
-                return "[필수]  개인정보 수집 및 이용동의"
-                
-            case .marketing:
-                return "[선택]  개인정보 수집 및 이용동의"
+                return "[필수] 개인정보 수집 및 이용동의"
             }
         }
     }

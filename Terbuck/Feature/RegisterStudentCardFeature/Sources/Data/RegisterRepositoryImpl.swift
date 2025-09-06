@@ -1,5 +1,5 @@
 //
-//  RegisterRepository.swift
+//  RegisterRepositoryImpl.swift
 //  CoreNetwork
 //
 //  Created by ParkJunHyuk on 6/4/25.

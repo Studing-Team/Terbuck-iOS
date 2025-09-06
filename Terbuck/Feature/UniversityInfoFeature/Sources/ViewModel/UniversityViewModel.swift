@@ -7,37 +7,30 @@
 
 import Foundation
 import Combine
+import Observation
 
 import Shared
 
 enum UniversityError: LocalizedError, Equatable {
-    case signupFailed
-    case editUniversityFailed
-    case notEditUniversity
+    case fetchFailed
     case unknown
-
+    
     var errorDescription: String? {
         switch self {
-        case .signupFailed:
-            return "회원가입에 실패했습니다."
-        case .editUniversityFailed:
-            return "대학교를 변경하지 못했습니다."
-        case .notEditUniversity:
-            return "대학교를 변경할 수 없습니다"
+        case .fetchFailed:
+            return "대학교 정보를 불러올 수 없습니다."
         case .unknown:
             return "알 수 없는 오류가 발생했어요."
         }
     }
 }
 
-public class UniversityViewModel: ObservableObject {
+@Observable
+public class UniversityViewModel {
     
     // MARK: - Properties
     
-    private var signupUseCase: SignupUseCase?
-    private var editUniversityUseCase: EditUniversityUseCase?
-    
-    var universityName: String? = nil
+    private var fetchUniversityInfoListUseCase: FetchUniversityInfoListUseCase
     
     // MARK: - Private Combine Publishers Properties
     
@@ -48,12 +41,13 @@ public class UniversityViewModel: ObservableObject {
     
     // MARK: - SwiftUI Published Properties
     
-    @Published var selectedItemForUI: String?
+    var selectedItemForUI: String?
+    var universityInfoModel: [UniversityInfoModel]?
     
     // MARK: - Input
     
     struct Input {
-//        let universityTapped: AnyPublisher<String?, Never>
+        let viewLifeCycleEventAction: AnyPublisher<ViewLifeCycleEvent, Never>
         let bottomButtonTapped: AnyPublisher<Void, Never>
     }
     
@@ -68,16 +62,34 @@ public class UniversityViewModel: ObservableObject {
     // MARK: - Init
     
     public init(
-        signupUseCase: SignupUseCase? = nil,
-        editUniversityUseCase: EditUniversityUseCase? = nil
+        fetchUniversityInfoListUseCase: FetchUniversityInfoListUseCase
     ) {
-        self.signupUseCase = signupUseCase
-        self.editUniversityUseCase = editUniversityUseCase
+        self.fetchUniversityInfoListUseCase = fetchUniversityInfoListUseCase
     }
     
     // MARK: - Public methods
     
     func transform(input: Input) -> Output {
+        input.viewLifeCycleEventAction
+            .filter { $0 == .viewDidLoad }
+            .flatMap { [weak self] _ -> AnyPublisher<[UniversityInfoModel], Never> in
+                guard let self else { return Just([]).eraseToAnyPublisher() }
+                
+                return self.fetchUniversityPublisher()
+                    .catch { [weak self] error -> Just<[UniversityInfoModel]> in
+                        self?.errorSubject.send(error)
+                        return Just([])
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .delay(for: .seconds(0.5), scheduler: DispatchQueue.main)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] universityInfo in
+                self?.universityInfoModel = universityInfo
+            }
+            .store(in: &cancellables)
+        
+        
         let isBottomButtonEnabled = selectedUniversitySubject
             .map { selectedItem in
                 selectedItem == nil ? false : true
@@ -115,43 +127,19 @@ public extension UniversityViewModel {
 // MARK: - Private API methods
 
 private extension UniversityViewModel {
-    func signupPublisher(_ university: String) -> AnyPublisher<Void, UniversityError> {
+    func fetchUniversityPublisher() -> AnyPublisher<[UniversityInfoModel], UniversityError> {
         return Future { [weak self] promise in
-            guard let self, let signupUseCase else {
+            guard let self else {
                 promise(.failure(.unknown))
                 return
             }
             
             Task {
                 do {
-                    _ = try await signupUseCase.execute(university: university)
-                    promise(.success(()))
+                    let result = try await self.fetchUniversityInfoListUseCase.execute()
+                    promise(.success(result))
                 } catch {
-                    promise(.failure(.signupFailed))
-                }
-            }
-        }
-        .eraseToAnyPublisher()
-    }
-    
-    func editUniversityPublisher(_ university: String) -> AnyPublisher<Void, UniversityError> {
-        return Future { [weak self] promise in
-            guard let self, let editUniversityUseCase else {
-                promise(.failure(.unknown))
-                return
-            }
-            
-            if university == UserDefaultsManager.shared.string(for: .university) {
-                promise(.failure(.notEditUniversity))
-                return
-            }
-            
-            Task {
-                do {
-                    let _ = try await editUniversityUseCase.execute(university: university)
-                    promise(.success(()))
-                } catch {
-                    promise(.failure(.editUniversityFailed))
+                    promise(.failure(.fetchFailed))
                 }
             }
         }

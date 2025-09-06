@@ -18,7 +18,7 @@ struct UniversitySectionView: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 8) {
-                ForEach(Array(section.enumerated()), id: \.offset) { index, item in
+                ForEach(section, id: \.self) { item in
                     HStack(spacing: 0) {
                         Text(item)
                             .font(DesignSystem.Font.swiftUIFont(.textRegular14))

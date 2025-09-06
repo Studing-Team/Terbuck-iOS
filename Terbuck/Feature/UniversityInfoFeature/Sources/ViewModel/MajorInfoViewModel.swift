@@ -14,7 +14,8 @@ public class MajorInfoViewModel: ObservableObject {
     
     // MARK: - Properties
     
-    
+    private var signupUseCase: SignupUseCase?
+    private var editUniversityUseCase: EditUniversityUseCase?
     
     // MARK: - Private Combine Publishers Properties
     
@@ -45,9 +46,13 @@ public class MajorInfoViewModel: ObservableObject {
     // MARK: - Init
     
     public init(
-        selectedUniversityName: String
+        selectedUniversityName: String,
+        signupUseCase: SignupUseCase? = nil,
+        editUniversityUseCase: EditUniversityUseCase? = nil,
     ) {
         self.selectedUniversityNameSubject.send(selectedUniversityName)
+        self.signupUseCase = signupUseCase
+        self.editUniversityUseCase = editUniversityUseCase
     }
     
     // MARK: - Public methods
@@ -95,5 +100,46 @@ public extension MajorInfoViewModel {
 // MARK: - Private API methods
 
 private extension MajorInfoViewModel {
+    func signupPublisher(_ university: String) -> AnyPublisher<Void, UniversityError> {
+        return Future { [weak self] promise in
+            guard let self, let signupUseCase else {
+                promise(.failure(.unknown))
+                return
+            }
+            
+            Task {
+                do {
+                    _ = try await signupUseCase.execute(university: university)
+                    promise(.success(()))
+                } catch {
+                    promise(.failure(.signupFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
     
+    func editUniversityPublisher(_ university: String) -> AnyPublisher<Void, UniversityError> {
+        return Future { [weak self] promise in
+            guard let self, let editUniversityUseCase else {
+                promise(.failure(.unknown))
+                return
+            }
+            
+            if university == UserDefaultsManager.shared.string(for: .university) {
+                promise(.failure(.notEditUniversity))
+                return
+            }
+            
+            Task {
+                do {
+                    let _ = try await editUniversityUseCase.execute(university: university)
+                    promise(.success(()))
+                } catch {
+                    promise(.failure(.editUniversityFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
 }
