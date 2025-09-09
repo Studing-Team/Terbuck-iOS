@@ -130,14 +130,14 @@ private extension TermsOfServiceViewController {
         output.serviceArrowResult
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.moveWebpage("https://terbuck.notion.site/11905c1258e080ee91cecfb7ff633bab")
+                self?.moveWebpage(WebLinkType.service)
             }
             .store(in: &cancellables)
         
         output.userInfoArrowResult
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.moveWebpage("https://terbuck.notion.site/11905c1258e08063bba2f82d320de454")
+                self?.moveWebpage(WebLinkType.userInfo)
             }
             .store(in: &cancellables)
     }

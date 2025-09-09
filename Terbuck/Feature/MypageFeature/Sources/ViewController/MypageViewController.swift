@@ -113,16 +113,16 @@ private extension MypageViewController {
                     
                 case .inquiry:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.askMenuButtonTapped)
-                    self?.moveWebpage("http://pf.kakao.com/_BzmZn")
+                    self?.moveWebpage(WebLinkType.inquiry)
                     break
                     
                 case .privacyPolicy:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.personalMenuButtonTapped)
-                    self?.moveWebpage("https://terbuck.notion.site/11905c1258e08063bba2f82d320de454")
+                    self?.moveWebpage(WebLinkType.userInfo)
                     
                 case .serviceGuide:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.serviceMenuButtonTapped)
-                    self?.moveWebpage("https://terbuck.notion.site/11905c1258e080ee91cecfb7ff633bab")
+                    self?.moveWebpage(WebLinkType.service)
                     
                 case .showLogout:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.logoutMenuButtonTapped)
