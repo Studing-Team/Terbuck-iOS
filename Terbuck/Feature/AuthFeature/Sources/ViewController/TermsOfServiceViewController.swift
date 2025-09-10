@@ -73,7 +73,9 @@ private extension TermsOfServiceViewController {
         let input = TermsOfServiceViewModel.Input(
             serviceTermsTapped: serviceTermsView.tapPublisher.eraseToAnyPublisher(),
             userInfoTermsTapped: userInfoTermsView.tapPublisher.eraseToAnyPublisher(),
-            allTermsTapped: allTermsCheckButton.tapPublisher
+            allTermsTapped: allTermsCheckButton.tapPublisher,
+            serviceArrowTapped: serviceTermsView.arrowTapPublisher.eraseToAnyPublisher(),
+            userInfoArrowTapped: userInfoTermsView.arrowTapPublisher.eraseToAnyPublisher()
         )
         
         let output = viewModel.transform(input: input)
@@ -122,6 +124,20 @@ private extension TermsOfServiceViewController {
                 guard let self else { return }
                 MixpanelManager.shared.track(eventType: TrackEventType.Signup.firstSignupButtonTapped)
                 self.coordinator?.showUniversity()
+            }
+            .store(in: &cancellables)
+        
+        output.serviceArrowResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.moveWebpage(WebLinkType.service)
+            }
+            .store(in: &cancellables)
+        
+        output.userInfoArrowResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.moveWebpage(WebLinkType.userInfo)
             }
             .store(in: &cancellables)
     }
@@ -204,6 +220,12 @@ private extension TermsOfServiceViewController {
     
     func setupDelegate() {
         
+    }
+    
+    func moveWebpage(_ urlString: String) {
+        guard let url = URL(string: urlString),
+              UIApplication.shared.canOpenURL(url) else { return }
+        UIApplication.shared.open(url, options: [:])
     }
 }
 

@@ -10,6 +10,29 @@ import Combine
 
 import Shared
 
+enum MajorError: LocalizedError, Equatable {
+    case fetchFailed
+    case signupFailed
+    case notEditUniversity
+    case editUniversityFailed
+    case unknown
+    
+    var errorDescription: String? {
+        switch self {
+        case .fetchFailed:
+            return "대학교 단과대 정보를 불러올 수 없습니다."
+        case .signupFailed:
+            return "가입 관련해서 문제가 발생했어요."
+        case .notEditUniversity:
+            return "대학교 인증 문제가 발생했어요."
+        case .editUniversityFailed:
+            return "대학교 변경 관련해서 문제가 발생했어요."
+        case .unknown:
+            return "알 수 없는 오류가 발생했어요."
+        }
+    }
+}
+
 public class MajorInfoViewModel: ObservableObject {
     
     // MARK: - Properties
@@ -100,7 +123,7 @@ public extension MajorInfoViewModel {
 // MARK: - Private API methods
 
 private extension MajorInfoViewModel {
-    func signupPublisher(_ university: String) -> AnyPublisher<Void, UniversityError> {
+    func signupPublisher(_ university: String) -> AnyPublisher<Void, MajorError> {
         return Future { [weak self] promise in
             guard let self, let signupUseCase else {
                 promise(.failure(.unknown))
@@ -119,7 +142,7 @@ private extension MajorInfoViewModel {
         .eraseToAnyPublisher()
     }
     
-    func editUniversityPublisher(_ university: String) -> AnyPublisher<Void, UniversityError> {
+    func editUniversityPublisher(_ university: String) -> AnyPublisher<Void, MajorError> {
         return Future { [weak self] promise in
             guard let self, let editUniversityUseCase else {
                 promise(.failure(.unknown))
