@@ -15,6 +15,7 @@ import Resource
 
 import SnapKit
 import Then
+import Lottie
 
 final class HomeViewController: UIViewController {
     
@@ -39,7 +40,11 @@ final class HomeViewController: UIViewController {
     private let studentIDCardButton = DesignSystem.Button.studentIDCardButton()
     private lazy var segmentedTabView = SegmentedTabView()
     private lazy var refreshControl = UIRefreshControl()
-    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let activityIndicator = LottieAnimationView(name: "LoadingIndicator", bundle: ResourceResources.bundle).then {
+        $0.loopMode = .loop
+        $0.contentMode = .scaleAspectFit
+        $0.animationSpeed = 1.0
+    }
     private let contentLayoutGuide = UILayoutGuide()
     
     private lazy var collectionView: UICollectionView = {
@@ -171,7 +176,6 @@ private extension HomeViewController {
     func setupStyle(_ isAuth: Bool) {
         self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         navigationItem.backButtonTitle = ""
-        activityIndicator.color = DesignSystem.Color.uiColor(.terbuckGreen50)
         
         studentIDCardButton.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
         
@@ -226,6 +230,7 @@ private extension HomeViewController {
         
         activityIndicator.snp.makeConstraints {
             $0.center.equalTo(contentLayoutGuide)
+            $0.size.equalTo(view.convertByHeightRatio(200))
         }
     }
     
@@ -275,12 +280,12 @@ private extension HomeViewController {
         case .loading:
             viewsToShow = [activityIndicator]
             viewsToHide = [segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton]
-            activityIndicator.startAnimating()
+            activityIndicator.play()
             
         case .noData:
             viewsToShow = [emptyStateView, emptyStateBottomButton]
             viewsToHide = [activityIndicator, segmentedTabView, collectionView]
-            activityIndicator.stopAnimating()
+            activityIndicator.stop()
             
             emptyStateView.changeState(.notRequest)
             emptyStateView.snp.remakeConstraints {
@@ -295,7 +300,7 @@ private extension HomeViewController {
         case .requestPartner:
             viewsToShow = [emptyStateView]
             viewsToHide = [activityIndicator, segmentedTabView, collectionView, emptyStateBottomButton]
-            activityIndicator.stopAnimating()
+            activityIndicator.stop()
             
             emptyStateView.changeState(.completeRequest)
             emptyStateView.snp.remakeConstraints {
@@ -311,7 +316,7 @@ private extension HomeViewController {
         case .existData:
             viewsToShow = [segmentedTabView, collectionView]
             viewsToHide = [activityIndicator, emptyStateView, emptyStateBottomButton]
-            activityIndicator.stopAnimating()
+            activityIndicator.stop()
         }
         
         // 애니메이션 준비: 나타날 뷰들의 isHidden을 false로 설정
