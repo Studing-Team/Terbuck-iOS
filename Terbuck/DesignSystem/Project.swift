@@ -17,6 +17,7 @@ let project = Project(
             dependencies: [
                 .external(name: "SnapKit"),
                 .external(name: "Then"),
+                .external(name: "Lottie"),
                 .project(target: "CoreNetwork", path: "../Core/CoreNetwork"),
                 .project(target: "CoreKeyChain", path: "../Core/CoreKeyChain"),
                 .project(target: "Resource", path: "../Resource"),
