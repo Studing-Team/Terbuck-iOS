@@ -15,6 +15,7 @@ import Resource
 
 import SnapKit
 import Then
+import Lottie
 
 final class HomeViewController: UIViewController {
     
@@ -39,7 +40,11 @@ final class HomeViewController: UIViewController {
     private let studentIDCardButton = DesignSystem.Button.studentIDCardButton()
     private lazy var segmentedTabView = SegmentedTabView()
     private lazy var refreshControl = UIRefreshControl()
-    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let activityIndicator = LottieAnimationView(name: "LoadingIndicator", bundle: ResourceResources.bundle).then {
+        $0.loopMode = .loop
+        $0.contentMode = .scaleAspectFit
+        $0.animationSpeed = 1.0
+    }
     private let contentLayoutGuide = UILayoutGuide()
     
     private lazy var collectionView: UICollectionView = {
@@ -171,7 +176,6 @@ private extension HomeViewController {
     func setupStyle(_ isAuth: Bool) {
         self.view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         navigationItem.backButtonTitle = ""
-        activityIndicator.color = DesignSystem.Color.uiColor(.terbuckGreen50)
         
         studentIDCardButton.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
         
@@ -226,6 +230,7 @@ private extension HomeViewController {
         
         activityIndicator.snp.makeConstraints {
             $0.center.equalTo(contentLayoutGuide)
+            $0.size.equalTo(view.convertByHeightRatio(200))
         }
     }
     
@@ -275,12 +280,11 @@ private extension HomeViewController {
         case .loading:
             viewsToShow = [activityIndicator]
             viewsToHide = [segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton]
-            activityIndicator.startAnimating()
+            activityIndicator.play()
             
         case .noData:
             viewsToShow = [emptyStateView, emptyStateBottomButton]
             viewsToHide = [activityIndicator, segmentedTabView, collectionView]
-            activityIndicator.stopAnimating()
             
             emptyStateView.changeState(.notRequest)
             emptyStateView.snp.remakeConstraints {
@@ -295,23 +299,16 @@ private extension HomeViewController {
         case .requestPartner:
             viewsToShow = [emptyStateView]
             viewsToHide = [activityIndicator, segmentedTabView, collectionView, emptyStateBottomButton]
-            activityIndicator.stopAnimating()
             
             emptyStateView.changeState(.completeRequest)
             emptyStateView.snp.remakeConstraints {
                 $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
                 $0.horizontalEdges.equalToSuperview()
-                $0.bottom.lessThanOrEqualToSuperview()
-            }
-            
-            ToastManager.shared.showToast(from: self, type: .requestPartnership) {
-                self.coordinator?.showAlarmSetting()
             }
             
         case .existData:
             viewsToShow = [segmentedTabView, collectionView]
             viewsToHide = [activityIndicator, emptyStateView, emptyStateBottomButton]
-            activityIndicator.stopAnimating()
         }
         
         // 애니메이션 준비: 나타날 뷰들의 isHidden을 false로 설정
@@ -320,12 +317,23 @@ private extension HomeViewController {
         // 애니메이션 실행
         UIView.animate(withDuration: 0.3, animations: {
             viewsToShow.forEach { $0.alpha = 1.0 }
+            
+            if state != .loading {
+                self.activityIndicator.stop()
+            }
+            
             viewsToHide.forEach { $0.alpha = 0.0 }
             self.view.layoutIfNeeded() // 제약조건 변경 애니메이션
         }) { finished in
             guard finished else { return }
             // 애니메이션 종료 후, 사라진 뷰들의 isHidden을 true로 설정
             viewsToHide.forEach { $0.isHidden = true }
+            
+            if state == .requestPartner {
+                ToastManager.shared.showToast(from: self, type: .requestPartnership) {
+                    self.coordinator?.showAlarmSetting()
+                }
+            }
         }
     }
     
