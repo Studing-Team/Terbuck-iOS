@@ -285,7 +285,6 @@ private extension HomeViewController {
         case .noData:
             viewsToShow = [emptyStateView, emptyStateBottomButton]
             viewsToHide = [activityIndicator, segmentedTabView, collectionView]
-            activityIndicator.stop()
             
             emptyStateView.changeState(.notRequest)
             emptyStateView.snp.remakeConstraints {
@@ -300,23 +299,16 @@ private extension HomeViewController {
         case .requestPartner:
             viewsToShow = [emptyStateView]
             viewsToHide = [activityIndicator, segmentedTabView, collectionView, emptyStateBottomButton]
-            activityIndicator.stop()
             
             emptyStateView.changeState(.completeRequest)
             emptyStateView.snp.remakeConstraints {
                 $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
                 $0.horizontalEdges.equalToSuperview()
-                $0.bottom.lessThanOrEqualToSuperview()
-            }
-            
-            ToastManager.shared.showToast(from: self, type: .requestPartnership) {
-                self.coordinator?.showAlarmSetting()
             }
             
         case .existData:
             viewsToShow = [segmentedTabView, collectionView]
             viewsToHide = [activityIndicator, emptyStateView, emptyStateBottomButton]
-            activityIndicator.stop()
         }
         
         // 애니메이션 준비: 나타날 뷰들의 isHidden을 false로 설정
@@ -325,12 +317,23 @@ private extension HomeViewController {
         // 애니메이션 실행
         UIView.animate(withDuration: 0.3, animations: {
             viewsToShow.forEach { $0.alpha = 1.0 }
+            
+            if state != .loading {
+                self.activityIndicator.stop()
+            }
+            
             viewsToHide.forEach { $0.alpha = 0.0 }
             self.view.layoutIfNeeded() // 제약조건 변경 애니메이션
         }) { finished in
             guard finished else { return }
             // 애니메이션 종료 후, 사라진 뷰들의 isHidden을 true로 설정
             viewsToHide.forEach { $0.isHidden = true }
+            
+            if state == .requestPartner {
+                ToastManager.shared.showToast(from: self, type: .requestPartnership) {
+                    self.coordinator?.showAlarmSetting()
+                }
+            }
         }
     }
     
