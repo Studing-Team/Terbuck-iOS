@@ -41,19 +41,23 @@ public final class DetailStoreInfoViewModel: PreviewImageDisplayable {
     
     public var selectedBenefitIndex: Int? = nil
     public var isShowModal = false
+    public var pendingMessage = false
     public var onUseagesListModalChanged: ((Bool) -> Void)?
     
     private let searchDetailStoreUseCase: SearchDetailStoreUseCase
+    private let fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCase
     private let storeId: Int
     
     // MARK: - Init
     
     public init(
         storeId: Int,
-        searchDetailStoreUseCase: SearchDetailStoreUseCase
+        searchDetailStoreUseCase: SearchDetailStoreUseCase,
+        fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCase
     ) {
         self.storeId = storeId
         self.searchDetailStoreUseCase = searchDetailStoreUseCase
+        self.fetchApprovedStudentIdStatusUseCase = fetchApprovedStudentIdStatusUseCase
     }
 }
 
@@ -88,6 +92,16 @@ public extension DetailStoreInfoViewModel {
                                             title: titleModel.storeName,
                                             images: imageModel.map { $0.imageURL })
     }
+    
+    func fetchApprovedStudentIdStatus() async throws {
+        do {
+            let result = try await self.fetchApprovedStudentIdStatusUseCase.execute()
+            self.pendingMessage = result
+        } catch (let error) {
+            print(error.localizedDescription)
+            throw error
+        }
+    }
 }
 
 // MARK: - Private API Extension
@@ -95,7 +109,6 @@ public extension DetailStoreInfoViewModel {
 private extension DetailStoreInfoViewModel {    
     func getDetailStoreData() async throws -> StoreBenefitResult {
         do {
-            
             let result = try await self.searchDetailStoreUseCase.execute(storeId: storeId)
             
             storeURL = result.3

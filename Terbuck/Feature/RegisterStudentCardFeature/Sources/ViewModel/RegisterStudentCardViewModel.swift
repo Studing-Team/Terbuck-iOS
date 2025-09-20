@@ -104,14 +104,23 @@ public final class RegisterStudentCardViewModel {
                 }
 
                 return self.putStudentCardPublisher()
-                    .handleEvents(receiveOutput: { _ in
-                        guard let imageData = self.studentImageData else { return }
-                        
-                        let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-                    })
+//                    .handleEvents(receiveOutput: { _ in
+//                        guard let imageData = self.studentImageData else { return }
+//                        
+//                        let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
+//                    })
                     .catch { _ in Just(false).eraseToAnyPublisher() }
                     .eraseToAnyPublisher()
             }
+            .handleEvents(receiveOutput: { [weak self] isSuccess in
+                if isSuccess {
+//                    guard let imageData = self?.studentImageData else { return }
+//                    let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
+                    
+                    UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
+                    FileStorageManager.shared.delete(type: .studentIdCard)
+                }
+            })
             .eraseToAnyPublisher()
         
         return Output(

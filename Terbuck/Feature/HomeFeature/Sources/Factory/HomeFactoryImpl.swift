@@ -22,7 +22,8 @@ public final class HomeFactoryImpl: HomeFactory {
             searchPartnershipUseCase: SearchPartnershipUseCaseImpl(repository: HomeRepositoryImpl()),
             fetchPartnershipDisclosureStatusUseCase: FetchPartnershipDisclosureStatusUseCaseImpl(repository: HomeRepositoryImpl()),
             requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCaseImpl(repository: HomeRepositoryImpl()),
-            fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCaseImpl(repository: HomeRepositoryImpl())
+            fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCaseImpl(repository: HomeRepositoryImpl()),
+            fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCaseImpl(repository: HomeRepositoryImpl())
         )
         
         return HomeViewController(
