@@ -93,13 +93,13 @@ public extension DetailStoreInfoViewModel {
                                             images: imageModel.map { $0.imageURL })
     }
     
-    func fetchApprovedStudentIdStatus() async throws {
+    func fetchApprovedStudentIdStatus() async {
         do {
             let result = try await self.fetchApprovedStudentIdStatusUseCase.execute()
             self.pendingMessage = result
         } catch (let error) {
+            // TODO: 추후 에러 정책이 정해지면 알맞은 로깅 또는 에러 상태값 변경 로직 추가
             print(error.localizedDescription)
-            throw error
         }
     }
 }

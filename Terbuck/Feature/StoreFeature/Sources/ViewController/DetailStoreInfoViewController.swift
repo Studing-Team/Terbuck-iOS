@@ -58,7 +58,7 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
 
         Task {
             await detailStoreViewModel.fetchDetailStoreBenefitData()
-            try await detailStoreViewModel.fetchApprovedStudentIdStatus()
+            await detailStoreViewModel.fetchApprovedStudentIdStatus()
         }
     }
     
