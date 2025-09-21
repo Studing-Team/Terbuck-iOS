@@ -12,7 +12,7 @@ public enum AuthorizedType {
     case detailStore
 }
 
-public enum ToastType {
+public enum ToastType: Equatable {
     case notAuthorized(type: AuthorizedType)
     case noticeStudentCard
     case alarmStudentCard
@@ -20,6 +20,7 @@ public enum ToastType {
     case moreBenefit
     case partnership
     case requestPartnership
+    case approvedStudentCard(type: AuthorizedType)
     
     var image: UIImage? {
         switch self {
@@ -41,7 +42,7 @@ public enum ToastType {
         case .partnership:
             return .moreBenefitIcon
              
-        case .requestPartnership:
+        case .requestPartnership, .approvedStudentCard:
             return nil
         }
     }
@@ -68,6 +69,9 @@ public enum ToastType {
             
         case .requestPartnership:
             return "업데이트 되는대로 알려드릴게요 :)"
+            
+        case .approvedStudentCard:
+            return "학생증을 확인 중이에요. 잠시만 기다려주세요 :)"
         }
     }
     
@@ -109,6 +113,13 @@ public enum ToastType {
             
         case .partnership:
             return 75
+            
+        case .approvedStudentCard(let type):
+            if type == .detailStore {
+                return 68
+            } else {
+                return 16
+            }
             
         default:
             return 16

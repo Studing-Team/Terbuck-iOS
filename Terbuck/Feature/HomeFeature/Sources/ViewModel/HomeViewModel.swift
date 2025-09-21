@@ -35,6 +35,7 @@ public final class HomeViewModel {
     private let fetchPartnershipDisclosureStatusUseCase: FetchPartnershipDisclosureStatusUseCase
     private let requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCase
     private let fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCase
+    private let fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCase
     
     // MARK: - Private Combine Publishers Properties
     
@@ -61,7 +62,7 @@ public final class HomeViewModel {
     // MARK: - Output
     
     struct Output {
-        let studentIDCardButtonResult: AnyPublisher<Bool, Never>
+        let studentIDCardButtonResult: AnyPublisher<AuthStudentCardType, Never>
         let authStudentResult: AnyPublisher<Bool?, Never>
         let homeError: AnyPublisher<HomeError, Never>
     }
@@ -73,13 +74,15 @@ public final class HomeViewModel {
         searchPartnershipUseCase: SearchPartnershipUseCase,
         fetchPartnershipDisclosureStatusUseCase: FetchPartnershipDisclosureStatusUseCase,
         requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCase,
-        fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCase
+        fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCase,
+        fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCase
     ) {
         self.searchStoreUseCase = searchStoreUseCase
         self.searchPartnershipUseCase = searchPartnershipUseCase
         self.fetchPartnershipDisclosureStatusUseCase = fetchPartnershipDisclosureStatusUseCase
         self.requestPartnershipDisclosureUseCase = requestPartnershipDisclosureUseCase
         self.fetchDisclosureRequestStatusUseCase = fetchDisclosureRequestStatusUseCase
+        self.fetchApprovedStudentIdStatusUseCase = fetchApprovedStudentIdStatusUseCase
     }
     
     // MARK: - Public methods
@@ -120,12 +123,33 @@ public final class HomeViewModel {
             .store(in: &cancellables)
         
         let studentIDCardButtonResult = input.studentIDCardButtonTap
-            .handleEvents(receiveOutput : { _ in
+            .handleEvents(receiveOutput: { _ in
                 MixpanelManager.shared.track(eventType: TrackEventType.Home.studentCardButtonTapped)
             })
-            .map { [weak self] _ -> Bool in
-                guard let self, let result = isAuthStudentSubject.value else { return false }
-                return result
+            .flatMap { [weak self] _ -> AnyPublisher<(isAuth: Bool, isPending: Bool), Never> in
+                guard let self = self else {
+                    return Just((isAuth: false, isPending: false)).eraseToAnyPublisher()
+                }
+                
+                let isAuthPublisher = self.isAuthStudentSubject.compactMap { $0 }.first()
+                let isPendingPublisher = self.fetchApprovedStudentIdStatusPublisher().catch { _ in Just(false) }
+                    
+                return Publishers.Zip(isAuthPublisher, isPendingPublisher)
+                    .map { (isAuth: $0.0, isPending: $0.1) }
+                    .eraseToAnyPublisher()
+            }
+            .map { (isAuth, isPending) -> AuthStudentCardType in
+                if isAuth {
+                    return .showStudentCard
+                }
+                
+                if isPending {
+                    return .pendingMessage
+                }
+                
+                // 인증도, 심사중도 아닐 때만 온보딩 여부를 확인
+                let hasCompletedOnboarding = UserDefaultsManager.shared.bool(for: .isOnboarding)
+                return hasCompletedOnboarding ? .registerMessage : .showOnboarding
             }
             .eraseToAnyPublisher()
         
@@ -412,6 +436,25 @@ private extension HomeViewModel {
                 do {
                     let result = try await self.fetchDisclosureRequestStatusUseCase.execute(universityName: universityName)
                     
+                    promise(.success(result))
+                } catch {
+                    promise(.failure(.serverFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func fetchApprovedStudentIdStatusPublisher() -> AnyPublisher<Bool, HomeError> {
+        return Future { [weak self] promise in
+            guard let self else {
+                promise(.failure(.unknown))
+                return
+            }
+            
+            Task {
+                do {
+                    let result = try await self.fetchApprovedStudentIdStatusUseCase.execute()
                     promise(.success(result))
                 } catch {
                     promise(.failure(.serverFailed))

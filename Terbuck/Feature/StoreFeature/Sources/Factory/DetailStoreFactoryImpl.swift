@@ -23,7 +23,8 @@ public final class DetailStoreFactoryImpl: DetailStoreFactory {
                 storeId: storeId,
                 searchDetailStoreUseCase: SearchDetailStoreUseCaseImpl(
                     repository: StoreRepositoryImpl()
-                )
+                ),
+                fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCaseImpl(repository: StoreRepositoryImpl())
             ),
             coordinator: coordinator
         )

@@ -14,6 +14,7 @@ public enum MemberAPIEndpoint {
     case getStudentId
     case putRegisterStudentId(RegisterStudentIDRequestDTO)
     case deleteStudentId
+    case getApprovedStudentIdStatus
 }
 
 extension MemberAPIEndpoint: EndpointProtocol {
@@ -31,6 +32,8 @@ extension MemberAPIEndpoint: EndpointProtocol {
             return basePath.rawValue + "/univ"
         case .getStudentId, .putRegisterStudentId, .deleteStudentId:
             return basePath.rawValue + "/studentID"
+        case .getApprovedStudentIdStatus:
+            return basePath.rawValue + "/studentID/pending"
         }
     }
     
@@ -40,7 +43,7 @@ extension MemberAPIEndpoint: EndpointProtocol {
             return .post
         case .patchUniversity:
             return .patch
-        case .getStudentId:
+        case .getStudentId, .getApprovedStudentIdStatus:
             return .get
         case .putRegisterStudentId:
             return .put

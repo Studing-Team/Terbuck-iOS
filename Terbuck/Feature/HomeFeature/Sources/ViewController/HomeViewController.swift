@@ -115,22 +115,25 @@ private extension HomeViewController {
         
         output.studentIDCardButtonResult
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] authResult in
+            .sink { [weak self] action in
                 guard let self else { return }
                 
-                if authResult == true {
-                    self.coordinator?.startRegisterStudentCard(for: .auth, location: nil)
-                    
-                } else if authResult == false && !UserDefaultsManager.shared.bool(for: .isOnboarding) {
+                switch action {
+                case .showOnboarding:
                     guard let holeLocation = self.holeLocation else { return }
                     self.coordinator?.startRegisterStudentCard(for: .onboarding, location: holeLocation)
                     UserDefaultsManager.shared.set(true, for: .isOnboarding)
                     
-                } else {
-                    MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonInToastMessage)
+                case .pendingMessage:
+                    ToastManager.shared.showToast(from: self, type: .approvedStudentCard(type: .home))
+                    
+                case .registerMessage:
                     ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
                         self.coordinator?.startRegisterStudentCard(for: .register, location: nil)
                     }
+                    
+                case .showStudentCard:
+                    self.coordinator?.startRegisterStudentCard(for: .auth, location: nil)
                 }
             }
             .store(in: &cancellables)

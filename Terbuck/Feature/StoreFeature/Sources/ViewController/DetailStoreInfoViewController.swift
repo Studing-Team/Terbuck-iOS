@@ -58,6 +58,7 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
 
         Task {
             await detailStoreViewModel.fetchDetailStoreBenefitData()
+            await detailStoreViewModel.fetchApprovedStudentIdStatus()
         }
     }
     
@@ -114,6 +115,8 @@ private extension DetailStoreInfoViewController {
             MixpanelManager.shared.track(eventType: TrackEventType.DetailStore.studentCardButtonTapped)
             if UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated) {
                 self.coordinator?.startRegisterStudentCard(for: .auth, location: nil)
+            } else if self.detailStoreViewModel.pendingMessage == true {
+                ToastManager.shared.showToast(from: self, type: .approvedStudentCard(type: .detailStore))
             } else {
                 ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .detailStore)) {
                     self.coordinator?.startRegisterStudentCard(for: .register, location: nil)

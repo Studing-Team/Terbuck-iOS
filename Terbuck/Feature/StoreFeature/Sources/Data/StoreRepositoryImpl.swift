@@ -13,6 +13,7 @@ import CoreNetwork
 public protocol StoreRepository {
     func getSearchStoreMap(university: String, category: String, latitude: String, longitude: String) async throws -> [SearchStoreMapEntity]
     func getSearchDetailStore(storeId: Int) async throws -> SearchDetailStoreEntity
+    func getApprovedStudentIdStatus() async throws -> Bool
 }
 
 struct StoreRepositoryImpl: StoreRepository {
@@ -30,5 +31,10 @@ struct StoreRepositoryImpl: StoreRepository {
         let dto: SearchStoreDetailResponseDTO = try await networkManager.request(StoreAPIEndpoint.getDetailStore(requestDTO))
         
         return dto.toEntity()
+    }
+    
+    func getApprovedStudentIdStatus() async throws -> Bool {
+        let dto: ApprovedStudentIdStatusResponseDTO = try await networkManager.request(MemberAPIEndpoint.getApprovedStudentIdStatus)
+        return dto.isPending
     }
 }
