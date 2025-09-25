@@ -82,7 +82,7 @@ public class UniversityViewModel {
                     }
                     .eraseToAnyPublisher()
             }
-            .delay(for: .seconds(0.5), scheduler: DispatchQueue.main)
+            .delay(for: .seconds(0.3), scheduler: DispatchQueue.main)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] universityInfo in
                 self?.universityInfoModel = universityInfo
