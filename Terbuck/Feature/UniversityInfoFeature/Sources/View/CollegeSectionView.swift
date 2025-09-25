@@ -1,5 +1,5 @@
 //
-//  MajorSectionView.swift
+//  CollegeSectionView.swift
 //  UniversityInfoFeature
 //
 //  Created by ParkJunHyuk on 8/27/25.
@@ -12,7 +12,7 @@ import Shared
 import Resource
 import Lottie
 
-struct MajorSectionView: View {
+struct CollegeSectionView: View {
     
     @State var viewModel: CollegeInfoViewModel
 

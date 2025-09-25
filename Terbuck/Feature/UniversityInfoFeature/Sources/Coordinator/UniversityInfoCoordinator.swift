@@ -57,7 +57,7 @@ final class UniversityInfoCoordinator: UniversityInfoCoordinating, PoppableCoord
         navigationController.pushViewController(universityInfoVC, animated: true)
     }
     
-    func showMajor(selectUniversityName: String) {
+    func showCollege(selectUniversityName: String) {
         let majorInfoVC = collegeInfoFactory.makeCollegeInfoViewController(
             type: initialType,
             universityName: selectUniversityName,

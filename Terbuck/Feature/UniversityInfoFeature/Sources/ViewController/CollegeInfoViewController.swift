@@ -34,7 +34,7 @@ final class CollegeInfoViewController: UIViewController, UIGestureRecognizerDele
     private let customNavBar: CustomNavigationView
     private let titleView: InformationTitleView
     private let terbuckBottomButton: TerbuckBottomButton
-    private let hostingController: UIHostingController<MajorSectionView>
+    private let hostingController: UIHostingController<CollegeSectionView>
     
     // MARK: - Init
     
@@ -50,7 +50,7 @@ final class CollegeInfoViewController: UIViewController, UIGestureRecognizerDele
         self.titleView = InformationTitleView(type: .major(""))
         self.terbuckBottomButton = TerbuckBottomButton(type:  type == .register ? .enter : .save, isEnabled: false)
         
-        self.hostingController = UIHostingController(rootView: MajorSectionView(viewModel: viewModel))
+        self.hostingController = UIHostingController(rootView: CollegeSectionView(viewModel: viewModel))
         super.init(nibName: nil, bundle: nil)
     }
     

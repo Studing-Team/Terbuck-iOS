@@ -11,7 +11,7 @@ public protocol UniversityInfoCoordinating: Coordinator {
     var delegate: UniversityInfoCoordinatorDelegate? { get set }
     
     func showUniversity()
-    func showMajor(selectUniversityName: String)
+    func showCollege(selectUniversityName: String)
     func didFinishUniversityInfo()
     func backNavigation()
 }
