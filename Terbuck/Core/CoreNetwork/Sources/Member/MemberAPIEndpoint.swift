@@ -25,7 +25,7 @@ extension MemberAPIEndpoint: EndpointProtocol {
     public var path: String {
         switch self {
         case .postSignin:
-            return basePath.rawValue + "/signin"
+            return basePath.rawValue + "/signin/v2"
         case .deleteMemeber:
             return basePath.rawValue
         case .patchUniversity:

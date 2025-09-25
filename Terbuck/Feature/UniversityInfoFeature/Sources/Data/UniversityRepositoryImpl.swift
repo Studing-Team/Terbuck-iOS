@@ -9,7 +9,7 @@ import Foundation
 import CoreNetwork
 
 public protocol UniversityRepository {
-    func postSignupMember(university: String) async throws -> Void
+    func postSignupMember(university: String, collgeId: Int) async throws -> Void
     func patchUniversityInfo(university: String) async throws -> Void
     func getUniversityInfoList() async throws -> [UniversityInfoEntity]
     func getCollegesInfoList(university: String) async throws -> [CollegesInfoEntity]
@@ -21,8 +21,8 @@ public struct UniversityRepositoryImpl: UniversityRepository {
     
     public init() {}
     
-    public func postSignupMember(university: String) async throws {
-        let requestDTO = SigninRequestDTO(university: university)
+    public func postSignupMember(university: String, collgeId: Int) async throws {
+        let requestDTO = SigninRequestDTO(university: university, collgeId: collgeId)
         let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.postSignin(requestDTO))
     }
     
