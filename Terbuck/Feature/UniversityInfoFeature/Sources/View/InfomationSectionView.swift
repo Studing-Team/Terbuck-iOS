@@ -7,6 +7,8 @@
 
 import SwiftUI
 import DesignSystem
+import Resource
+import Lottie
 
 enum SectionType {
     case location
@@ -79,7 +81,11 @@ struct InfomationSectionView: View {
             } else {
                 VStack(spacing: 0) {
                     Spacer()
-                    ProgressView()
+                    
+                    LottieView(animation: .named("LoadingIndicator", bundle: ResourceResources.bundle))
+                        .playing(loopMode: .loop)
+                        .animationSpeed(1)
+                        
                     Spacer()
                     Spacer()
                 }

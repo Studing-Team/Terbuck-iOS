@@ -1,5 +1,5 @@
 //
-//  MajorInfoViewModel.swift
+//  CollegeInfoViewModel.swift
 //  UniversityInfoFeature
 //
 //  Created by ParkJunHyuk on 8/26/25.
@@ -10,7 +10,7 @@ import Combine
 
 import Shared
 
-enum MajorError: LocalizedError, Equatable {
+enum CollegesError: LocalizedError, Equatable {
     case fetchFailed
     case signupFailed
     case notEditUniversity
@@ -33,10 +33,12 @@ enum MajorError: LocalizedError, Equatable {
     }
 }
 
-public class MajorInfoViewModel: ObservableObject {
+@Observable
+public class CollegeInfoViewModel {
     
     // MARK: - Properties
     
+    private var fetchCollegesInfoListUseCase: FetchCollegesInfoListUseCase
     private var signupUseCase: SignupUseCase?
     private var editUniversityUseCase: EditUniversityUseCase?
     
@@ -44,6 +46,11 @@ public class MajorInfoViewModel: ObservableObject {
     
     public let selectedUniversityNameSubject = CurrentValueSubject<String, Never>("")
     private let selectedMajorSubject = CurrentValueSubject<String?, Never>(nil)
+    private let errorSubject = PassthroughSubject<CollegesError, Never>()
+    
+    // MARK: - SwiftUI Published Properties
+    
+    var collegesInfoModel: [CollegesInfoModel]?
     
     // MARK: - Private Combine Publishers Properties
     
@@ -51,11 +58,12 @@ public class MajorInfoViewModel: ObservableObject {
     
     // MARK: - SwiftUI Published Properties
     
-    @Published var selectedItemForUI: String?
+    var selectedItemForUI: String?
     
     // MARK: - Input
     
     struct Input {
+        let viewLifeCycleEventAction: AnyPublisher<ViewLifeCycleEvent, Never>
         let bottomButtonTapped: AnyPublisher<Void, Never>
     }
     
@@ -70,10 +78,12 @@ public class MajorInfoViewModel: ObservableObject {
     
     public init(
         selectedUniversityName: String,
+        fetchCollegesInfoListUseCase: FetchCollegesInfoListUseCase,
         signupUseCase: SignupUseCase? = nil,
         editUniversityUseCase: EditUniversityUseCase? = nil,
     ) {
         self.selectedUniversityNameSubject.send(selectedUniversityName)
+        self.fetchCollegesInfoListUseCase = fetchCollegesInfoListUseCase
         self.signupUseCase = signupUseCase
         self.editUniversityUseCase = editUniversityUseCase
     }
@@ -81,7 +91,27 @@ public class MajorInfoViewModel: ObservableObject {
     // MARK: - Public methods
     
     func transform(input: Input) -> Output {
-        
+        input.viewLifeCycleEventAction
+            .filter { $0 == .viewDidLoad }
+            .flatMap { [weak self] _ -> AnyPublisher<[CollegesInfoModel], Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                
+                let universityName = self.selectedUniversityNameSubject.value
+                
+                return self.fetchCollegesInfoListPublisher(universityName)
+                    .catch { error -> Just<[CollegesInfoModel]> in
+                        self.errorSubject.send(error)
+                        return Just([])
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .delay(for: .seconds(0.3), scheduler: DispatchQueue.main)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] collegesData in
+                self?.collegesInfoModel = collegesData
+            }
+            .store(in: &cancellables)
+                
         let isBottomButtonEnabled = selectedMajorSubject
             .map { selectedItem in
                 selectedItem == nil ? false : true
@@ -108,7 +138,7 @@ public class MajorInfoViewModel: ObservableObject {
 
 // MARK: - Public Methods
 
-public extension MajorInfoViewModel {
+public extension CollegeInfoViewModel {
     func selectItem(_ item: String?) {
         if selectedItemForUI == item {
             selectedItemForUI = nil
@@ -122,8 +152,27 @@ public extension MajorInfoViewModel {
 
 // MARK: - Private API methods
 
-private extension MajorInfoViewModel {
-    func signupPublisher(_ university: String) -> AnyPublisher<Void, MajorError> {
+private extension CollegeInfoViewModel {
+    func fetchCollegesInfoListPublisher(_ university: String) -> AnyPublisher<[CollegesInfoModel], CollegesError> {
+        return Future { [weak self] promise in
+            guard let self else {
+                promise(.failure(.unknown))
+                return
+            }
+                
+            Task {
+                do {
+                    let result = try await self.fetchCollegesInfoListUseCase.execute(universityName: university)
+                    promise(.success(result))
+                } catch {
+                    promise(.failure(.signupFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func signupPublisher(_ university: String) -> AnyPublisher<Void, CollegesError> {
         return Future { [weak self] promise in
             guard let self, let signupUseCase else {
                 promise(.failure(.unknown))
@@ -142,7 +191,7 @@ private extension MajorInfoViewModel {
         .eraseToAnyPublisher()
     }
     
-    func editUniversityPublisher(_ university: String) -> AnyPublisher<Void, MajorError> {
+    func editUniversityPublisher(_ university: String) -> AnyPublisher<Void, CollegesError> {
         return Future { [weak self] promise in
             guard let self, let editUniversityUseCase else {
                 promise(.failure(.unknown))

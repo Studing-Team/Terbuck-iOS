@@ -15,6 +15,8 @@ public enum UniversityAPIEndpoint {
     case postPartnershipDisclosureRequest(MyUniversityRequestDTO)
     /// 내가 보낸 '공개 요청'의 처리 '상태'를 조회
     case getDisclosureRequestStatus(MyUniversityRequestDTO)
+    /// 대학별 '단과대' 조회
+    case getCollegesInfoList(MyUniversityRequestDTO)
 }
 
 extension UniversityAPIEndpoint: EndpointProtocol {
@@ -30,12 +32,14 @@ extension UniversityAPIEndpoint: EndpointProtocol {
             return basePath.rawValue + "/is-registered"
         case .postPartnershipDisclosureRequest, .getDisclosureRequestStatus:
             return basePath.rawValue + "/open"
+        case .getCollegesInfoList:
+            return basePath.rawValue + "/colleges"
         }
     }
     
     public var method: HTTPMethod {
         switch self {
-        case .getUniversityInfoList, .getPartnershipDisclosureStatus, .getDisclosureRequestStatus:
+        case .getUniversityInfoList, .getPartnershipDisclosureStatus, .getDisclosureRequestStatus, .getCollegesInfoList:
             return .get
         case .postPartnershipDisclosureRequest:
             return .post
@@ -57,6 +61,8 @@ extension UniversityAPIEndpoint: EndpointProtocol {
         case .getPartnershipDisclosureStatus(let dto):
             return dto.toQueryItems()
         case .postPartnershipDisclosureRequest(let dto):
+            return dto.toQueryItems()
+        case .getCollegesInfoList(let dto):
             return dto.toQueryItems()
         default:
             return nil

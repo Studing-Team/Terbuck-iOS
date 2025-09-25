@@ -91,7 +91,7 @@ private extension UniversityViewController {
         output.bottomButtonResult
             .receive(on: DispatchQueue.main)
             .sink { [weak self] selectUniversityName in
-                self?.coordinator?.showMajor(selectUniversityName: selectUniversityName)
+                self?.coordinator?.showCollege(selectUniversityName: selectUniversityName)
             }
             .store(in: &cancellables)
         

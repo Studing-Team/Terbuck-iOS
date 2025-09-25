@@ -12,6 +12,7 @@ public protocol UniversityRepository {
     func postSignupMember(university: String) async throws -> Void
     func patchUniversityInfo(university: String) async throws -> Void
     func getUniversityInfoList() async throws -> [UniversityInfoEntity]
+    func getCollegesInfoList(university: String) async throws -> [CollegesInfoEntity]
 }
 
 public struct UniversityRepositoryImpl: UniversityRepository {
@@ -33,6 +34,14 @@ public struct UniversityRepositoryImpl: UniversityRepository {
     
     public func getUniversityInfoList() async throws -> [UniversityInfoEntity] {
         let dto: [UniversityInfoListResponseDTO] = try await networkManager.request(UniversityAPIEndpoint.getUniversityInfoList)
+        
+        return dto.map { $0.toEntity() }
+    }
+    
+    public func getCollegesInfoList(university: String) async throws -> [CollegesInfoEntity] {
+        let requestDTO = MyUniversityRequestDTO(universityName: university)
+        
+        let dto: [CollegesInfoResponseDTO] = try await networkManager.request(UniversityAPIEndpoint.getCollegesInfoList(requestDTO))
         
         return dto.map { $0.toEntity() }
     }

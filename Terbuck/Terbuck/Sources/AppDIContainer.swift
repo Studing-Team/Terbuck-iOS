@@ -65,8 +65,8 @@ public final class AppDIContainer {
         return UniversityInfoFactoryImpl()
     }
     
-    func makeMajorInfoFactory() -> MajorInfoFactory {
-        return MajorInfoFactoryImpl()
+    func makeCollegeInfoFactory() -> CollegeInfoFactory {
+        return CollegeInfoFactoryImpl()
     }
     
     func registerStudentCardFactory() -> RegisterStudentCardCoordinatorFactory {
@@ -76,7 +76,7 @@ public final class AppDIContainer {
     func universityInfoCoordinatorFactory() -> UniversityInfoCoordinatorFactory {
         return UniversityInfoCoordinatorFactoryImpl(
             universityInfoFactory: makeUniversityInfoFactory(),
-            majorInfoFactory: makeMajorInfoFactory()
+            collegeInfoFactory: makeCollegeInfoFactory()
         )
     }
 }

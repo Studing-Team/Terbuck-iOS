@@ -1,5 +1,5 @@
 //
-//  MajorInfoViewController.swift
+//  CollegeInfoViewController.swift
 //  UniversityInfoFeature
 //
 //  Created by ParkJunHyuk on 8/26/25.
@@ -16,14 +16,17 @@ import UniversityInfoInterface
 import SnapKit
 import Then
 
-final class MajorInfoViewController: UIViewController, UIGestureRecognizerDelegate {
+final class CollegeInfoViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
     private var type: UniversityType
     weak var coordinator: UniversityInfoCoordinating?
-    private var viewModel: MajorInfoViewModel
+    private var viewModel: CollegeInfoViewModel
     
+    // MARK: - Combine Properties
+    
+    private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -31,13 +34,13 @@ final class MajorInfoViewController: UIViewController, UIGestureRecognizerDelega
     private let customNavBar: CustomNavigationView
     private let titleView: InformationTitleView
     private let terbuckBottomButton: TerbuckBottomButton
-    private let hostingController: UIHostingController<MajorSectionView>
+    private let hostingController: UIHostingController<CollegeSectionView>
     
     // MARK: - Init
     
     public init(
         type: UniversityType,
-        viewModel: MajorInfoViewModel,
+        viewModel: CollegeInfoViewModel,
         coordinator: UniversityInfoCoordinating
     ) {
         self.type = type
@@ -47,7 +50,7 @@ final class MajorInfoViewController: UIViewController, UIGestureRecognizerDelega
         self.titleView = InformationTitleView(type: .major(""))
         self.terbuckBottomButton = TerbuckBottomButton(type:  type == .register ? .enter : .save, isEnabled: false)
         
-        self.hostingController = UIHostingController(rootView: MajorSectionView(viewModel: viewModel))
+        self.hostingController = UIHostingController(rootView: CollegeSectionView(viewModel: viewModel))
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -69,14 +72,17 @@ final class MajorInfoViewController: UIViewController, UIGestureRecognizerDelega
         setupLayout()
         setupDelegate()
         bindViewModel()
+        
+        viewLifeCycleSubject.send(.viewDidLoad)
     }
 }
 
 // MARK: - Private Bind Extensions
 
-private extension MajorInfoViewController {
+private extension CollegeInfoViewController {
     func bindViewModel() {
-        let input = MajorInfoViewModel.Input(
+        let input = CollegeInfoViewModel.Input(
+            viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher(),
             bottomButtonTapped: terbuckBottomButton.tapPublisher
         )
         
@@ -109,7 +115,7 @@ private extension MajorInfoViewController {
 
 // MARK: - Private Extensions
 
-private extension MajorInfoViewController {
+private extension CollegeInfoViewController {
     func setupStyle() {
         view.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
@@ -137,15 +143,15 @@ private extension MajorInfoViewController {
             $0.horizontalEdges.equalToSuperview().inset(25)
         }
         
+        terbuckBottomButton.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(view.convertByHeightRatio(8))
+        }
+        
         hostingController.view.snp.makeConstraints {
             $0.top.equalTo(titleView.snp.bottom).offset(view.convertByHeightRatio(120))
             $0.horizontalEdges.equalToSuperview()
-        }
-        
-        terbuckBottomButton.snp.makeConstraints {
-            $0.top.equalTo(hostingController.view.snp.bottom).offset(view.convertByHeightRatio(20))
-            $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(view.convertByHeightRatio(8))
+            $0.height.equalTo(view.convertByHeightRatio(360))
         }
     }
     
