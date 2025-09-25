@@ -18,7 +18,7 @@ final class UniversityInfoCoordinator: UniversityInfoCoordinating, PoppableCoord
     var navigationController: UINavigationController
     
     private let universityInfoFactory: UniversityInfoFactory
-    private let majorInfoFactory: MajorInfoFactory
+    private let collegeInfoFactory: CollegeInfoFactory
     
     private let initialType: UniversityType
     
@@ -27,12 +27,12 @@ final class UniversityInfoCoordinator: UniversityInfoCoordinating, PoppableCoord
     public init(
         navigationController: UINavigationController,
         universityInfoFactory: UniversityInfoFactory,
-        majorInfoFactory: MajorInfoFactory,
+        collegeInfoFactory: CollegeInfoFactory,
         initialType: UniversityType
     ) {
         self.navigationController = navigationController
         self.universityInfoFactory = universityInfoFactory
-        self.majorInfoFactory = majorInfoFactory
+        self.collegeInfoFactory = collegeInfoFactory
         self.initialType = initialType
     }
     
@@ -58,7 +58,7 @@ final class UniversityInfoCoordinator: UniversityInfoCoordinating, PoppableCoord
     }
     
     func showMajor(selectUniversityName: String) {
-        let majorInfoVC = majorInfoFactory.makeMajorInfoViewController(
+        let majorInfoVC = collegeInfoFactory.makeCollegeInfoViewController(
             type: initialType,
             universityName: selectUniversityName,
             coordinator: self

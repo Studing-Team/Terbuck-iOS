@@ -12,14 +12,14 @@ import UniversityInfoInterface
 public final class UniversityInfoCoordinatorFactoryImpl: UniversityInfoCoordinatorFactory {
     
     private let universityInfoFactory: UniversityInfoFactory
-    private let majorInfoFactory: MajorInfoFactory
+    private let collegeInfoFactory: CollegeInfoFactory
     
     public init(
         universityInfoFactory: UniversityInfoFactory,
-        majorInfoFactory: MajorInfoFactory
+        collegeInfoFactory: CollegeInfoFactory
     ) {
         self.universityInfoFactory = universityInfoFactory
-        self.majorInfoFactory = majorInfoFactory
+        self.collegeInfoFactory = collegeInfoFactory
     }
     
     public func makeUniversityInfoCoordinator(
@@ -29,7 +29,7 @@ public final class UniversityInfoCoordinatorFactoryImpl: UniversityInfoCoordinat
         return UniversityInfoCoordinator(
             navigationController: navigationController,
             universityInfoFactory: universityInfoFactory,
-            majorInfoFactory: majorInfoFactory,
+            collegeInfoFactory: collegeInfoFactory,
             initialType: initialType
         )
     }
