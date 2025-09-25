@@ -45,7 +45,7 @@ public class CollegeInfoViewModel {
     // MARK: - Private Combine Publishers Properties
     
     public let selectedUniversityNameSubject = CurrentValueSubject<String, Never>("")
-    private let selectedMajorSubject = CurrentValueSubject<String?, Never>(nil)
+    private let selectedCollegeSubject = CurrentValueSubject<CollegesInfoModel?, Never>(nil)
     private let errorSubject = PassthroughSubject<CollegesError, Never>()
     
     // MARK: - SwiftUI Published Properties
@@ -58,7 +58,7 @@ public class CollegeInfoViewModel {
     
     // MARK: - SwiftUI Published Properties
     
-    var selectedItemForUI: String?
+    var selectedItemForUI: CollegesInfoModel?
     
     // MARK: - Input
     
@@ -112,7 +112,7 @@ public class CollegeInfoViewModel {
             }
             .store(in: &cancellables)
                 
-        let isBottomButtonEnabled = selectedMajorSubject
+        let isBottomButtonEnabled = selectedCollegeSubject
             .map { selectedItem in
                 selectedItem == nil ? false : true
             }
@@ -125,6 +125,43 @@ public class CollegeInfoViewModel {
                     return Just(false).eraseToAnyPublisher()
                 }
                 
+                let universityName = self.selectedUniversityNameSubject.value
+                
+                if let _ = self.signupUseCase,
+                   let selectCollege = self.selectedCollegeSubject.value {
+                    return self.signupPublisher(universityName, selectCollege.id)
+                        .handleEvents(receiveOutput:  { _ in
+                            MixpanelManager.shared.track(eventType: TrackEventType.Signup.secondSignupButtonTapped)
+                            
+                            MixpanelManager.shared.setupUniversity(universityName: universityName)
+                        })
+                        .map { _ in
+                            UserDefaultsManager.shared.set(universityName, for: .university)
+                            
+                            UserDefaultsManager.shared.set(object: selectCollege, for: .college)
+                            return true
+                        }
+                        .catch { _ in Just(false) }
+                        .eraseToAnyPublisher()
+                }
+                
+                if let _ = self.editUniversityUseCase,
+                   let collegeId = self.selectedCollegeSubject.value  {
+                    return editUniversityPublisher(universityName)
+                        .map { _ in
+                            UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
+                            UserDefaultsManager.shared.set(universityName, for: .university)
+                            MixpanelManager.shared.setupUniversity(universityName: universityName)
+                            FileStorageManager.shared.delete(type: .studentIdCard)
+                            return true
+                        }
+                        .catch { error in
+                            self.errorSubject.send(error)
+                            return Just(false)
+                        }
+                        .eraseToAnyPublisher()
+                }
+
                 return Just(false).eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
@@ -139,13 +176,13 @@ public class CollegeInfoViewModel {
 // MARK: - Public Methods
 
 public extension CollegeInfoViewModel {
-    func selectItem(_ item: String?) {
+    func selectItem(_ item: CollegesInfoModel) {
         if selectedItemForUI == item {
             selectedItemForUI = nil
-            selectedMajorSubject.send(nil)
+            selectedCollegeSubject.send(nil)
         } else {
             selectedItemForUI = item
-            selectedMajorSubject.send(item)
+            selectedCollegeSubject.send(item.id)
         }
     }
 }
@@ -172,7 +209,7 @@ private extension CollegeInfoViewModel {
         .eraseToAnyPublisher()
     }
     
-    func signupPublisher(_ university: String) -> AnyPublisher<Void, CollegesError> {
+    func signupPublisher(_ university: String, _ collegeId: Int) -> AnyPublisher<Void, CollegesError> {
         return Future { [weak self] promise in
             guard let self, let signupUseCase else {
                 promise(.failure(.unknown))
@@ -181,7 +218,7 @@ private extension CollegeInfoViewModel {
             
             Task {
                 do {
-                    _ = try await signupUseCase.execute(university: university)
+                    _ = try await signupUseCase.execute(university: university, collgeId: collegeId)
                     promise(.success(()))
                 } catch {
                     promise(.failure(.signupFailed))

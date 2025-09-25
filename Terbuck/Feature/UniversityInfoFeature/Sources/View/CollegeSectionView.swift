@@ -30,9 +30,9 @@ struct CollegeSectionView: View {
                                 Spacer()
                                 
                                 Button(action: {
-                                    viewModel.selectItem(item.collegesName)
+                                    viewModel.selectItem(item)
                                 }) {
-                                    Image(uiImage: viewModel.selectedItemForUI == item.collegesName ? .selectedCheck : .notSelectedCheck)
+                                    Image(uiImage: viewModel.selectedItemForUI == item ? .selectedCheck : .notSelectedCheck)
                                 }
                             }
                             .padding(.vertical, 13)
