@@ -23,7 +23,14 @@ public final class SplashCoordinator: SplashCoordinating {
     }
     
     public func start() {
-        let splashVC = SplashViewController()
+        let splashVM = SplashViewModel(
+            searchStudentInfoUseCase: SearchStudentInfoUseCaseImpl(repository: SplashRepositoryImpl()),
+            fetchCheckUpdateStateUseCase: FetchCheckUpdateStateUseCaseImpl(repository: SplashRepositoryImpl())
+        )
+        
+        let splashVC = SplashViewController(
+            viewModel: splashVM
+        )
         splashVC.delegate = self
         window.rootViewController = splashVC
     }

@@ -6,9 +6,9 @@
 //
 
 import UIKit
+import Combine
 
 import CoreNetwork
-import CoreKeyChain
 import DesignSystem
 import Shared
 
@@ -22,9 +22,33 @@ final class SplashViewController: UIViewController {
     private var shouldShowLogin: Bool?
     weak var delegate: SplashViewControllerDelegate?
     
+    private var viewModel: SplashViewModel
+    
+    // MARK: - Combine Properties
+    
+    private let viewLifeCycleSubject = PassthroughSubject<ViewLifeCycleEvent, Never>()
+    private var cancellables = Set<AnyCancellable>()
+    
     // MARK: - UI Properties
     
     private let logoImageView = UIImageView()
+    
+    // MARK: - Init
+    
+    public init(
+        viewModel: SplashViewModel
+    ) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        AppLogger.log("SplashViewController Deinit", .info, .ui)
+    }
     
     // MARK: - Life Cycle
     
@@ -35,19 +59,47 @@ final class SplashViewController: UIViewController {
         setupHierarchy()
         setupLayout()
         setupDelegate()
+        bindViewModel()
         
-        Task {
-            if let token = KeychainManager.shared.load(key: .accessToken) {
-                await searchMyInfo()
-            } else {
-                self.shouldShowLogin = true
-            }
-        }
+        viewLifeCycleSubject.send(.viewDidLoad)
+    }
+}
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            guard let self, let shouldShowLogin = self.shouldShowLogin else { return }
-            self.delegate?.splashDidFinish(shouldShowLogin: shouldShowLogin)
-        }
+// MARK: - Private Bind Extensions
+
+private extension SplashViewController {
+    func bindViewModel() {
+        let input = SplashViewModel.Input(
+            viewLifeCycleEventAction: viewLifeCycleSubject.eraseToAnyPublisher()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.splashAction
+            .receive(on: DispatchQueue.main)
+            .delay(for: .seconds(0.7), scheduler: DispatchQueue.main)
+            .sink { [weak self] action in
+                switch action {
+                case .goToMain:
+                    self?.delegate?.splashDidFinish(shouldShowLogin: false)
+                case .goToLogin:
+                    self?.delegate?.splashDidFinish(shouldShowLogin: true)
+                case .needsUpdate:
+                    self?.showConfirmAlert(
+                        mainTitle: "업데이트가 필요해요",
+                        subTitle: "새로운 기능과 더 나은 사용을 위해\n앱을 최신 버전으로 바꿔주세요",
+                        centerButton: TerbuckBottomButton(type: .update),
+                        centerButtonHandler: {
+                            self?.openAppStore()
+                        }
+                    )
+                    
+                    // TODO: 강제 업데이트 알림창 표시
+                    // 현재는 우선 로그인으로 보내도록 처리
+                    self?.delegate?.splashDidFinish(shouldShowLogin: true)
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -76,34 +128,33 @@ private extension SplashViewController {
     func setupDelegate() {
         
     }
-}
-
-private extension SplashViewController {
-    func searchMyInfo() async {
-        do {
-            let dto: SearchStudentInfoResponseDTO = try await NetworkManager.shared.request(MemberAPIEndpoint.getStudentId)
-            
-            UserDefaultsManager.shared.set(dto.isRegistered, for: .isStudentIDAuthenticated)
-            UserDefaultsManager.shared.set(dto.university, for: .university)
-            
-            if let imageURL = dto.imageURL {
-                UserDefaultsManager.shared.set(imageURL, for: .studentIdCardImageURL)
-            }
-            
-            self.shouldShowLogin = false
-        } catch {
-            self.shouldShowLogin = true
+    
+    func openAppStore() {
+        guard let appID = Bundle.main.infoDictionary?["APP_ID"] as? String else {
+            print("Error: App ID not found in Info.plist")
+            return
+        }
+        
+        guard let url = URL(string: "itms-apps://itunes.apple.com/app/id/\(appID)") else {
+            print("Error: Invalid App Store URL")
+            return
+        }
+        
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
         }
     }
 }
 
+
+
 // MARK: - Show Preview
 
-#if canImport(SwiftUI) && DEBUG
-import SwiftUI
-
-#Preview("SplashViewController") {
-    SplashViewController()
-        .showPreview()
-}
-#endif
+//#if canImport(SwiftUI) && DEBUG
+//import SwiftUI
+//
+//#Preview("SplashViewController") {
+//    SplashViewController()
+//        .showPreview()
+//}
+//#endif
