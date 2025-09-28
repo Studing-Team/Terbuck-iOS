@@ -32,7 +32,7 @@ public final class AppDIContainer {
     
     func makeAuthFactory() -> AuthFactory {
         return AuthFactoryImpl(
-            universityInfoFactory: makeUniversityInfoFactory()
+            universityInfoCoordinatorFactory: universityInfoCoordinatorFactory()
         )
     }
     
@@ -52,7 +52,7 @@ public final class AppDIContainer {
     func makeMypageFactory() -> MypageTabFactory {
         return MypageTabFactoryImpl(
             alarmSettingFactory: makeAlarmSettingFactory(),
-            universityInfoFactory: makeUniversityInfoFactory(),
+            universityInfoCoordinatorFactory: universityInfoCoordinatorFactory(),
             registerStudentCardFactory: registerStudentCardFactory()
         )
     }
@@ -65,7 +65,18 @@ public final class AppDIContainer {
         return UniversityInfoFactoryImpl()
     }
     
+    func makeCollegeInfoFactory() -> CollegeInfoFactory {
+        return CollegeInfoFactoryImpl()
+    }
+    
     func registerStudentCardFactory() -> RegisterStudentCardCoordinatorFactory {
         return RegisterStudentCardCoordinatorFactoryImpl(registerStudentCardFactory: RegisterStudentCardFactoryImpl())
+    }
+    
+    func universityInfoCoordinatorFactory() -> UniversityInfoCoordinatorFactory {
+        return UniversityInfoCoordinatorFactoryImpl(
+            universityInfoFactory: makeUniversityInfoFactory(),
+            collegeInfoFactory: makeCollegeInfoFactory()
+        )
     }
 }

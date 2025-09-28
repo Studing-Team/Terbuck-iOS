@@ -18,24 +18,21 @@ public final class TermsListView: UIView {
     // MARK: - Combine Properties
     
     let tapPublisher = PassthroughSubject<Bool, Never>()
+    let arrowTapPublisher = PassthroughSubject<Void, Never>()
     
     // MARK: - Enum Properties
     
     public enum TermsType {
         case service
         case userInfo
-        case marketing
         
         var title: String {
             switch self {
             case .service:
-                return "[필수]  서비스 이용약관"
+                return "[필수] 서비스 이용약관"
                 
             case .userInfo:
-                return "[필수]  개인정보 수집 및 이용동의"
-                
-            case .marketing:
-                return "[선택]  개인정보 수집 및 이용동의"
+                return "[필수] 개인정보 수집 및 이용동의"
             }
         }
     }
@@ -59,6 +56,7 @@ public final class TermsListView: UIView {
         setupHierarchy()
         setupLayout()
         setupButtonAction()
+        setupArrowButtonAction()
     }
     
     public required init?(coder: NSCoder) {
@@ -106,8 +104,18 @@ private extension TermsListView {
         checkButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
+    func setupArrowButtonAction() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(arrowTapped))
+        arrowImageView.addGestureRecognizer(tapGesture)
+        arrowImageView.isUserInteractionEnabled = true
+    }
+    
     @objc private func buttonTapped() {
         tapPublisher.send(checkButton.getButtonState())
+    }
+    
+    @objc private func arrowTapped() {
+        arrowTapPublisher.send(())
     }
 }
 

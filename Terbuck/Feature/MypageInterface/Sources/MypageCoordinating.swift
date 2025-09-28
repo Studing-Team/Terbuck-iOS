@@ -11,4 +11,5 @@ public protocol MypageCoordinating: Coordinator {
     var delegate: notAuthCoordinatorDelegate? { get set }
     
     func startMypage()
+    func showUniversity()
 }

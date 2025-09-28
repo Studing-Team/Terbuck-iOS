@@ -94,6 +94,7 @@ public final class RegisterStudentCardViewModel {
             .store(in: &cancellables)
         
         let registerBottomButtonResult = input.bottomButtonTapped
+            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
             .handleEvents(receiveOutput:  { _ in
                 MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
             })
@@ -103,14 +104,23 @@ public final class RegisterStudentCardViewModel {
                 }
 
                 return self.putStudentCardPublisher()
-                    .handleEvents(receiveOutput: { _ in
-                        guard let imageData = self.studentImageData else { return }
-                        
-                        let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-                    })
+//                    .handleEvents(receiveOutput: { _ in
+//                        guard let imageData = self.studentImageData else { return }
+//                        
+//                        let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
+//                    })
                     .catch { _ in Just(false).eraseToAnyPublisher() }
                     .eraseToAnyPublisher()
             }
+            .handleEvents(receiveOutput: { [weak self] isSuccess in
+                if isSuccess {
+//                    guard let imageData = self?.studentImageData else { return }
+//                    let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
+                    
+                    UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
+                    FileStorageManager.shared.delete(type: .studentIdCard)
+                }
+            })
             .eraseToAnyPublisher()
         
         return Output(

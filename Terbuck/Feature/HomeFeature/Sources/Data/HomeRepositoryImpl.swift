@@ -13,6 +13,10 @@ public protocol HomeRepository {
     func getSearchPartner(university: String) async throws -> [SearchPartnershipEntity]
     func getSearchNewPartner(university: String) async throws -> [SearchPartnershipEntity]
     func getDetailPartner(partnershipId: Int) async throws -> DetailPartnershipEntity
+    func getPartnershipDisclosureStatus(universityName: String) async throws -> Bool
+    func postPartnershipDisclosureRequest(universityName: String) async throws
+    func getDisclosureRequestStatus(universityName: String) async throws -> Bool
+    func getApprovedStudentIdStatus() async throws -> Bool
 }
 
 struct HomeRepositoryImpl: HomeRepository {
@@ -44,5 +48,28 @@ struct HomeRepositoryImpl: HomeRepository {
         let dto: DetailPartnershipResponseDTO = try await networkManager.request(PartnershipAPIEndpoint.getDetailPartnership(requestDTO))
         
         return dto.toEntity()
+    }
+    
+    func getPartnershipDisclosureStatus(universityName: String) async throws -> Bool {
+        let requestDTO = MyUniversityRequestDTO(universityName: universityName)
+        
+        return try await networkManager.request(UniversityAPIEndpoint.getPartnershipDisclosureStatus(requestDTO))
+    }
+    
+    func postPartnershipDisclosureRequest(universityName: String) async throws {
+        let requestDTO = MyUniversityRequestDTO(universityName: universityName)
+        
+        let _: PartnershipDisclosureRequestResponseDTO = try await networkManager.request(UniversityAPIEndpoint.postPartnershipDisclosureRequest(requestDTO))
+    }
+    
+    func getDisclosureRequestStatus(universityName: String) async throws -> Bool {
+        let requestDTO = MyUniversityRequestDTO(universityName: universityName)
+        
+        return try await networkManager.request(UniversityAPIEndpoint.getDisclosureRequestStatus(requestDTO))
+    }
+    
+    func getApprovedStudentIdStatus() async throws -> Bool {
+        let dto: ApprovedStudentIdStatusResponseDTO = try await networkManager.request(MemberAPIEndpoint.getApprovedStudentIdStatus)
+        return dto.isPending
     }
 }

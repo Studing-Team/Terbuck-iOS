@@ -13,13 +13,13 @@ import RegisterStudentCardInterface
 import UniversityInfoInterface
 import Shared
 
-public class MypageCoordinator: MypageCoordinating {
-    public var childCoordinators: [any Shared.Coordinator] = []
+public class MypageCoordinator: BaseCoordinator, MypageCoordinating {
+
+    public var rootViewController: UIViewController?
     
-    private let navigationController: UINavigationController
     private let mypageFactory: MypageFactory
     private let alarmSettingFactory: AlarmSettingFactory
-    private let universityInfoFactory: UniversityInfoFactory
+    private let universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
     private let registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     
     public weak var delegate: notAuthCoordinatorDelegate?
@@ -30,19 +30,19 @@ public class MypageCoordinator: MypageCoordinating {
         navigationController: UINavigationController,
         mypageFactory: MypageFactory,
         alarmSettingFactory: AlarmSettingFactory,
-        universityInfoFactory: UniversityInfoFactory,
+        universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory,
         registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     ) {
-        self.navigationController = navigationController
         self.mypageFactory = mypageFactory
         self.alarmSettingFactory = alarmSettingFactory
-        self.universityInfoFactory = universityInfoFactory
+        self.universityInfoCoordinatorFactory = universityInfoCoordinatorFactory
         self.registerStudentCardFactory = registerStudentCardFactory
+        super.init(navigationController: navigationController)
     }
     
     // MARK: - Method
     
-    public func start() {
+    public override func start() {
         startMypage()
     }
     
@@ -65,6 +65,18 @@ public class MypageCoordinator: MypageCoordinating {
         registerCoordinator.start()
     }
     
+    public func showUniversity() {
+        let universityCoordinator = universityInfoCoordinatorFactory.makeUniversityInfoCoordinator(
+            navigationController: self.navigationController,
+            initialType: .edit
+        )
+        
+        universityCoordinator.delegate = self
+        
+        childCoordinators.append(universityCoordinator)
+        universityCoordinator.start()
+    }
+    
     public func moveLoginFlow() {
         delegate?.moveLoginFlow()
     }
@@ -83,16 +95,13 @@ extension MypageCoordinator: AlarmSettingCoordinating {
 
 // MARK: - 대학교 변경을 위한 Coordinator
 
-extension MypageCoordinator: UniversityInfoCoordinating {
-    public func showUniversity() {
-        let universityVC = universityInfoFactory.makeUniversityInfoViewController(
-            type: .edit,
-            coordinator: self,
-            onFinish: {}
-        )
-
-        universityVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(universityVC, animated: true)
+extension MypageCoordinator: UniversityInfoCoordinatorDelegate {
+    public func didFinishUniversityInfo(coordinator: Coordinator, initialType: UniversityType) {
+        childCoordinators = childCoordinators.filter { $0 !== coordinator }
+    }
+    
+    public func universityInfoCoordinatorDidTapBack(coordinator: Coordinator) {
+        childCoordinators = childCoordinators.filter { $0 !== coordinator }
     }
 }
 
