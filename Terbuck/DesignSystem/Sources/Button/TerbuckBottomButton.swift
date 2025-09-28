@@ -28,6 +28,7 @@ public enum TerbuckButtonType {
     case moveNaver
     case moveInstar
     case requestPartner
+    case update
     
     var title: String {
         switch self {
@@ -43,12 +44,13 @@ public enum TerbuckButtonType {
         case .moveNaver: return "네이버 플레이스로 이동"
         case .moveInstar: return "인스타그램 게시물 보기"
         case .requestPartner: return "제휴혜택 정보 요청하기"
+        case .update: return "업데이트"
         }
     }
     
     var font: UIFont {
         switch self {
-        case .cancel, .logout, .draw:
+        case .cancel, .logout, .draw, .update:
             return DesignSystem.Font.uiFont(.textSemi16)
         default:
             return DesignSystem.Font.uiFont(.textSemi18)
@@ -57,7 +59,7 @@ public enum TerbuckButtonType {
     
     var height: CGFloat {
         switch self {
-        case .cancel, .logout, .draw:
+        case .cancel, .logout, .draw, .update:
             return 39
             
         case .close(let type):
@@ -83,7 +85,7 @@ public enum TerbuckButtonType {
     
     var cornerRadius: CGFloat {
         switch self {
-        case .cancel, .logout, .draw:
+        case .cancel, .logout, .draw, .update:
             return 8
             
         case .close(let type):
