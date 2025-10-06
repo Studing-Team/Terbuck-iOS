@@ -10,25 +10,25 @@ import Combine
 
 import Shared
 
-enum CollegesError: LocalizedError, Equatable {
+public enum CollegesError: LocalizedError, Equatable {
     case fetchFailed
     case signupFailed
     case notEditUniversity
     case editUniversityFailed
     case unknown
     
-    var errorDescription: String? {
+    var errorDescription: String {
         switch self {
         case .fetchFailed:
-            return "대학교 단과대 정보를 불러올 수 없습니다."
+            return "대학교 단과대 정보를 불러올 수 없습니다"
         case .signupFailed:
-            return "가입 관련해서 문제가 발생했어요."
+            return "가입 관련해서 문제가 발생했어요"
         case .notEditUniversity:
-            return "대학교 인증 문제가 발생했어요."
+            return "대학교 인증 문제가 발생했어요"
         case .editUniversityFailed:
-            return "대학교 변경 관련해서 문제가 발생했어요."
+            return "대학교 변경에 문제가 발생했어요"
         case .unknown:
-            return "알 수 없는 오류가 발생했어요."
+            return "알 수 없는 오류가 발생했어요"
         }
     }
 }
@@ -42,11 +42,14 @@ public class CollegeInfoViewModel {
     private var signupUseCase: SignupUseCase?
     private var editUniversityUseCase: EditUniversityUseCase?
     
+    // MARK: - Public Combine Publishers Properties
+    
+    public var errorSubject = PassthroughSubject<CollegesError, Never>()
+    
     // MARK: - Private Combine Publishers Properties
     
     public let selectedUniversityNameSubject = CurrentValueSubject<String, Never>("")
     private let selectedCollegeSubject = CurrentValueSubject<CollegesInfoModel?, Never>(nil)
-    private let errorSubject = PassthroughSubject<CollegesError, Never>()
     
     // MARK: - SwiftUI Published Properties
     
@@ -146,8 +149,8 @@ public class CollegeInfoViewModel {
                 }
                 
                 if let _ = self.editUniversityUseCase,
-                   let collegeId = self.selectedCollegeSubject.value  {
-                    return editUniversityPublisher(universityName)
+                   let selectCollege = self.selectedCollegeSubject.value  {
+                    return editUniversityPublisher(universityName, selectCollege.id)
                         .map { _ in
                             UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
                             UserDefaultsManager.shared.set(universityName, for: .university)
@@ -182,7 +185,7 @@ public extension CollegeInfoViewModel {
             selectedCollegeSubject.send(nil)
         } else {
             selectedItemForUI = item
-            selectedCollegeSubject.send(item.id)
+            selectedCollegeSubject.send(item)
         }
     }
 }
@@ -218,7 +221,7 @@ private extension CollegeInfoViewModel {
             
             Task {
                 do {
-                    _ = try await signupUseCase.execute(university: university, collgeId: collegeId)
+                    _ = try await signupUseCase.execute(university: university, collegeId: collegeId)
                     promise(.success(()))
                 } catch {
                     promise(.failure(.signupFailed))
@@ -228,7 +231,7 @@ private extension CollegeInfoViewModel {
         .eraseToAnyPublisher()
     }
     
-    func editUniversityPublisher(_ university: String) -> AnyPublisher<Void, CollegesError> {
+    func editUniversityPublisher(_ university: String, _ collegeId: Int) -> AnyPublisher<Void, CollegesError> {
         return Future { [weak self] promise in
             guard let self, let editUniversityUseCase else {
                 promise(.failure(.unknown))
@@ -242,7 +245,7 @@ private extension CollegeInfoViewModel {
             
             Task {
                 do {
-                    let _ = try await editUniversityUseCase.execute(university: university)
+                    let _ = try await editUniversityUseCase.execute(university: university, collegeId: collegeId)
                     promise(.success(()))
                 } catch {
                     promise(.failure(.editUniversityFailed))
