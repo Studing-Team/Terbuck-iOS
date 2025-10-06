@@ -29,7 +29,7 @@ extension MemberAPIEndpoint: EndpointProtocol {
         case .deleteMemeber:
             return basePath.rawValue
         case .patchUniversity:
-            return basePath.rawValue + "/univ"
+            return basePath.rawValue + "/univ/v2"
         case .getStudentId, .putRegisterStudentId, .deleteStudentId:
             return basePath.rawValue + "/studentID"
         case .getApprovedStudentIdStatus:

@@ -9,10 +9,10 @@ import Foundation
 
 public struct SigninRequestDTO: Encodable {
     let university: String
-    let collgeId: Int
+    let collegeId: Int
     
-    public init(university: String, collgeId: Int) {
+    public init(university: String, collegeId: Int) {
         self.university = university
-        self.collgeId = collgeId
+        self.collegeId = collegeId
     }
 }
