@@ -9,7 +9,7 @@ import Foundation
 import CoreNetwork
 
 public protocol EditUniversityUseCase {
-    func execute(university: String) async throws -> Void
+    func execute(university: String, collegeId: Int) async throws -> Void
 }
 
 public struct EditUniversityUseCaseImpl: EditUniversityUseCase {
@@ -19,7 +19,10 @@ public struct EditUniversityUseCaseImpl: EditUniversityUseCase {
         self.repository = repository
     }
 
-    public func execute(university: String) async throws -> Void {
-        try await repository.patchUniversityInfo(university: university)
+    public func execute(university: String, collegeId: Int) async throws -> Void {
+        try await repository.patchUniversityInfo(
+            university: university,
+            collegeId: collegeId
+        )
     }
 }

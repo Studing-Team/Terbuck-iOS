@@ -210,12 +210,6 @@ private extension CustomAlertViewController {
                 $0.bottom.equalToSuperview().inset(15)
             }
         }
-        
-        [leftButton, rightButton, centerButton].forEach {
-            $0?.snp.makeConstraints {
-                $0.height.equalTo(39)
-            }
-        }
     }
      
      func setupButtonActions() {

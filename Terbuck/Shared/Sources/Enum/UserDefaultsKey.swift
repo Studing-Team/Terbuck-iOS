@@ -10,6 +10,7 @@ import Foundation
 public enum UserDefaultsKey: String {
     case isStudentIDAuthenticated
     case university
+    case college
     case isOnboarding
     case studentIdCardImageURL
 }

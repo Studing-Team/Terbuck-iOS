@@ -90,8 +90,10 @@ private extension CollegeInfoViewController {
         
         output.bottomButtonResult
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] selectUniversityName in
-                self?.coordinator?.didFinishUniversityInfo()
+            .sink { [weak self] buttonResult in
+                if buttonResult {
+                    self?.coordinator?.didFinishUniversityInfo()
+                }
             }
             .store(in: &cancellables)
         
@@ -108,6 +110,17 @@ private extension CollegeInfoViewController {
             .sink { [weak self] name in
                 guard let self else { return }
                 titleView.setupTitleText(name)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.errorSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorcase in
+                self?.showConfirmAlert(
+                    mainTitle: errorcase.errorDescription,
+                    subTitle: "잠시 후 다시 시도해주세요\n",
+                    centerButton: TerbuckBottomButton(type: .confirm)
+                )
             }
             .store(in: &cancellables)
     }
