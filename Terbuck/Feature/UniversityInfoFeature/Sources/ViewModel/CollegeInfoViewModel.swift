@@ -124,33 +124,32 @@ public class CollegeInfoViewModel {
         let bottomButtonResult = input.bottomButtonTapped
             .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
             .flatMap { [weak self] _ -> AnyPublisher<Bool, Never> in
-                guard let self else {
+                guard let self, let selectCollege = self.selectedCollegeSubject.value else {
                     return Just(false).eraseToAnyPublisher()
                 }
                 
                 let universityName = self.selectedUniversityNameSubject.value
                 
-                if let _ = self.signupUseCase,
-                   let selectCollege = self.selectedCollegeSubject.value {
+                if let _ = self.signupUseCase {
                     return self.signupPublisher(universityName, selectCollege.id)
                         .handleEvents(receiveOutput:  { _ in
                             MixpanelManager.shared.track(eventType: TrackEventType.Signup.secondSignupButtonTapped)
-                            
                             MixpanelManager.shared.setupUniversity(universityName: universityName)
                         })
                         .map { _ in
                             UserDefaultsManager.shared.set(universityName, for: .university)
-                            
                             UserDefaultsManager.shared.set(object: selectCollege, for: .college)
                             return true
                         }
-                        .catch { _ in Just(false) }
+                        .catch { error in
+                            self.errorSubject.send(error)
+                            return Just(false)
+                        }
                         .eraseToAnyPublisher()
                 }
                 
-                if let _ = self.editUniversityUseCase,
-                   let selectCollege = self.selectedCollegeSubject.value  {
-                    return editUniversityPublisher(universityName, selectCollege.id)
+                if let _ = self.editUniversityUseCase {
+                    return self.editUniversityPublisher(universityName, selectCollege.id)
                         .map { _ in
                             UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
                             UserDefaultsManager.shared.set(universityName, for: .university)
