@@ -9,7 +9,7 @@ import Foundation
 import CoreNetwork
 
 public protocol SignupUseCase {
-    func execute(university: String) async throws -> Void
+    func execute(university: String, collegeId: Int) async throws -> Void
 }
 
 public struct SignupUseCaseImpl: SignupUseCase {
@@ -19,7 +19,7 @@ public struct SignupUseCaseImpl: SignupUseCase {
         self.repository = repository
     }
 
-    public func execute(university: String) async throws -> Void {
-        try await repository.postSignupMember(university: university)
+    public func execute(university: String, collegeId: Int) async throws -> Void {
+        try await repository.postSignupMember(university: university, collegeId: collegeId)
     }
 }

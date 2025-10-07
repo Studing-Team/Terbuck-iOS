@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct CollegesInfoModel: Identifiable, Decodable {
+public struct CollegesInfoModel: Identifiable, Equatable, Codable {
     public var id: Int
     public let collegesName: String
 
