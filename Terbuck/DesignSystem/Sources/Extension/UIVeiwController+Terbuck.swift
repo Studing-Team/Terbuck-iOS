@@ -143,6 +143,20 @@ public extension UIViewController {
     }
 }
 
+public extension UIViewController {
+    /// CustomTabBarController의 탭바를 숨깁니다.
+    func hideCustomTabBar() {
+        guard let customTabBarController = self.tabBarController as? CustomTabBarController else { return }
+        customTabBarController.hideTabBar()
+    }
+    
+    /// CustomTabBarController의 탭바를 보여줍니다
+    func showCustomTabBar() {
+        guard let customTabBarController = self.tabBarController as? CustomTabBarController else { return }
+        customTabBarController.showTabBar()
+    }
+}
+
 public extension UIView {
     // firstResponder를 쉽게 찾기 위한 UIView extension
     var firstResponder: UIView? {
