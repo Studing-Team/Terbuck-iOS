@@ -55,14 +55,12 @@ public class StoreCoordinator: StoreCoordinating {
     
     public func showDetailStoreInfo(storeId: Int) {
         let detailStoreVC = detailStoreFactory.makeDetailStoreViewController(coordinator: self, storeId: storeId)
-        detailStoreVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(detailStoreVC, animated: true)
     }
     
     public func searchStore() {
         let searchStoreVC = searchStoreFactory.makeSearchStoreViewController(storeMapViewModel: storeMapViewModel, coordinator: self)
         searchStoreVC.modalPresentationStyle = .overFullScreen
-        searchStoreVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(searchStoreVC, animated: false)
     }
     

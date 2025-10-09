@@ -60,12 +60,20 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
             await detailStoreViewModel.fetchDetailStoreBenefitData()
             await detailStoreViewModel.fetchApprovedStudentIdStatus()
         }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            ToastManager.shared.showToast(from: self, type: .moreBenefit)
+        }
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.hideCustomTabBar()
     }
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        ToastManager.shared.showToast(from: self, type: .moreBenefit)
         
         detailStoreViewModel.onUseagesListModalChanged = { [weak self] isPresented in
             if isPresented {

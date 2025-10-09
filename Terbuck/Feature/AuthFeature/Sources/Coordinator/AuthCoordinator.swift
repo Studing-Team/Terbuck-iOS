@@ -52,7 +52,6 @@ public final class AuthCoordinator: BaseCoordinator, AuthCoordinating {
         guard let signupViewModel else { return }
         
         let termsOfServiceVC = termsFactory.makeTermsViewController(coordinator: self, viewModel: signupViewModel)
-        termsOfServiceVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(termsOfServiceVC, animated: true)
     }
     

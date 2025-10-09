@@ -77,6 +77,12 @@ public final class RegisterStudentCardViewController: UIViewController, UIGestur
         setupKeyboardHandling()
     }
     
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.hideCustomTabBar()
+    }
+    
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         

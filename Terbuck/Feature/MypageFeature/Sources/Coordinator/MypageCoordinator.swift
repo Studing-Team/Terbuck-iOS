@@ -88,8 +88,6 @@ public class MypageCoordinator: BaseCoordinator, MypageCoordinating {
 extension MypageCoordinator: AlarmSettingCoordinating {
     public func showAlarmSetting() {
         let alarmSettingVC = alarmSettingFactory.makeAlarmSettingViewController(coordinator: self)
-        
-        alarmSettingVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(alarmSettingVC, animated: true)
     }
 }

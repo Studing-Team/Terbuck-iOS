@@ -92,6 +92,7 @@ final class HomeViewController: UIViewController {
         super.viewWillAppear(animated)
         
         viewLifeCycleSubject.send(.viewWillAppear)
+        self.showCustomTabBar()
     }
     
     override func viewDidLayoutSubviews() {
