@@ -27,6 +27,7 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
     private let customNavBar = CustomNavigationView(type: .benefitStore, title: "제휴 혜택")
     private let naverMovementButton = DesignSystem.Button.naverMovementButton()
     private var hostingController: UIHostingController<DetailStoreInfoView>!
+    private var toastHasBeenShown = false
     
     private let backgroundView = UIView()
     private var bottomSheetVC: DetailBenefitListModalViewController?
@@ -62,10 +63,19 @@ public final class DetailStoreInfoViewController: UIViewController, UIGestureRec
         }
     }
     
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.hideCustomTabBar()
+    }
+    
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        ToastManager.shared.showToast(from: self, type: .moreBenefit)
+        if !toastHasBeenShown {
+            ToastManager.shared.showToast(from: self, type: .moreBenefit)
+            toastHasBeenShown = true
+        }
         
         detailStoreViewModel.onUseagesListModalChanged = { [weak self] isPresented in
             if isPresented {

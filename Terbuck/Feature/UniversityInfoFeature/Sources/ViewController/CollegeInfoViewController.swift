@@ -75,6 +75,12 @@ final class CollegeInfoViewController: UIViewController, UIGestureRecognizerDele
         
         viewLifeCycleSubject.send(.viewDidLoad)
     }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.hideCustomTabBar()
+    }
 }
 
 // MARK: - Private Bind Extensions

@@ -96,10 +96,10 @@ final class StoreMapViewController: UIViewController {
         
         switch storeMapViewModel.storeMapTypeSubject.value {
         case .search:
-            tabBarController?.tabBar.isHidden = false
+            self.showCustomTabBar()
             searchBarView.configureSearchType(.search)
         case .searchResult:
-            tabBarController?.tabBar.isHidden = true
+            self.hideCustomTabBar()
         }
     }
     
@@ -173,8 +173,13 @@ private extension StoreMapViewController {
                 guard let self else { return }
                 
                 bottomSheetVC.view.isHidden = type == .search ? false : true
-                tabBarController?.tabBar.isHidden = type == .search ? false : true
                 storeInfoBottomView.isHidden = type == .searchResult ? false : true
+                
+                if type == .search {
+                    self.showCustomTabBar()
+                } else {
+                    self.hideCustomTabBar()
+                }
                 
                 if type == .search {
                     searchBarView.configureSearchType(.search)
@@ -468,7 +473,12 @@ private extension StoreMapViewController {
     
     func updateSearchLayout(_ store: StoreListModel, isHidden: Bool) {
         bottomSheetVC.view.isHidden = true
-        tabBarController?.tabBar.isHidden = isHidden
+        
+        if !isHidden {
+            self.showCustomTabBar()
+        } else {
+            self.hideCustomTabBar()
+        }
         
         storeInfoBottomView.snp.remakeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(15)
@@ -547,7 +557,7 @@ extension StoreMapViewController: NMFMapViewTouchDelegate {
             self.selectedMarker = nil
             self.bottomSheetVC.view.isHidden = false
             self.storeInfoBottomView.isHidden = true
-            self.tabBarController?.tabBar.isHidden = false
+            self.showCustomTabBar()
         }
     }
 }

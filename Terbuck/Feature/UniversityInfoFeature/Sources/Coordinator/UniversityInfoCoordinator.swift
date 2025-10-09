@@ -52,8 +52,6 @@ final class UniversityInfoCoordinator: UniversityInfoCoordinating, PoppableCoord
             coordinator: self
         )
         self.rootViewController = universityInfoVC
-        
-        universityInfoVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(universityInfoVC, animated: true)
     }
     
@@ -64,7 +62,6 @@ final class UniversityInfoCoordinator: UniversityInfoCoordinating, PoppableCoord
             coordinator: self
         )
         
-        majorInfoVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(majorInfoVC, animated: true)
     }
     

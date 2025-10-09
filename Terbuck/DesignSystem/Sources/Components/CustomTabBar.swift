@@ -18,6 +18,7 @@ public final class CustomTabBar: UITabBar {
     
     private var selectedIndex: Int = 0
     public var onTabSelected: ((TabBarType) -> Void)?
+    public var onButtonTapped: ((Int) -> Void)?
     
     // MARK: - UI Components
     
@@ -61,6 +62,10 @@ public final class CustomTabBar: UITabBar {
 // MARK: - Private Extensions
 
 private extension CustomTabBar {
+    @objc func tabButtonTapped(_ sender: UIButton) {
+        onButtonTapped?(sender.tag)
+    }
+    
     func setupStyle() {
         self.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
         
@@ -118,6 +123,7 @@ private extension CustomTabBar {
         
         let button = UIButton(configuration: config)
         button.tag = type.rawValue
+        button.addTarget(self, action: #selector(tabButtonTapped), for: .touchUpInside)
 
         return button
     }
