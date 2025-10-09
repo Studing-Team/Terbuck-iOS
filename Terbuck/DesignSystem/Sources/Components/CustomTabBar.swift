@@ -64,7 +64,6 @@ public final class CustomTabBar: UITabBar {
 private extension CustomTabBar {
     @objc func tabButtonTapped(_ sender: UIButton) {
         onButtonTapped?(sender.tag)
-        updateSelectedIndex(to: sender.tag)
     }
     
     func setupStyle() {

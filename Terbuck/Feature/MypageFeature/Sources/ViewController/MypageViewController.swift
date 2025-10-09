@@ -70,7 +70,7 @@ public final class MypageViewController: UIViewController {
         super.viewWillAppear(animated)
         
         viewLifeCycleSubject.send(.viewWillAppear)
-        self.self.showCustomTabBar()
+        self.showCustomTabBar()
     }
 }
 
