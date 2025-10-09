@@ -19,9 +19,41 @@ public final class CustomTabBarController: UITabBarController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        delegate = self
         
         setupStyle()
+        tabBar.isHidden = true
+
+        view.addSubview(customTabBarView)
+        view.clipsToBounds = true // transform으로 이동한 뷰가 부모 bounds 밖으로 나가면 숨김
+        
+        customTabBarView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+    }
+    
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        updateSafeAreaInsetsForAllViewControllers()
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.tabBar.isHidden = true
+    }
+    
+    // MARK: - Methods
+    
+    public func hideTabBar() {
+        self.customTabBarView.isHidden = true
+        self.view.setNeedsLayout()
+    }
+    
+    public func showTabBar() {
+        self.customTabBarView.isHidden = false
+        self.view.setNeedsLayout()
     }
 }
 
@@ -29,16 +61,40 @@ public final class CustomTabBarController: UITabBarController {
 
 private extension CustomTabBarController {
     func setupStyle() {
-        setValue(customTabBarView, forKey: "tabBar")
-    }
-}
+        customTabBarView.onButtonTapped = { [weak self] index in
+            guard let self = self else { return }
 
-// UITabBarControllerDelegate 구현
-extension CustomTabBarController: UITabBarControllerDelegate {
-    public func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        self.customTabBarView.updateSelectedIndex(to: selectedIndex)
+            // 1. 탭 인덱스 변경
+            self.selectedIndex = index
+            
+            // 2. 탭바 UI 업데이트
+            self.customTabBarView.updateSelectedIndex(to: index)
+            
+            // 3. 햅틱 피드백
+            self.hapticGenerator.impactOccurred()
+            
+            // 4. 안전 영역 업데이트
+            self.updateSafeAreaInsetsForAllViewControllers()
+        }
+    }
+    
+    /// 모든 자식 뷰컨트롤러의 Safe Area Inset을 업데이트합니다.
+    func updateSafeAreaInsetsForAllViewControllers() {
+        let isTabBarHidden = customTabBarView.isHidden
         
-        // 햅틱 피드백
-        hapticGenerator.impactOccurred()
+        self.viewControllers?.forEach { viewController in
+            // 탭바가 숨겨져 있다면, 모든 VC의 inset을 0으로 설정
+            if isTabBarHidden {
+                viewController.additionalSafeAreaInsets.bottom = 0
+            } else {
+                // 탭바가 보일 때만 기존 로직을 실행
+                if viewController == self.selectedViewController {
+                    let overlapHeight = customTabBarView.frame.height - view.safeAreaInsets.bottom
+                    viewController.additionalSafeAreaInsets.bottom = overlapHeight
+                } else {
+                    viewController.additionalSafeAreaInsets.bottom = 0
+                }
+            }
+        }
     }
 }

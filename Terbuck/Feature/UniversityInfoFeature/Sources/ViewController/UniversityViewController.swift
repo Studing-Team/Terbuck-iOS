@@ -75,6 +75,12 @@ public final class UniversityViewController: UIViewController, UIGestureRecogniz
         
         viewLifeCycleSubject.send(.viewDidLoad)
     }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.hideCustomTabBar()
+    }
 }
 
 // MARK: - Private Bind Extensions

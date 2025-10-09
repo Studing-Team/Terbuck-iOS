@@ -48,6 +48,7 @@ public class MypageCoordinator: BaseCoordinator, MypageCoordinating {
     
     public func startMypage() {
         let mypageVC = mypageFactory.makeMypageViewController(coordinator: self)
+        self.rootViewController = mypageVC
         navigationController.pushViewController(mypageVC, animated: true)
     }
     
@@ -87,8 +88,6 @@ public class MypageCoordinator: BaseCoordinator, MypageCoordinating {
 extension MypageCoordinator: AlarmSettingCoordinating {
     public func showAlarmSetting() {
         let alarmSettingVC = alarmSettingFactory.makeAlarmSettingViewController(coordinator: self)
-        
-        alarmSettingVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(alarmSettingVC, animated: true)
     }
 }
@@ -97,6 +96,9 @@ extension MypageCoordinator: AlarmSettingCoordinating {
 
 extension MypageCoordinator: UniversityInfoCoordinatorDelegate {
     public func didFinishUniversityInfo(coordinator: Coordinator, initialType: UniversityType) {
+        if let mypageVC = rootViewController {
+            navigationController.popToViewController(mypageVC, animated: true)
+        }
         childCoordinators = childCoordinators.filter { $0 !== coordinator }
     }
     
