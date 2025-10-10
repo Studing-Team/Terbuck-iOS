@@ -15,7 +15,7 @@ public enum ButtonType {
     case alert
 }
 
-public enum TerbuckButtonType {
+public enum TerbuckButtonType: Equatable {
     case confirm
     case next
     case enter
@@ -59,7 +59,7 @@ public enum TerbuckButtonType {
     
     var height: CGFloat {
         switch self {
-        case .cancel, .logout, .draw, .confirm:
+        case .cancel, .logout, .draw, .confirm, .update:
             return 39
             
         case .close(let type):
@@ -85,7 +85,7 @@ public enum TerbuckButtonType {
     
     var cornerRadius: CGFloat {
         switch self {
-        case .cancel, .logout, .draw, .confirm:
+        case .cancel, .logout, .draw, .confirm, .update:
             return 8
             
         case .close(let type):
@@ -115,7 +115,7 @@ public final class TerbuckBottomButton: AnimatedButton {
     
     // MARK: - Properties
     
-    private var type: TerbuckButtonType
+    public private(set) var type: TerbuckButtonType
     
     public override var isUserInteractionEnabled: Bool {
         didSet {
