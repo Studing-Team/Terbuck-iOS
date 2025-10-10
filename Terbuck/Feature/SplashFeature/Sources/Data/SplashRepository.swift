@@ -27,7 +27,7 @@ public struct SplashRepositoryImpl: SplashRepository {
     public func getCheckUpdateState(version: String) async throws -> CheckUpdateStateInfoEntity {
         let requestDTO = CheckUpdateStateRequestDTO(version: version)
         
-        let dto: CheckUpdateStateResponseDTO = try await networkManager.request(InfomationAPIEndpoint.getCheckUpdateState(requestDTO))
+        let dto: CheckUpdateStateResponseDTO = try await networkManager.request(InformationAPIEndpoint.getCheckUpdateState(requestDTO))
         return dto.toEntity()
     }
 }

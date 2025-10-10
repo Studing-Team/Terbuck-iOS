@@ -11,7 +11,7 @@ public struct CurrentVersionResponseDTO: Decodable{
     public let os: String
     public let version: String
     
-    init(os: String, version: String) {
+    public init(os: String, version: String) {
         self.os = os
         self.version = version
     }

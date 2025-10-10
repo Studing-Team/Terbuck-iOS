@@ -41,9 +41,6 @@ public class SplashViewModel {
     private var searchStudentInfoUseCase: SearchStudentInfoUseCase
     private var fetchCheckUpdateStateUseCase: FetchCheckUpdateStateUseCase
     
-    public var shouldShowLoginSubject = CurrentValueSubject<Bool?, Never>(nil)
-    
-    
     // MARK: - Private Combine Publishers Properties
     
     
@@ -51,7 +48,6 @@ public class SplashViewModel {
     
     struct Input {
         let viewLifeCycleEventAction: AnyPublisher<ViewLifeCycleEvent, Never>
-        
     }
     
     // MARK: - Output
@@ -116,17 +112,17 @@ public class SplashViewModel {
 
 // MARK: - Private Extension
 
-public extension SplashViewModel {
+private extension SplashViewModel {
     func getAppVersion() -> String? {
         guard let dictionary = Bundle.main.infoDictionary else { return nil }
         
-        let version = dictionary["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let version = dictionary["CFBundleShortVersionString"] as? String
         
         return version
     }
 }
 
-// MARK: - Private Extension
+// MARK: - Private API Func Extension
 
 private extension SplashViewModel {
     func fetchCheckUpdateStatePublisher() -> AnyPublisher<Bool, SplashError> {

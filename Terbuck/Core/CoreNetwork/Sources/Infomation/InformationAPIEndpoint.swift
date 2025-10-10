@@ -7,14 +7,14 @@
 
 import Foundation
 
-public enum InfomationAPIEndpoint {
+public enum InformationAPIEndpoint {
     case getCurrentVersion(CurrentVersionRequestDTO)
     case getCheckUpdateState(CheckUpdateStateRequestDTO)
 }
 
-extension InfomationAPIEndpoint: EndpointProtocol {
+extension InformationAPIEndpoint: EndpointProtocol {
     public var basePath: BasePath {
-        return .infomation
+        return .information
     }
     
     public var path: String {
@@ -31,7 +31,6 @@ extension InfomationAPIEndpoint: EndpointProtocol {
     }
     
     public var headers: HeaderType? {
-//        return .accessTokenHeader/
         return nil
     }
     

@@ -12,7 +12,7 @@ public struct CheckUpdateStateResponseDTO: Decodable {
     public let currentVersion: String
     public let leastRequiredVersion: String
     
-    init(isUpdateNeeded: Bool, currentVersion: String, leastRequiredVersion: String) {
+    public init(isUpdateNeeded: Bool, currentVersion: String, leastRequiredVersion: String) {
         self.isUpdateNeeded = isUpdateNeeded
         self.currentVersion = currentVersion
         self.leastRequiredVersion = leastRequiredVersion

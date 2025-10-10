@@ -127,12 +127,12 @@ private extension SplashViewController {
     
     func openAppStore() {
         guard let appID = Bundle.main.infoDictionary?["APP_ID"] as? String else {
-            print("Error: App ID not found in Info.plist")
+            AppLogger.log("Error: App ID not found in Info.plist", .error, .ui)
             return
         }
         
         guard let url = URL(string: "itms-apps://itunes.apple.com/app/id/\(appID)") else {
-            print("Error: Invalid App Store URL")
+            AppLogger.log("Error: Invalid App Store URL", .error, .ui)
             return
         }
         
@@ -141,8 +141,6 @@ private extension SplashViewController {
         }
     }
 }
-
-
 
 // MARK: - Show Preview
 
