@@ -60,7 +60,6 @@ final class RegisterStudentCardCoordinator: RegisterStudentCardCoordinating, Pop
     func showRegisterStudentCard() {
         let registerStudentIDCardVC = registerStudentCardFactory.makeRegisterStudentCardViewController(coordinator: self)
         self.rootViewController = registerStudentIDCardVC
-        registerStudentIDCardVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(registerStudentIDCardVC, animated: true)
     }
     

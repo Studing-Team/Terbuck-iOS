@@ -67,6 +67,7 @@ public final class AlarmSettingViewControllor: UIViewController, UIGestureRecogn
         super.viewWillAppear(animated)
         
         viewLifeCycleSubject.send(.viewWillAppear)
+        self.hideCustomTabBar()
     }
 }
 

@@ -58,7 +58,6 @@ public class HomeCoordinator: HomeCoordinating, PoppableCoordinator {
             partnershipId: partnershipId
         )
         
-        partnershipVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(partnershipVC, animated: true)
     }
     
@@ -82,8 +81,6 @@ public class HomeCoordinator: HomeCoordinating, PoppableCoordinator {
 extension HomeCoordinator: AlarmSettingCoordinating {
     public func showAlarmSetting() {
         let alarmSettingVC = alarmSettingFactory.makeAlarmSettingViewController(coordinator: self)
-        
-        alarmSettingVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(alarmSettingVC, animated: true)
     }
 }

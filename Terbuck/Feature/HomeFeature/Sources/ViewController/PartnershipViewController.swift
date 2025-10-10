@@ -49,10 +49,16 @@ final class PartnershipViewController: UIViewController, UIGestureRecognizerDele
         setupStyle()
         setupHierarchy()
         setupLayout()
-
+        
         Task {
             await partnershipViewModel.fetchPartnershipData()
         }
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.hideCustomTabBar()
     }
 }
 

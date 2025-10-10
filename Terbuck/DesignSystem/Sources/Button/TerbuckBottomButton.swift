@@ -15,7 +15,7 @@ public enum ButtonType {
     case alert
 }
 
-public enum TerbuckButtonType {
+public enum TerbuckButtonType: Equatable {
     case confirm
     case next
     case enter
@@ -28,6 +28,7 @@ public enum TerbuckButtonType {
     case moveNaver
     case moveInstar
     case requestPartner
+    case update
     
     var title: String {
         switch self {
@@ -43,12 +44,13 @@ public enum TerbuckButtonType {
         case .moveNaver: return "네이버 플레이스로 이동"
         case .moveInstar: return "인스타그램 게시물 보기"
         case .requestPartner: return "제휴혜택 정보 요청하기"
+        case .update: return "업데이트"
         }
     }
     
     var font: UIFont {
         switch self {
-        case .cancel, .logout, .draw:
+        case .cancel, .logout, .draw, .update:
             return DesignSystem.Font.uiFont(.textSemi16)
         default:
             return DesignSystem.Font.uiFont(.textSemi18)
@@ -57,7 +59,7 @@ public enum TerbuckButtonType {
     
     var height: CGFloat {
         switch self {
-        case .cancel, .logout, .draw:
+        case .cancel, .logout, .draw, .confirm, .update:
             return 39
             
         case .close(let type):
@@ -83,7 +85,7 @@ public enum TerbuckButtonType {
     
     var cornerRadius: CGFloat {
         switch self {
-        case .cancel, .logout, .draw:
+        case .cancel, .logout, .draw, .confirm, .update:
             return 8
             
         case .close(let type):
@@ -113,7 +115,7 @@ public final class TerbuckBottomButton: AnimatedButton {
     
     // MARK: - Properties
     
-    private var type: TerbuckButtonType
+    public private(set) var type: TerbuckButtonType
     
     public override var isUserInteractionEnabled: Bool {
         didSet {
@@ -139,23 +141,20 @@ public final class TerbuckBottomButton: AnimatedButton {
 
 private extension TerbuckBottomButton {
     func setupButton(type: TerbuckButtonType) {
-        var config = UIButton.Configuration.filled()
-        
+        var config = UIButton.Configuration.plain()
+
         let titleString = AttributedString(type.title, attributes: .init(
             [.font: type.font,
              .foregroundColor: UIColor.white
             ]
         ))
         config.attributedTitle = titleString
-        
-        self.tintColor = type.backgroundColor
 
-        config.baseBackgroundColor = self.isUserInteractionEnabled == true ? type.backgroundColor : type.resolvedBackgroundColor(isEnabled: false)
-        
-        config.baseForegroundColor = .white
+        config.background.backgroundColor = self.isUserInteractionEnabled == true ? type.backgroundColor : type.resolvedBackgroundColor(isEnabled: false)
+
+        config.background.cornerRadius = type.cornerRadius
         configuration = config
-        
-        self.layer.cornerRadius = type.cornerRadius
+
         self.clipsToBounds = true
         
         self.snp.makeConstraints {
@@ -165,8 +164,7 @@ private extension TerbuckBottomButton {
     
     func updateColor() {
         guard var config = configuration else { return }
-        config.baseBackgroundColor = self.isUserInteractionEnabled ? DesignSystem.Color.uiColor(.terbuckGreen50) : DesignSystem.Color.uiColor(.terbuckGreen10)
-        config.baseForegroundColor = .white
+        config.background.backgroundColor = self.isUserInteractionEnabled ? DesignSystem.Color.uiColor(.terbuckGreen50) : DesignSystem.Color.uiColor(.terbuckGreen10)
         configuration = config
     }
 }

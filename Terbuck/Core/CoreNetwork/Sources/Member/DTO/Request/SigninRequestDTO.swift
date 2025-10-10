@@ -9,14 +9,10 @@ import Foundation
 
 public struct SigninRequestDTO: Encodable {
     let university: String
-//    let agreedToService: Bool
-//    let agreedToEssentialInfo: Bool
-//    let agreedToOptional: Bool
+    let collegeId: Int
     
-    public init(university: String) {//, agreedToService: Bool, agreedToEssentialInfo: Bool, agreedToOptional: Bool) {
+    public init(university: String, collegeId: Int) {
         self.university = university
-//        self.agreedToService = agreedToService
-//        self.agreedToEssentialInfo = agreedToEssentialInfo
-//        self.agreedToOptional = agreedToOptional
+        self.collegeId = collegeId
     }
 }
