@@ -44,6 +44,7 @@ let appInfoPlist: [String: Plist.Value] = [
     "CFBundleShortVersionString": "$(MARKETING_VERSION)",
     "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
     "UIDeviceFamily": [1],
+    "APP_ID": "6747154359",
     "CFBundleDisplayName": "터벅",
     "UISupportedInterfaceOrientations": [
         "UIInterfaceOrientationPortrait"
