@@ -93,11 +93,14 @@ public class SplashViewModel {
                         if isUpdateRequired {
                             return .needsUpdate
                         } else {
-                            if info.isAuth {
-                                return .goToMain
-                            } else {
-                                return .goToLogin
+                            UserDefaultsManager.shared.set(info.isAuth, for: .isStudentIDAuthenticated)
+                            UserDefaultsManager.shared.set(info.universityName, for: .university)
+                            
+                            if let imageURL = info.imageUrl {
+                                UserDefaultsManager.shared.set(imageURL, for: .studentIdCardImageURL)
                             }
+                            
+                            return .goToMain
                         }
                     }
                     .catch { error -> Just<SplashAction> in
@@ -122,7 +125,6 @@ public extension SplashViewModel {
         return version
     }
 }
-
 
 // MARK: - Private Extension
 

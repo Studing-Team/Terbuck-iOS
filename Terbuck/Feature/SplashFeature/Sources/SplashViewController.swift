@@ -93,10 +93,6 @@ private extension SplashViewController {
                             self?.openAppStore()
                         }
                     )
-                    
-                    // TODO: 강제 업데이트 알림창 표시
-                    // 현재는 우선 로그인으로 보내도록 처리
-                    self?.delegate?.splashDidFinish(shouldShowLogin: true)
                 }
             }
             .store(in: &cancellables)
