@@ -104,23 +104,18 @@ public final class RegisterStudentCardViewModel {
                 }
 
                 return self.putStudentCardPublisher()
-//                    .handleEvents(receiveOutput: { _ in
-//                        guard let imageData = self.studentImageData else { return }
-//                        
-//                        let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-//                    })
                     .catch { _ in Just(false).eraseToAnyPublisher() }
                     .eraseToAnyPublisher()
             }
-            .handleEvents(receiveOutput: { [weak self] isSuccess in
+            .map { isSuccess -> Bool in
                 if isSuccess {
-//                    guard let imageData = self?.studentImageData else { return }
-//                    let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-                    
+                    // 제출은 성공, 인증 여부는 불가하므로 false 로 변경, 이미지도 바뀌었지만 인증 여부는 불가하므로 삭제
                     UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
                     FileStorageManager.shared.delete(type: .studentIdCard)
                 }
-            })
+                
+                return isSuccess
+            }
             .eraseToAnyPublisher()
         
         return Output(
