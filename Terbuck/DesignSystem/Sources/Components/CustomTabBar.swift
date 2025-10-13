@@ -85,7 +85,7 @@ private extension CustomTabBar {
     
     func setupHierarchy() {
         addSubviews(topSeparator, backgroundView)
-        backgroundView.addSubview(stackView)
+        backgroundView.addSubviews(stackView)
     }
     
     func setupLayout() {
