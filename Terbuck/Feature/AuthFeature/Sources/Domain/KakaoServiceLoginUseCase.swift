@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol KakaoServiceLoginUseCase {
-    func execute() async throws -> String
+    func execute() async throws -> (token: String, user: String)
 }
 
 public struct KakaoServiceLoginUseCaseImpl: KakaoServiceLoginUseCase {
@@ -18,7 +18,9 @@ public struct KakaoServiceLoginUseCaseImpl: KakaoServiceLoginUseCase {
         self.repository = repository
     }
 
-    public func execute() async throws -> String {
-        try await repository.loginWithKakaoService()
+    public func execute() async throws -> (token: String, user: String) {
+        let result = try await repository.loginWithKakaoService()
+        
+        return (token: result.token, user: result.username)
     }
 }

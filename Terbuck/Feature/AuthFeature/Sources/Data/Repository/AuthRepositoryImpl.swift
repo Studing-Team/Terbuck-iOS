@@ -14,7 +14,7 @@ public protocol AuthRepository {
     func serverLoginWithKakao(token: String) async throws -> SocialLoginResultEntity
     func serverLoginWithApple(code: String, name: String) async throws -> SocialLoginResultEntity
     func loginWithAppleService() async throws -> (code: String, name: String)
-    func loginWithKakaoService() async throws -> String
+    func loginWithKakaoService() async throws -> (token: String, username: String)
     func postNotificationToken(token: String) async throws
     func getStudentInfo() async throws -> SearchStudentInfoEntity
 }
@@ -45,8 +45,9 @@ struct AuthRepositoryImpl: AuthRepository {
     
     // MARK: - Service Function
     
-    func loginWithKakaoService() async throws -> String {
-        return try await kakaoLoginService.login()
+    func loginWithKakaoService() async throws -> (token: String, username: String) {
+        let result = try await kakaoLoginService.login()
+        return (token: result.0, username: result.1 ?? "")
     }
     
     func loginWithAppleService() async throws -> (code: String, name: String) {
