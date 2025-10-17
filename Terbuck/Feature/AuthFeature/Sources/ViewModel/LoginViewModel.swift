@@ -92,8 +92,12 @@ public class LoginViewModel {
                 }
                 
                 return self.appleServiceLoginPublisher()
-                    .flatMap { code, name in
-                        self.appleServerLoginPublisher(code: code, name: name)
+                    .flatMap { code, username in
+                        if username != "" {
+                            MixpanelManager.shared.setupUserName(name: username)
+                        }
+                        
+                        return self.appleServerLoginPublisher(code: code, name: username)
                     }
                     .map { loginResult -> Result<LoginResultModel, LoginError> in
                         return .success(loginResult)
@@ -122,11 +126,14 @@ public class LoginViewModel {
                 guard let self else {
                     return Just(.failure(.unknown))
                         .eraseToAnyPublisher()
-                 }
-        
+                }
+                
                 return self.kakaoServiceLoginPublisher()
-                    .flatMap { token in
-                        self.kakaoServerLoginPublisher(token: token)
+                    .flatMap { token, username in
+                        if username != "" {
+                            MixpanelManager.shared.setupUserName(name: username)
+                        }
+                        return self.kakaoServerLoginPublisher(token: token)
                     }
                     .map { loginResult -> Result<LoginResultModel, LoginError> in
                         return .success(loginResult)
@@ -251,7 +258,7 @@ private extension LoginViewModel {
 // MARK: - Kakao Login Function
 
 private extension LoginViewModel {
-    func kakaoServiceLoginPublisher() -> AnyPublisher<String, LoginError> {
+    func kakaoServiceLoginPublisher() -> AnyPublisher<(token: String, user: String), LoginError> {
         return Future { [weak self] promise in
             guard let self = self else {
                 promise(.failure(.kakaoLoginFailed))
