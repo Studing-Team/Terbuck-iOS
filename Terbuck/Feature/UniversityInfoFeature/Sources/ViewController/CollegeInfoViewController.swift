@@ -35,6 +35,7 @@ final class CollegeInfoViewController: UIViewController, UIGestureRecognizerDele
     private let titleView: InformationTitleView
     private let terbuckBottomButton: TerbuckBottomButton
     private let hostingController: UIHostingController<CollegeSectionView>
+    private let activityIndicatorView = LottieActivityIndicatorView(isHidden: true)
     
     // MARK: - Init
     
@@ -59,7 +60,7 @@ final class CollegeInfoViewController: UIViewController, UIGestureRecognizerDele
     }
     
     deinit {
-        AppLogger.log("MajorInfoViewController Deinit", .info, .ui)
+        AppLogger.log("CollegeInfoViewController Deinit", .info, .ui)
     }
     
     // MARK: - Life Cycle
@@ -124,9 +125,24 @@ private extension CollegeInfoViewController {
             .sink { [weak self] errorcase in
                 self?.showConfirmAlert(
                     mainTitle: errorcase.errorDescription,
-                    subTitle: "잠시 후 다시 시도해주세요\n",
+                    subTitle: errorcase.errorSubTitle,
                     centerButton: TerbuckBottomButton(type: .confirm)
                 )
+            }
+            .store(in: &cancellables)
+        
+        viewModel.isPlayIndicatorSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isPlay in
+                
+                self?.activityIndicatorView.isHidden = !isPlay
+                self?.activityIndicatorView.indicatorHidden(!isPlay)
+                
+                if isPlay {
+                    self?.activityIndicatorView.playIndicator()
+                } else {
+                    self?.activityIndicatorView.stopIndicator()
+                }
             }
             .store(in: &cancellables)
     }
@@ -143,11 +159,13 @@ private extension CollegeInfoViewController {
         customNavBar.setupBackButtonAction { [weak self] in
             self?.coordinator?.backNavigation()
         }
+        
+        activityIndicatorView.isHidden = true
     }
     
     func setupHierarchy() {
         addChild(hostingController)
-        view.addSubviews(customNavBar, titleView, hostingController.view, terbuckBottomButton)
+        view.addSubviews(customNavBar, titleView, hostingController.view, terbuckBottomButton, activityIndicatorView)
     }
     
     func setupLayout() {
@@ -171,6 +189,10 @@ private extension CollegeInfoViewController {
             $0.top.equalTo(titleView.snp.bottom).offset(view.convertByHeightRatio(120))
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(view.convertByHeightRatio(360))
+        }
+        
+        activityIndicatorView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
     
