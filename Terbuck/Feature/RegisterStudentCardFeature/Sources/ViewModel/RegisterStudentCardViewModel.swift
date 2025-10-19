@@ -171,37 +171,3 @@ private extension RegisterStudentCardViewModel {
         .eraseToAnyPublisher()
     }
 }
-
-
-//let registerBottomButtonResult = input.bottomButtonTapped
-////            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
-//    .handleEvents(receiveOutput:  { [weak self] _ in
-//        self?.isPlayIndicatorSubject.send(true)
-//        MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
-//    })
-//    .flatMap { [weak self] in
-//        guard let self else {
-//            return Just(false).eraseToAnyPublisher()
-//        }
-//
-////                return Just(true).eraseToAnyPublisher()
-//        return self.putStudentCardPublisher()
-//            .catch { _ in Just(false).eraseToAnyPublisher() }
-//            .eraseToAnyPublisher()
-//    }
-//    .map { isSuccess -> Bool in
-//        if isSuccess {
-////                    guard let imageData = self?.studentImageData else { return }
-////                    let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-//            
-//            UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
-//            FileStorageManager.shared.delete(type: .studentIdCard)
-//        }
-//        
-//        return isSuccess
-//    }
-//    .delay(for: .seconds(1), scheduler: RunLoop.main)
-//    .handleEvents(receiveOutput: { [weak self] _ in
-//        self?.isPlayIndicatorSubject.send(false)
-//    })
-//    .eraseToAnyPublisher()
