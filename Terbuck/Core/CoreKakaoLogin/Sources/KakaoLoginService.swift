@@ -16,10 +16,11 @@ public final class KakaoLoginService: NSObject {
     
     private override init() {}
 
-    public func login() async throws -> String {
+    public func login() async throws -> (String, String?) {
         let oauthToken = try await loginWithKakaoAppOrWeb()
-        
-        return oauthToken.accessToken
+        let userInfo = try await fetchUserInfo()
+        let userName = userInfo.kakaoAccount?.profile?.nickname
+        return (oauthToken.accessToken, userName)
     }
 }
 
