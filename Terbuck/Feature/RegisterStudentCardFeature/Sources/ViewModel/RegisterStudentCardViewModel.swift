@@ -33,6 +33,10 @@ public final class RegisterStudentCardViewModel {
     private var studentId: String?
     private var studentImageData: Data?
     
+    // MARK: - Public Combine Publishers Properties
+    
+    public let isPlayIndicatorSubject = PassthroughSubject<Bool, Never>()
+    
     // MARK: - Private Combine Publishers Properties
     
     private var cancellables = Set<AnyCancellable>()
@@ -95,32 +99,36 @@ public final class RegisterStudentCardViewModel {
         
         let registerBottomButtonResult = input.bottomButtonTapped
             .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
-            .handleEvents(receiveOutput:  { _ in
-                MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
-            })
-            .flatMap { [weak self] in
+            .flatMap { [weak self] _ in
                 guard let self else {
                     return Just(false).eraseToAnyPublisher()
                 }
 
-                return self.putStudentCardPublisher()
-//                    .handleEvents(receiveOutput: { _ in
-//                        guard let imageData = self.studentImageData else { return }
-//                        
-//                        let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-//                    })
+                self.isPlayIndicatorSubject.send(true)
+                MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
+
+                let apiResultPublisher = self.putStudentCardPublisher()
                     .catch { _ in Just(false).eraseToAnyPublisher() }
+                    .map { isSuccess -> Bool in
+                        if isSuccess {
+                            UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
+                            FileStorageManager.shared.delete(type: .studentIdCard)
+                        }
+                        return isSuccess
+                    }
+
+                let minDurationPublisher = Just(())
+                    .delay(for: .seconds(1), scheduler: RunLoop.main)
+
+                return Publishers.Zip(apiResultPublisher, minDurationPublisher)
+                    .map { (apiResult, _) -> Bool in
+                        return apiResult
+                    }
+                    .handleEvents(receiveOutput: { [weak self] _ in
+                        self?.isPlayIndicatorSubject.send(false)
+                    })
                     .eraseToAnyPublisher()
             }
-            .handleEvents(receiveOutput: { [weak self] isSuccess in
-                if isSuccess {
-//                    guard let imageData = self?.studentImageData else { return }
-//                    let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-                    
-                    UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
-                    FileStorageManager.shared.delete(type: .studentIdCard)
-                }
-            })
             .eraseToAnyPublisher()
         
         return Output(
@@ -163,3 +171,37 @@ private extension RegisterStudentCardViewModel {
         .eraseToAnyPublisher()
     }
 }
+
+
+//let registerBottomButtonResult = input.bottomButtonTapped
+////            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
+//    .handleEvents(receiveOutput:  { [weak self] _ in
+//        self?.isPlayIndicatorSubject.send(true)
+//        MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
+//    })
+//    .flatMap { [weak self] in
+//        guard let self else {
+//            return Just(false).eraseToAnyPublisher()
+//        }
+//
+////                return Just(true).eraseToAnyPublisher()
+//        return self.putStudentCardPublisher()
+//            .catch { _ in Just(false).eraseToAnyPublisher() }
+//            .eraseToAnyPublisher()
+//    }
+//    .map { isSuccess -> Bool in
+//        if isSuccess {
+////                    guard let imageData = self?.studentImageData else { return }
+////                    let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
+//            
+//            UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
+//            FileStorageManager.shared.delete(type: .studentIdCard)
+//        }
+//        
+//        return isSuccess
+//    }
+//    .delay(for: .seconds(1), scheduler: RunLoop.main)
+//    .handleEvents(receiveOutput: { [weak self] _ in
+//        self?.isPlayIndicatorSubject.send(false)
+//    })
+//    .eraseToAnyPublisher()
