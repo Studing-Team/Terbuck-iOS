@@ -27,7 +27,6 @@ public final class RegisterStudentCardViewController: UIViewController, UIGestur
     // MARK: - Combine Properties
     
     private var registerStudentIdImageSubject = PassthroughSubject<Data, Never>()
-    
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -43,6 +42,8 @@ public final class RegisterStudentCardViewController: UIViewController, UIGestur
     private let textFieldStackView = UIStackView()
     private let nameTextFieldView = TerbuckTextFieldView(type: .name)
     private let studentIdTextFieldView = TerbuckTextFieldView(type: .studentID)
+    
+    private let activityIndicatorView = LottieActivityIndicatorView(isHidden: true)
     
     // MARK: - Init
     
@@ -135,6 +136,13 @@ private extension RegisterStudentCardViewController {
                 NotificationCenter.default.post(name: .userAuthDidUpdate, object: nil)
             }
             .store(in: &cancellables)
+        
+        registerStudentCardViewModel.isPlayIndicatorSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isPlay in
+                self?.activityIndicatorView.setAnimating(isPlay)
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -186,10 +194,12 @@ private extension RegisterStudentCardViewController {
             $0.clipsToBounds = true
             $0.isHidden = true
         }
+        
+        activityIndicatorView.isHidden = true
     }
     
     func setupHierarchy() {
-        self.view.addSubviews(customNavBar, titleLabel, subTitleLabel, containerView, textFieldStackView, bottomButton)
+        self.view.addSubviews(customNavBar, titleLabel, subTitleLabel, containerView, textFieldStackView, bottomButton, activityIndicatorView)
         containerView.addSubviews(registerStudentIDCardButton, studentIdImageView)
     }
     
@@ -230,6 +240,10 @@ private extension RegisterStudentCardViewController {
         bottomButton.snp.makeConstraints {
             $0.top.equalTo(textFieldStackView.snp.bottom).offset(view.convertByHeightRatio(120))
             $0.horizontalEdges.equalToSuperview().inset(20)
+        }
+        
+        activityIndicatorView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
 }

@@ -33,6 +33,10 @@ public final class RegisterStudentCardViewModel {
     private var studentId: String?
     private var studentImageData: Data?
     
+    // MARK: - Public Combine Publishers Properties
+    
+    public let isPlayIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
+    
     // MARK: - Private Combine Publishers Properties
     
     private var cancellables = Set<AnyCancellable>()
@@ -95,26 +99,35 @@ public final class RegisterStudentCardViewModel {
         
         let registerBottomButtonResult = input.bottomButtonTapped
             .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
-            .handleEvents(receiveOutput:  { _ in
-                MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
-            })
-            .flatMap { [weak self] in
+            .flatMap { [weak self] _ in
                 guard let self else {
                     return Just(false).eraseToAnyPublisher()
                 }
 
-                return self.putStudentCardPublisher()
+                self.isPlayIndicatorSubject.send(true)
+                MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
+
+                let apiResultPublisher = self.putStudentCardPublisher()
                     .catch { _ in Just(false).eraseToAnyPublisher() }
+                    .map { isSuccess -> Bool in
+                        if isSuccess {
+                            UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
+                            FileStorageManager.shared.delete(type: .studentIdCard)
+                        }
+                        return isSuccess
+                    }
+
+                let minDurationPublisher = Just(())
+                    .delay(for: .seconds(1), scheduler: RunLoop.main)
+
+                return Publishers.Zip(apiResultPublisher, minDurationPublisher)
+                    .map { (apiResult, _) -> Bool in
+                        return apiResult
+                    }
+                    .handleEvents(receiveOutput: { [weak self] _ in
+                        self?.isPlayIndicatorSubject.send(false)
+                    })
                     .eraseToAnyPublisher()
-            }
-            .map { isSuccess -> Bool in
-                if isSuccess {
-                    // 제출은 성공, 인증 여부는 불가하므로 false 로 변경, 이미지도 바뀌었지만 인증 여부는 불가하므로 삭제
-                    UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
-                    FileStorageManager.shared.delete(type: .studentIdCard)
-                }
-                
-                return isSuccess
             }
             .eraseToAnyPublisher()
         

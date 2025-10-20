@@ -13,7 +13,7 @@ import Shared
 public enum CollegesError: LocalizedError, Equatable {
     case fetchFailed
     case signupFailed
-    case notEditUniversity
+    case equalEditUniversity
     case editUniversityFailed
     case unknown
     
@@ -23,12 +23,21 @@ public enum CollegesError: LocalizedError, Equatable {
             return "대학교 단과대 정보를 불러올 수 없습니다"
         case .signupFailed:
             return "가입 관련해서 문제가 발생했어요"
-        case .notEditUniversity:
-            return "대학교 인증 문제가 발생했어요"
+        case .equalEditUniversity:
+            return "대학교 변경 문제가 발생했어요"
         case .editUniversityFailed:
             return "대학교 변경에 문제가 발생했어요"
         case .unknown:
             return "알 수 없는 오류가 발생했어요"
+        }
+    }
+    
+    var errorSubTitle: String{
+        switch self {
+        case .equalEditUniversity:
+            return "다른 대학교를 선택해주세요"
+        default:
+            return "잠시 후 다시 시도해주세요\n"
         }
     }
 }
@@ -44,6 +53,7 @@ public class CollegeInfoViewModel {
     
     // MARK: - Public Combine Publishers Properties
     
+    public var isPlayIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
     public var errorSubject = PassthroughSubject<CollegesError, Never>()
     
     // MARK: - Private Combine Publishers Properties
@@ -128,10 +138,14 @@ public class CollegeInfoViewModel {
                     return Just(false).eraseToAnyPublisher()
                 }
                 
+                self.isPlayIndicatorSubject.send(true)
+                
                 let universityName = self.selectedUniversityNameSubject.value
                 
+                let apiResultPublisher: AnyPublisher<Bool, Never>
+                
                 if let _ = self.signupUseCase {
-                    return self.signupPublisher(universityName, selectCollege.id)
+                    apiResultPublisher = self.signupPublisher(universityName, selectCollege.id)
                         .handleEvents(receiveOutput:  { _ in
                             MixpanelManager.shared.track(eventType: TrackEventType.Signup.secondSignupButtonTapped)
                             MixpanelManager.shared.setupUniversity(universityName: universityName)
@@ -146,10 +160,8 @@ public class CollegeInfoViewModel {
                             return Just(false)
                         }
                         .eraseToAnyPublisher()
-                }
-                
-                if let _ = self.editUniversityUseCase {
-                    return self.editUniversityPublisher(universityName, selectCollege.id)
+                } else if let _ = self.editUniversityUseCase {
+                    apiResultPublisher = self.editUniversityPublisher(universityName, selectCollege.id)
                         .map { _ in
                             UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
                             UserDefaultsManager.shared.set(universityName, for: .university)
@@ -162,9 +174,21 @@ public class CollegeInfoViewModel {
                             return Just(false)
                         }
                         .eraseToAnyPublisher()
+                } else {
+                    apiResultPublisher = Just(false).eraseToAnyPublisher()
                 }
 
-                return Just(false).eraseToAnyPublisher()
+                let minDurationPublisher = Just(())
+                    .delay(for: .seconds(1), scheduler: RunLoop.main)
+
+                return Publishers.Zip(apiResultPublisher, minDurationPublisher)
+                    .map { (apiResult, _) -> Bool in
+                        return apiResult
+                    }
+                    .handleEvents(receiveOutput: { [weak self] _ in
+                        self?.isPlayIndicatorSubject.send(false)
+                    })
+                    .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
         
@@ -238,7 +262,7 @@ private extension CollegeInfoViewModel {
             }
             
             if university == UserDefaultsManager.shared.string(for: .university) {
-                promise(.failure(.notEditUniversity))
+                promise(.failure(.equalEditUniversity))
                 return
             }
             
