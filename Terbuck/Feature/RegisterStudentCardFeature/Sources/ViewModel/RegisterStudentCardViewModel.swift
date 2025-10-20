@@ -35,7 +35,7 @@ public final class RegisterStudentCardViewModel {
     
     // MARK: - Public Combine Publishers Properties
     
-    public let isPlayIndicatorSubject = PassthroughSubject<Bool, Never>()
+    public let isPlayIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
     
     // MARK: - Private Combine Publishers Properties
     

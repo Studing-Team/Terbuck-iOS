@@ -140,14 +140,7 @@ private extension RegisterStudentCardViewController {
         registerStudentCardViewModel.isPlayIndicatorSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isPlay in
-                self?.activityIndicatorView.isHidden = !isPlay
-                self?.activityIndicatorView.indicatorHidden(!isPlay)
-                
-                if isPlay {
-                    self?.activityIndicatorView.playIndicator()
-                } else {
-                    self?.activityIndicatorView.stopIndicator()
-                }
+                self?.activityIndicatorView.setAnimating(isPlay)
             }
             .store(in: &cancellables)
     }

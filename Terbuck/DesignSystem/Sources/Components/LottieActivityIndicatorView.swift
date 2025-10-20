@@ -53,16 +53,15 @@ public final class LottieActivityIndicatorView: UIView {
 // MARK: - Public func Extensions
 
 public extension LottieActivityIndicatorView {
-    func indicatorHidden(_ isHidden: Bool) {
-        self.activityIndicatorHidden = isHidden
-    }
-    
-    func playIndicator() {
-        activityIndicator.play()
-    }
-    
-    func stopIndicator() {
-        activityIndicator.stop()
+    func setAnimating(_ animating: Bool) {
+        isHidden = !animating
+        self.activityIndicatorHidden = !animating
+        
+        if animating {
+            activityIndicator.play()
+        } else {
+            activityIndicator.stop()
+        }
     }
 }
 
@@ -100,6 +99,20 @@ private extension LottieActivityIndicatorView {
     func setupHidden() {
         indicatorBackground.isHidden = activityIndicatorHidden
         activityIndicator.isHidden = activityIndicatorHidden
+    }
+}
+
+private extension LottieActivityIndicatorView {
+    func indicatorHidden(_ isHidden: Bool) {
+        self.activityIndicatorHidden = isHidden
+    }
+    
+    func playIndicator() {
+        activityIndicator.play()
+    }
+    
+    func stopIndicator() {
+        activityIndicator.stop()
     }
 }
 
