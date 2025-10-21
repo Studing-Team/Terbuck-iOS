@@ -171,6 +171,14 @@ private extension HomeViewController {
                 self?.homeViewModel.selectedFilterSubject.send(filterType)
             }
             .store(in: &cancellables)
+        
+        homeViewModel.currentMyUniversitySubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.viewLifeCycleSubject.send(.viewDidLoad)
+            }
+            .store(in: &cancellables)
+        
     }
 }
 
