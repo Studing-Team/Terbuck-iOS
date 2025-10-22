@@ -173,9 +173,11 @@ private extension HomeViewController {
             .store(in: &cancellables)
         
         homeViewModel.currentMyUniversitySubject
+            .filter { !$0.isEmpty }
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
-                self?.viewLifeCycleSubject.send(.viewDidLoad)
+                self?.viewLifeCycleSubject.send(.reloadData)
             }
             .store(in: &cancellables)
         

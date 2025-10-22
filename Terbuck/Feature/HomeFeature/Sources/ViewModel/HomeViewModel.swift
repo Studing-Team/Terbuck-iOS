@@ -95,7 +95,7 @@ public final class HomeViewModel {
         
         // viewDidLoad 이벤트 처리
         input.viewLifeCycleEventAction
-            .filter { $0 == .viewDidLoad }
+            .filter { $0 == .viewDidLoad || $0 == .reloadData }
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.homeDataStateSubject.send(.loading)
             })

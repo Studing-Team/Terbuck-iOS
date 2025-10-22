@@ -10,4 +10,5 @@ import Foundation
 public enum ViewLifeCycleEvent {
     case viewDidLoad
     case viewWillAppear
+    case reloadData
 }

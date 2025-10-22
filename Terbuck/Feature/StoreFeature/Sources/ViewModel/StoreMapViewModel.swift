@@ -98,6 +98,8 @@ public final class StoreMapViewModel {
                     if let name = self?.currentUniversityName, savedUniversityName != name {
                         self?.fetchStoreCategory()
                     }
+                case .reloadData:
+                    break
                 }
             }
             .store(in: &cancellables)
