@@ -27,15 +27,18 @@ enum HomeError: LocalizedError, Equatable {
 
 public final class HomeViewModel {
     
-    // MARK: - Properties
+    // MARK: - UseCase Properties
     
-    private let locationManager = CLLocationManager()
     private let searchStoreUseCase: SearchStoreUseCase
     private let searchPartnershipUseCase: SearchPartnershipUseCase
     private let fetchPartnershipDisclosureStatusUseCase: FetchPartnershipDisclosureStatusUseCase
     private let requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCase
     private let fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCase
     private let fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCase
+    
+    // MARK: - Properties
+    
+    private let locationManager = CLLocationManager()
     
     // MARK: - Private Combine Publishers Properties
     
@@ -51,6 +54,7 @@ public final class HomeViewModel {
     public var sectionDataSubject = CurrentValueSubject<[HomeSection: [HomeItem]], Never>([:])
     public let myLocationSubject = CurrentValueSubject<(latitude: Double?, longitude: Double?), Never>((nil, nil))
     public let emptyStateButtonTapSubject = PassthroughSubject<Void, Never>()
+    public let currentMyUniversitySubject = CurrentValueSubject<String, Never>("")
     
     // MARK: - Input
     
@@ -91,7 +95,7 @@ public final class HomeViewModel {
         
         // viewDidLoad 이벤트 처리
         input.viewLifeCycleEventAction
-            .filter { $0 == .viewDidLoad }
+            .filter { $0 == .viewDidLoad || $0 == .reloadData }
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.homeDataStateSubject.send(.loading)
             })
@@ -119,6 +123,14 @@ public final class HomeViewModel {
             .filter { $0 == .viewWillAppear }
             .sink { [weak self] _ in
                 self?.isAuthStudentSubject.send(UserDefaultsManager.shared.bool(for: .isStudentIDAuthenticated))
+                
+                guard let storedUniversityName = UserDefaultsManager.shared.string(for: .university) else { return }
+                
+                let currentUniversityName = self?.currentMyUniversitySubject.value
+                
+                if currentUniversityName != storedUniversityName {
+                    self?.currentMyUniversitySubject.send(storedUniversityName)
+                }
             }
             .store(in: &cancellables)
         

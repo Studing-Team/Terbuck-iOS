@@ -88,12 +88,8 @@ private extension CustomTabBarController {
                 viewController.additionalSafeAreaInsets.bottom = 0
             } else {
                 // 탭바가 보일 때만 기존 로직을 실행
-                if viewController == self.selectedViewController {
-                    let overlapHeight = customTabBarView.frame.height - view.safeAreaInsets.bottom
-                    viewController.additionalSafeAreaInsets.bottom = overlapHeight
-                } else {
-                    viewController.additionalSafeAreaInsets.bottom = 0
-                }
+                let overlapHeight = customTabBarView.frame.height - view.safeAreaInsets.bottom
+                viewController.additionalSafeAreaInsets.bottom = overlapHeight
             }
         }
     }
