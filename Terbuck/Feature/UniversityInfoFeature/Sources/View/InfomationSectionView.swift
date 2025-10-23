@@ -19,7 +19,7 @@ struct InfomationSectionView: View {
     
     @State var viewModel: UniversityViewModel
     @State private var isExpanded: Bool = true
-    @State private var sectionType: SectionType = .university
+    @State private var sectionType: SectionType = .location
     @State private var selectedSectionIndex: Int = 0
     
     // MARK: - Properties
@@ -73,10 +73,6 @@ struct InfomationSectionView: View {
                     accordionSectionView(universityInfo: universityInfo, currentSection: currentSection)
                 }
                 .padding(.horizontal, 20)
-                .onAppear {
-                    sectionType = .university
-                    isExpanded = true
-                }
                 .transition(.opacity)
             } else {
                 VStack(spacing: 0) {
