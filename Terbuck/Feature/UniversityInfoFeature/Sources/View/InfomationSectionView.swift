@@ -73,10 +73,6 @@ struct InfomationSectionView: View {
                     accordionSectionView(universityInfo: universityInfo, currentSection: currentSection)
                 }
                 .padding(.horizontal, 20)
-                .onAppear {
-                    sectionType = .location
-                    isExpanded = true
-                }
                 .transition(.opacity)
             } else {
                 VStack(spacing: 0) {
