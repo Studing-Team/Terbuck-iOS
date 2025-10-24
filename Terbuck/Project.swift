@@ -21,6 +21,9 @@ let projectSettings: Settings = .settings(
 
 let appDependencies: [TargetDependency] = [
     .external(name: "FirebaseMessaging"),
+    .project(target: "Domain", path: "Domain"),
+    .project(target: "DomainInterface", path: "DomainInterface"),
+    .project(target: "Data", path: "Data"),
     .project(target: "DesignSystem", path: "DesignSystem"),
     .project(target: "SplashFeature", path: "Feature/SplashFeature"),
     .project(target: "SplashInterface", path: "Feature/SplashInterface"),

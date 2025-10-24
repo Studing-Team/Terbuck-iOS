@@ -11,7 +11,7 @@ import AuthInterface
 import UniversityInfoInterface
 import Shared
 
-public final class AuthCoordinator: BaseCoordinator, AuthCoordinating {
+public final class AuthCoordinator : BaseCoordinator, AuthCoordinating {
     
     public var rootViewController: UIViewController?
     

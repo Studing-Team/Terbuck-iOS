@@ -24,14 +24,37 @@ import UniversityInfoInterface
 import UniversityInfoFeature
 import RegisterStudentCardInterface
 import RegisterStudentCardFeature
+import Domain
+import DomainInterface
 
 public final class AppDIContainer {
+    lazy var socialLoginFactory: SocialLoginUseCaseFactory = {
+      return SocialLoginUseCaseFactoryImpl()
+    }()
+
+    lazy var searchStudentFactory: SearchStudentInfoUseCaseFactory = {
+      return SearchStudentInfoUseCaseFactoryImpl()
+    }()
+
+    lazy var appleServiceFactory: AppleServiceLoginUseCaseFactory = {
+      return AppleServiceLoginUseCaseFactoryImpl()
+    }()
+
+    lazy var kakaoServiceFactory: KakaoServiceLoginUseCaseFactory = {
+      return KakaoServiceLoginUseCaseFactoryImpl()
+    }()
+    
+    
     func makeSplashFactory() -> SplashFactory {
         return SplashFactoryImpl()
     }
     
-    func makeAuthFactory() -> AuthFactory {
+    func makeAuthFactory () -> AuthFactory {
         return AuthFactoryImpl(
+            socialLoginFactory: socialLoginFactory,
+            searchStudentFactory: searchStudentFactory,
+            appleServiceFactory: appleServiceFactory,
+            kakaoServiceFactory: kakaoServiceFactory,
             universityInfoCoordinatorFactory: universityInfoCoordinatorFactory()
         )
     }

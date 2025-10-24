@@ -15,7 +15,8 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
-                .project(target: "Shared", path: "../../Shared")
+                .project(target: "Shared", path: "../../Shared"),
+                .project(target: "DomainInterface", path: "../../DomainInterface"),
             ]
         )
     ]

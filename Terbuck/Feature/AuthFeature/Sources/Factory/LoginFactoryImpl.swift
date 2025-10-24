@@ -6,21 +6,36 @@
 //
 
 import UIKit
+import DomainInterface
 
 public protocol LoginFactory {
     func makeLoginViewController(coordinator: AuthCoordinator) -> UIViewController
 }
 
 public final class LoginFactoryImpl: LoginFactory {
-    public init() {}
+    private let socialLoginFactory: SocialLoginUseCaseFactory
+    private let appleServiceFactory: AppleServiceLoginUseCaseFactory
+    private let kakaoServiceFactory: KakaoServiceLoginUseCaseFactory
+    private let searchStudentFactory: SearchStudentInfoUseCaseFactory
+    
+    public init(
+        socialLoginFactory: SocialLoginUseCaseFactory,
+        appleServiceFactory: AppleServiceLoginUseCaseFactory,
+        kakaoServiceFactory: KakaoServiceLoginUseCaseFactory,
+        searchStudentFactory: SearchStudentInfoUseCaseFactory
+    ) {
+        self.socialLoginFactory = socialLoginFactory
+        self.appleServiceFactory = appleServiceFactory
+        self.kakaoServiceFactory = kakaoServiceFactory
+        self.searchStudentFactory = searchStudentFactory
+    }
 
     public func makeLoginViewController(coordinator: AuthCoordinator) -> UIViewController {
-        let repository = AuthRepositoryImpl()
         let viewModel = LoginViewModel(
-            loginUseCase: SocialLoginUseCaseImpl(repository: repository),
-            appleServiceLoginUseCase: AppleServiceLoginUseCaseImpl(repository: repository),
-            kakaoServiceLoginUseCase: KakaoServiceLoginUseCaseImpl(repository: repository),
-            searchStudentInfoUseCase: SearchStudentInfoUseCaseImpl(repository: repository)
+            loginUseCase: socialLoginFactory.makeSocialLoginUseCase(),
+            appleServiceLoginUseCase: appleServiceFactory.makeAppleServiceLoginUseCase(),
+            kakaoServiceLoginUseCase: kakaoServiceFactory.makeKakaoServiceLoginUseCase(),
+            searchStudentInfoUseCase: searchStudentFactory.makeSearchStudentInfoUseCase()
         )
         
         return LoginViewController(viewModel: viewModel, coordinator: coordinator)
