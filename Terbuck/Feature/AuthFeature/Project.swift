@@ -19,6 +19,7 @@ let project = Project(
                 .external(name: "Then"),
                 .project(target: "AuthInterface", path: "../AuthInterface"),
                 .project(target: "UniversityInfoInterface", path: "../UniversityInfoInterface"),
+                .project(target: "DomainInterface", path: "../../DomainInterface"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),
                 .project(target: "CoreNetwork", path: "../../Core/CoreNetwork"),

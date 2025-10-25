@@ -8,8 +8,9 @@
 import Combine
 import CoreAppleLogin
 import CoreKakaoLogin
-
 import CoreKeyChain
+
+import AuthInterface
 import Shared
 import Foundation
 
@@ -41,10 +42,10 @@ public class LoginViewModel {
     
     // MARK: - Properties
     
-    var loginUseCase: SocialLoginUseCase
-    var appleServiceLoginUseCase: AppleServiceLoginUseCase
-    var kakaoServiceLoginUseCase: KakaoServiceLoginUseCase
-    private var searchStudentInfoUseCase: SearchStudentInfoUseCase
+    private var loginUseCase: any SocialLoginUseCase
+    private var appleServiceLoginUseCase: any AppleServiceLoginUseCase
+    private var kakaoServiceLoginUseCase: any KakaoServiceLoginUseCase
+    private var searchStudentInfoUseCase: any SearchStudentInfoUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -67,10 +68,10 @@ public class LoginViewModel {
     // MARK: - Init
     
     public init(
-        loginUseCase: SocialLoginUseCase,
-        appleServiceLoginUseCase: AppleServiceLoginUseCase,
-        kakaoServiceLoginUseCase: KakaoServiceLoginUseCase,
-        searchStudentInfoUseCase: SearchStudentInfoUseCase
+        loginUseCase: any SocialLoginUseCase,
+        appleServiceLoginUseCase: any AppleServiceLoginUseCase,
+        kakaoServiceLoginUseCase: any KakaoServiceLoginUseCase,
+        searchStudentInfoUseCase: any SearchStudentInfoUseCase
     ) {
         self.loginUseCase = loginUseCase
         self.appleServiceLoginUseCase = appleServiceLoginUseCase
@@ -244,7 +245,8 @@ private extension LoginViewModel {
             
             Task {
                 do {
-                    let loginResult = try await self.loginUseCase.appleLoginExecute(code: code, name: name)
+                    let entity = try await self.loginUseCase.appleLoginExecute(code: code, name: name)
+                    let loginResult = LoginResultModel(from: entity)
                     promise(.success(loginResult))
                 } catch {
                     promise(.failure(.serverLoginFailed(reason: error.localizedDescription)))
@@ -286,7 +288,8 @@ private extension LoginViewModel {
             
             Task {
                 do {
-                    let loginResult = try await self.loginUseCase.kakaoLoginExecute(token: token)
+                    let entity = try await self.loginUseCase.kakaoLoginExecute(token: token)
+                    let loginResult = LoginResultModel(from: entity)
                     promise(.success(loginResult))
                 } catch {
                     promise(.failure(.serverLoginFailed(reason: error.localizedDescription)))

@@ -1,20 +1,13 @@
 //
-//  SearchStudentInfoEntity.swift
-//  AuthFeature
+//  SearchStudentInfoResponseDTOExtension.swift
+//  Data
 //
-//  Created by ParkJunHyuk on 6/29/25.
+//  Created by ParkJunHyuk on 10/23/25.
 //
 
 import Foundation
 import CoreNetwork
-
-public struct SearchStudentInfoEntity {
-    let studentName: String
-    let universityName: String
-    let isAuth: Bool
-    let studentNum: String?
-    let imageUrl: String?
-}
+import DomainInterface
 
 extension SearchStudentInfoResponseDTO {
     func toEntity() -> SearchStudentInfoEntity {

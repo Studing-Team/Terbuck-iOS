@@ -2,22 +2,19 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project(
-    name: "AuthInterface",
+    name: "DomainInterface",
     settings: .module,
     targets: [
         .target(
-            name: "AuthInterface",
+            name: "DomainInterface",
             destinations: .iOS,
             product: .staticFramework,
-            bundleId: "com.Fouryears.Terbuck",
+            bundleId: "com.Fouryears.DomainInterface",
             deploymentTargets: .iOS("17.0"),
             infoPlist: .default,
             sources: ["Sources/**"],
             resources: [],
-            dependencies: [
-                .project(target: "Shared", path: "../../Shared"),
-                .project(target: "DomainInterface", path: "../../DomainInterface"),
-            ]
+            dependencies: []
         )
     ]
 )

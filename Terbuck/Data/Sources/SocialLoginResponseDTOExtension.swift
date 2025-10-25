@@ -1,19 +1,13 @@
 //
-//  SocialLoginResultEntity.swift
-//  AuthFeature
+//  SocialLoginResponseDTOExtension.swift
+//  Data
 //
-//  Created by ParkJunHyuk on 5/25/25.
+//  Created by ParkJunHyuk on 10/23/25.
 //
 
 import Foundation
 import CoreNetwork
-
-public struct SocialLoginResultEntity {
-    let showSignup: Bool
-    let id: Int
-    let accessToken: String
-    let refreshToken: String
-}
+import DomainInterface
 
 extension SocialLoginResponseDTO {
     func toEntity() -> SocialLoginResultEntity {
