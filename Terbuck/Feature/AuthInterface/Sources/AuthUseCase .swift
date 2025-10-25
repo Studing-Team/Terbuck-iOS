@@ -1,5 +1,5 @@
 //
-//  AuthUseCase .swift
+//  AuthUseCase.swift
 //  AuthInterface
 //
 //  Created by ParkJunHyuk on 10/24/25.
