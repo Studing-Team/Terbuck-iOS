@@ -8,6 +8,7 @@
 import Foundation
 
 public enum HomeItem: Hashable {
+    case banner(BannerItemModel)
     case restaurant(NearStoreModel)
     case convenient(NearStoreModel)
     case partnership(PartnershipModel)
