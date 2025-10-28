@@ -27,7 +27,7 @@ final class ToastMessageView: UIView {
         
         setupStyle(type)
         setupHierarchy()
-        setupLayout()
+        setupLayout(type)
     }
     
     required init?(coder: NSCoder) {
@@ -57,6 +57,7 @@ private extension ToastMessageView {
         iconImageView.do {
             $0.contentMode = .scaleAspectFit
             $0.image = type.image
+            $0.isHidden = type.image == nil ? true : false
         }
 
         titleLabel.do {
@@ -80,12 +81,18 @@ private extension ToastMessageView {
         self.addSubview(titleStackView)
     }
     
-    func setupLayout() {
+    func setupLayout(_ type: ToastType) {
         titleStackView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.leading.trailing.equalToSuperview().inset(16)
+            
+            switch type {
+            case .approvedStudentCard(_), .moreBenefit:
+                $0.centerX.equalToSuperview()
+            default:
+                $0.horizontalEdges.equalToSuperview().inset(16)
+            }
         }
-
+        
         iconImageView.snp.makeConstraints {
             $0.size.equalTo(16)
         }

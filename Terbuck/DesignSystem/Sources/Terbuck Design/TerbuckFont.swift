@@ -31,6 +31,8 @@ extension DesignSystem {
             case captionMedium12
             case captionSemi11
             case captionRegular11
+            case gmarketTitleBold20
+            case gmarketTitleBold36
             
             var info: UIFont {
                 switch self {
@@ -87,6 +89,12 @@ extension DesignSystem {
                     
                 case .captionRegular11:
                     return UIFont(font: ResourceFontFamily.Pretendard.regular, size: 11)!
+                    
+                case .gmarketTitleBold20:
+                    return UIFont(font: ResourceFontFamily.GmarketSansTTF.bold, size: 20)!
+                    
+                case .gmarketTitleBold36:
+                    return UIFont(font: ResourceFontFamily.GmarketSansTTF.bold, size: 36)!
                 }
             }
             

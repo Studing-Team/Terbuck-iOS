@@ -1,4 +1,3 @@
-
 //
 //  HomeViewController.swift
 //  MypageFeature
@@ -16,6 +15,7 @@ import Resource
 
 import SnapKit
 import Then
+import Lottie
 
 final class HomeViewController: UIViewController {
     
@@ -38,12 +38,21 @@ final class HomeViewController: UIViewController {
     
     private let titleLogo = TerbuckLogoLabel(type: .medium)
     private let studentIDCardButton = DesignSystem.Button.studentIDCardButton()
-    private let segmentedTabView = SegmentedTabView()
-    private let refreshControl = UIRefreshControl()
+    private lazy var segmentedTabView = SegmentedTabView()
+    private lazy var refreshControl = UIRefreshControl()
+    private let activityIndicator = LottieAnimationView(name: "LoadingIndicator", bundle: ResourceResources.bundle).then {
+        $0.loopMode = .loop
+        $0.contentMode = .scaleAspectFit
+        $0.animationSpeed = 1.0
+    }
+    private let contentLayoutGuide = UILayoutGuide()
     
     private lazy var collectionView: UICollectionView = {
         return UICollectionView(frame: .zero, collectionViewLayout: createLayout())
     }()
+    
+    private lazy var emptyStateView = EmptyStateView(type: .notRequest)
+    private lazy var emptyStateBottomButton = TerbuckBottomButton(type: .requestPartner)
     
     // MARK: - Init
     
@@ -83,6 +92,7 @@ final class HomeViewController: UIViewController {
         super.viewWillAppear(animated)
         
         viewLifeCycleSubject.send(.viewWillAppear)
+        self.showCustomTabBar()
     }
     
     override func viewDidLayoutSubviews() {
@@ -106,20 +116,25 @@ private extension HomeViewController {
         
         output.studentIDCardButtonResult
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] authResult in
+            .sink { [weak self] action in
                 guard let self else { return }
                 
-                if authResult == true {
-                    self.coordinator?.showAuthStudentID()
-                } else if authResult == false && !UserDefaultsManager.shared.bool(for: .isOnboarding) {
+                switch action {
+                case .showOnboarding:
                     guard let holeLocation = self.holeLocation else { return }
-                    self.coordinator?.showOnboardiing(location: holeLocation)
+                    self.coordinator?.startRegisterStudentCard(for: .onboarding, location: holeLocation)
                     UserDefaultsManager.shared.set(true, for: .isOnboarding)
-                } else {
-                    MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonInToastMessage)
+                    
+                case .pendingMessage:
+                    ToastManager.shared.showToast(from: self, type: .approvedStudentCard(type: .home))
+                    
+                case .registerMessage:
                     ToastManager.shared.showToast(from: self, type: .notAuthorized(type: .home)) {
-                        self.coordinator?.registerStudentID()
+                        self.coordinator?.startRegisterStudentCard(for: .register, location: nil)
                     }
+                    
+                case .showStudentCard:
+                    self.coordinator?.startRegisterStudentCard(for: .auth, location: nil)
                 }
             }
             .store(in: &cancellables)
@@ -136,12 +151,19 @@ private extension HomeViewController {
         
         homeViewModel.sectionDataSubject
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] sectionData in
+
                 self?.applySnapshot()
                 self?.collectionView.setContentOffset(.zero, animated: true)
             }
             .store(in: &cancellables)
         
+        homeViewModel.homeDataStateSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.updateLayoutToDataExist(state)
+            }
+            .store(in: &cancellables)
         
         segmentedTabView
             .selectedFilterPublisher
@@ -149,6 +171,16 @@ private extension HomeViewController {
                 self?.homeViewModel.selectedFilterSubject.send(filterType)
             }
             .store(in: &cancellables)
+        
+        homeViewModel.currentMyUniversitySubject
+            .filter { !$0.isEmpty }
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.viewLifeCycleSubject.send(.reloadData)
+            }
+            .store(in: &cancellables)
+        
     }
 }
 
@@ -160,10 +192,15 @@ private extension HomeViewController {
         navigationItem.backButtonTitle = ""
         
         studentIDCardButton.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
+        
+        [segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton].forEach {
+            $0.isHidden = true
+        }
     }
     
     func setupHierarchy() {
-        self.view.addSubviews(titleLogo, studentIDCardButton, segmentedTabView, collectionView)
+        view.addLayoutGuide(contentLayoutGuide)
+        self.view.addSubviews(titleLogo, studentIDCardButton, segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton, activityIndicator)
     }
     
     func setupLayout() {
@@ -177,6 +214,12 @@ private extension HomeViewController {
             $0.trailing.equalToSuperview().inset(25)
         }
         
+        contentLayoutGuide.snp.makeConstraints {
+            $0.top.equalTo(titleLogo.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+        
         segmentedTabView.snp.makeConstraints {
             $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(35))
             $0.horizontalEdges.equalToSuperview().inset(20)
@@ -185,7 +228,23 @@ private extension HomeViewController {
 
         collectionView.snp.makeConstraints {
             $0.top.equalTo(segmentedTabView.snp.bottom).offset(16)
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        emptyStateView.snp.makeConstraints {
+            $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
+            $0.horizontalEdges.equalToSuperview()
+        }
+        
+        emptyStateBottomButton.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(15)
+        }
+        
+        activityIndicator.snp.makeConstraints {
+            $0.center.equalTo(contentLayoutGuide)
+            $0.size.equalTo(view.convertByHeightRatio(200))
         }
     }
     
@@ -225,6 +284,75 @@ private extension HomeViewController {
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    func updateLayoutToDataExist(_ state: HomeDataStateType) {
+        var viewsToShow: [UIView] = []
+        var viewsToHide: [UIView] = []
+        
+        switch state {
+        case .loading:
+            viewsToShow = [activityIndicator]
+            viewsToHide = [segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton]
+            activityIndicator.play()
+            
+        case .noData:
+            viewsToShow = [emptyStateView, emptyStateBottomButton]
+            viewsToHide = [activityIndicator, segmentedTabView, collectionView]
+            
+            emptyStateView.changeState(.notRequest)
+            emptyStateView.snp.remakeConstraints {
+                $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
+                $0.horizontalEdges.equalToSuperview()
+            }
+            
+            if emptyStateBottomButton.actions(forTarget: self, forControlEvent: .touchUpInside) == nil {
+                emptyStateBottomButton.addTarget(self, action: #selector(emptyStateBottomButtonTapped), for: .touchUpInside)
+            }
+            
+        case .requestPartner:
+            viewsToShow = [emptyStateView]
+            viewsToHide = [activityIndicator, segmentedTabView, collectionView, emptyStateBottomButton]
+            
+            emptyStateView.changeState(.completeRequest)
+            emptyStateView.snp.remakeConstraints {
+                $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(15))
+                $0.horizontalEdges.equalToSuperview()
+            }
+            
+        case .existData:
+            viewsToShow = [segmentedTabView, collectionView]
+            viewsToHide = [activityIndicator, emptyStateView, emptyStateBottomButton]
+        }
+        
+        // 애니메이션 준비: 나타날 뷰들의 isHidden을 false로 설정
+        viewsToShow.forEach { $0.isHidden = false }
+        
+        // 애니메이션 실행
+        UIView.animate(withDuration: 0.3, animations: {
+            viewsToShow.forEach { $0.alpha = 1.0 }
+            
+            if state != .loading {
+                self.activityIndicator.stop()
+            }
+            
+            viewsToHide.forEach { $0.alpha = 0.0 }
+            self.view.layoutIfNeeded() // 제약조건 변경 애니메이션
+        }) { finished in
+            guard finished else { return }
+            // 애니메이션 종료 후, 사라진 뷰들의 isHidden을 true로 설정
+            viewsToHide.forEach { $0.isHidden = true }
+            
+            if state == .requestPartner {
+                ToastManager.shared.showToast(from: self, type: .requestPartnership) {
+                    self.coordinator?.showAlarmSetting()
+                }
+            }
+        }
+    }
+    
+    @objc private func emptyStateBottomButtonTapped() {
+        homeViewModel.emptyStateButtonTapSubject.send()
     }
 }
 
@@ -267,6 +395,7 @@ private extension HomeViewController {
     }
     
     func setupCollectionView() {
+        collectionView.contentInsetAdjustmentBehavior = .never
         collectionView.backgroundColor = .clear
         collectionView.refreshControl = refreshControl
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)

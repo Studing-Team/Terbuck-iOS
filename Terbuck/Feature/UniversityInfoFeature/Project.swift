@@ -1,7 +1,9 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "UniversityInfoFeature",
+    settings: .module,
     targets: [
         .target(
             name: "UniversityInfoFeature",
@@ -18,7 +20,8 @@ let project = Project(
                 .project(target: "Shared", path: "../../Shared"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "CoreNetwork", path: "../../Core/CoreNetwork"),
-                .project(target: "CoreKeyChain", path: "../../Core/CoreKeyChain")
+                .project(target: "CoreKeyChain", path: "../../Core/CoreKeyChain"),
+                .project(target: "UniversityInfoInterface", path: "../UniversityInfoInterface"),
             ]
         )
     ]

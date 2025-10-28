@@ -84,6 +84,7 @@ final class SearchStoreViewController: UIViewController {
         super.viewWillAppear(animated)
         
         textField.becomeFirstResponder()
+        self.hideCustomTabBar()
     }
     
     @objc func backButtonTapped() {

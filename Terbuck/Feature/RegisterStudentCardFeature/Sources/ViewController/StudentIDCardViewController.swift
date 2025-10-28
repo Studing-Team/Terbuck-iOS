@@ -11,6 +11,7 @@ import Combine
 import CoreNetwork
 import DesignSystem
 import Shared
+import RegisterStudentCardInterface
 
 import SnapKit
 import Then
@@ -19,11 +20,11 @@ public final class StudentIDCardViewController: UIViewController {
     
     // MARK: - Properties
     
-    private let authType: AuthStudentType
+    private let authType: AuthStudentUIType
     private var holeLocation: CGRect?
     
     private var viewModel: StudentIdCardViewModel
-    weak var coordinator: StudentIDCardFlowDelegate?
+    weak var coordinator: RegisterStudentCardCoordinating?
     
     // MARK: - Combine Publishers Properties
     
@@ -45,9 +46,9 @@ public final class StudentIDCardViewController: UIViewController {
     // MARK: - Init
     
     public init(
-        authType: AuthStudentType,
+        authType: AuthStudentUIType,
         location: CGRect? = nil,
-        coordinator: StudentIDCardFlowDelegate,
+        coordinator: RegisterStudentCardCoordinating,
         viewModel: StudentIdCardViewModel
     ) {
         self.authType = authType
@@ -78,6 +79,11 @@ public final class StudentIDCardViewController: UIViewController {
         bindViewModel()
         
         viewLifeCycleSubject.send(.viewDidLoad)
+    }
+    
+    deinit {
+        AppLogger.log("StudentIDCardViewController Deinit", .info, .ui)
+        coordinator?.didFinishRegistration()
     }
 }
 

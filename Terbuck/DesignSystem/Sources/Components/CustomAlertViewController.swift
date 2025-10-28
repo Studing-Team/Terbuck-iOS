@@ -210,12 +210,6 @@ private extension CustomAlertViewController {
                 $0.bottom.equalToSuperview().inset(15)
             }
         }
-        
-        [leftButton, rightButton, centerButton].forEach {
-            $0?.snp.makeConstraints {
-                $0.height.equalTo(39)
-            }
-        }
     }
      
      func setupButtonActions() {
@@ -233,8 +227,13 @@ private extension CustomAlertViewController {
      }
      
      @objc func cancelBackgroundAction() {
-         dismiss(animated: false)
-     }
+        // `update` 타입의 버튼을 가진 Alert는 백그라운드 탭으로 닫히지 않도록 함
+        if centerButton?.type == .update {
+            return
+        }
+        
+        dismiss(animated: false)
+    }
 }
 
 // MARK: - Show Preview

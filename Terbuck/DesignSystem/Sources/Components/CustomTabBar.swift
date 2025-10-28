@@ -18,11 +18,13 @@ public final class CustomTabBar: UITabBar {
     
     private var selectedIndex: Int = 0
     public var onTabSelected: ((TabBarType) -> Void)?
+    public var onButtonTapped: ((Int) -> Void)?
     
     // MARK: - UI Components
     
     private var buttons: [UIButton] = []
     private let stackView = UIStackView()
+    private let backgroundView = UIView()
     private let topSeparator = UIView()
     
     // MARK: - Init
@@ -61,9 +63,11 @@ public final class CustomTabBar: UITabBar {
 // MARK: - Private Extensions
 
 private extension CustomTabBar {
+    @objc func tabButtonTapped(_ sender: UIButton) {
+        onButtonTapped?(sender.tag)
+    }
+    
     func setupStyle() {
-        self.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
-        
         stackView.do {
             $0.axis = .horizontal
             $0.distribution = .fillEqually
@@ -73,10 +77,15 @@ private extension CustomTabBar {
         topSeparator.do {
             $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite3)
         }
+        
+        backgroundView.do {
+            $0.backgroundColor = DesignSystem.Color.uiColor(.terbuckWhite)
+        }
     }
     
     func setupHierarchy() {
-        addSubviews(topSeparator, stackView)
+        addSubviews(topSeparator, backgroundView)
+        backgroundView.addSubviews(stackView)
     }
     
     func setupLayout() {
@@ -86,9 +95,16 @@ private extension CustomTabBar {
             $0.height.equalTo(1)
         }
         
+        backgroundView.snp.makeConstraints {
+            $0.top.equalTo(topSeparator.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+        
         stackView.snp.makeConstraints {
-            $0.bottom.equalToSuperview().inset(23)
+            $0.top.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(50)
+            $0.bottom.equalToSuperview().inset(23)
         }
     }
     
@@ -118,6 +134,7 @@ private extension CustomTabBar {
         
         let button = UIButton(configuration: config)
         button.tag = type.rawValue
+        button.addTarget(self, action: #selector(tabButtonTapped), for: .touchUpInside)
 
         return button
     }

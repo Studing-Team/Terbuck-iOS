@@ -25,7 +25,7 @@ public class APIClient {
     init(session: URLSessionProtocol = URLSession.shared) {
         self.session = session
     }
-
+    
     func request<T: Decodable>(_ endpoint: EndpointProtocol) async throws -> T {
         var urlRequest: URLRequest
         
@@ -65,11 +65,11 @@ private extension APIClient {
         if let parameters = endpoint.parameters, !parameters.isEmpty {
             components?.queryItems = parameters
         }
-
+        
         guard let finalURL = components?.url else {
             throw NetworkError.invalidURL
         }
-
+        
         var urlRequest = URLRequest(url: finalURL)
         urlRequest.httpMethod = endpoint.method.rawValue
         
@@ -190,7 +190,15 @@ private extension APIClient {
         case 200..<300:
             do {
                 let apiResponse = try JSONDecoder().decode(APIResponse<T>.self, from: data)
-                print("📦 APIResponse 디코딩 결과:", apiResponse)
+                
+                if let jsonObject = try? JSONSerialization.jsonObject(with: data) {
+                    let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted, .sortedKeys])
+                    if let prettyData, let prettyString = String(data: prettyData, encoding: .utf8) {
+                        print("📦 APIResponse 디코딩 결과\n\(prettyString)")
+                    }
+                } else {
+                    print("📦 APIResponse 디코딩 결과: \n\(String(describing: apiResponse.data))")
+                }
                 
                 if let result = apiResponse.data {
                     return result

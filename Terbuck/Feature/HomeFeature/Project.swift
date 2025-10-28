@@ -1,7 +1,9 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "HomeFeature",
+    settings: .module,
     targets: [
         .target(
             name: "HomeFeature",
@@ -19,7 +21,7 @@ let project = Project(
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),
                 .project(target: "NotificationSettingInterface", path: "../NotificationSettingInterface"),
-                .project(target: "RegisterStudentCardFeature", path: "../RegisterStudentCardFeature")
+                .project(target: "RegisterStudentCardInterface", path: "../RegisterStudentCardInterface")
             ]
         )
     ]

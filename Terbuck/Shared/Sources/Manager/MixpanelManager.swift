@@ -27,11 +27,22 @@ public final class MixpanelManager {
         mixpanel?.identify(distinctId: "\(userId)")
     }
     
+    public func setupPlatform() {
+        AppLogger.log("Mixpanel Platform: iOS", .debug, .service)
+        mixpanel?.people.set(properties: ["Platform" : "iOS"])
+    }
+    
     public func setupUniversity(universityName: String) {
         AppLogger.log("유저 프로퍼티(학교) 설정", .info, .service)
         AppLogger.log("학교 이름: \(universityName)", .debug, .service)
         
-        mixpanel?.people.set(properties: ["$school" : universityName])
+        mixpanel?.people.set(properties: ["School" : universityName])
+    }
+    
+    public func setupUserName(name: String) {
+        AppLogger.log("Mixpanel UserName: \(name)", .debug, .service)
+        
+        mixpanel?.people.set(properties: ["$name" : name])
     }
 
     public func track(eventType: String, properties: Properties? = nil) {

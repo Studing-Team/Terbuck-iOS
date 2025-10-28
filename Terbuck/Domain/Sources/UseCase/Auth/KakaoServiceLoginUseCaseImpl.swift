@@ -1,0 +1,23 @@
+//
+//  KakaoServiceLoginUseCaseImpl.swift
+//  Domain
+//
+//  Created by ParkJunHyuk on 10/23/25.
+//
+
+import Foundation
+import DomainInterface
+
+public struct KakaoServiceLoginUseCaseImpl: DomainInterface.KakaoServiceLoginUseCase {
+    private let repository: DomainInterface.AuthRepository
+
+    public init(repository: DomainInterface.AuthRepository) {
+        self.repository = repository
+    }
+
+    public func execute() async throws -> (token: String, user: String) {
+        let result = try await repository.loginWithKakaoService()
+        
+        return (token: result.token, user: result.username)
+    }
+}

@@ -9,16 +9,18 @@ import UIKit
 
 import MypageInterface
 import NotificationSettingInterface
-import RegisterStudentCardFeature
-import UniversityInfoFeature
+import RegisterStudentCardInterface
+import UniversityInfoInterface
 import Shared
 
-public class MypageCoordinator: MypageCoordinating {
-    public var childCoordinators: [any Shared.Coordinator] = []
+public class MypageCoordinator: BaseCoordinator, MypageCoordinating {
+
+    public var rootViewController: UIViewController?
     
-    private let navigationController: UINavigationController
     private let mypageFactory: MypageFactory
     private let alarmSettingFactory: AlarmSettingFactory
+    private let universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
+    private let registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     
     public weak var delegate: notAuthCoordinatorDelegate?
     
@@ -27,44 +29,53 @@ public class MypageCoordinator: MypageCoordinating {
     public init(
         navigationController: UINavigationController,
         mypageFactory: MypageFactory,
-        alarmSettingFactory: AlarmSettingFactory
+        alarmSettingFactory: AlarmSettingFactory,
+        universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory,
+        registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     ) {
-        self.navigationController = navigationController
         self.mypageFactory = mypageFactory
         self.alarmSettingFactory = alarmSettingFactory
+        self.universityInfoCoordinatorFactory = universityInfoCoordinatorFactory
+        self.registerStudentCardFactory = registerStudentCardFactory
+        super.init(navigationController: navigationController)
     }
     
     // MARK: - Method
     
-    public func start() {
+    public override func start() {
         startMypage()
     }
     
     public func startMypage() {
         let mypageVC = mypageFactory.makeMypageViewController(coordinator: self)
+        self.rootViewController = mypageVC
         navigationController.pushViewController(mypageVC, animated: true)
     }
     
-    public func registerStudentID() {
-        let viewModel = RegisterStudentCardViewModel(
-            registerStudentIDUseCase: RegisterStudentIDUseCaseImpl(repository: RegisterRepositoryImpl())
+    public func startRegisterStudentCard(for type: AuthStudentType, location: CGRect?) {
+        let registerCoordinator = registerStudentCardFactory.makeRegisterStudentCardCoordinator(
+            navigationController: self.navigationController,
+            initialType: type,
+            initialLocation: location
         )
+
+        registerCoordinator.delegate = self
         
-        let registerStudentIDCardVC = RegisterStudentCardViewController(viewModel: viewModel)
-        registerStudentIDCardVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(registerStudentIDCardVC, animated: true)
+        childCoordinators.append(registerCoordinator)
+        
+        registerCoordinator.start()
     }
     
-    public func startEditUniversity() {
-        let viewModel = UniversityViewModel(editUniversityUseCase: EditUniversityUseCaseImpl(repository: UniversityRepositoryImpl()))
-        
-        let universityVC = UniversityViewController(
-            type: .edit,
-            viewModel: viewModel
+    public func showUniversity() {
+        let universityCoordinator = universityInfoCoordinatorFactory.makeUniversityInfoCoordinator(
+            navigationController: self.navigationController,
+            initialType: .edit
         )
         
-        universityVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(universityVC, animated: true)
+        universityCoordinator.delegate = self
+        
+        childCoordinators.append(universityCoordinator)
+        universityCoordinator.start()
     }
     
     public func moveLoginFlow() {
@@ -77,8 +88,29 @@ public class MypageCoordinator: MypageCoordinating {
 extension MypageCoordinator: AlarmSettingCoordinating {
     public func showAlarmSetting() {
         let alarmSettingVC = alarmSettingFactory.makeAlarmSettingViewController(coordinator: self)
-        
-        alarmSettingVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(alarmSettingVC, animated: true)
+    }
+}
+
+// MARK: - 대학교 변경을 위한 Coordinator
+
+extension MypageCoordinator: UniversityInfoCoordinatorDelegate {
+    public func didFinishUniversityInfo(coordinator: Coordinator, initialType: UniversityType) {
+        if let mypageVC = rootViewController {
+            navigationController.popToViewController(mypageVC, animated: true)
+        }
+        childCoordinators = childCoordinators.filter { $0 !== coordinator }
+    }
+    
+    public func universityInfoCoordinatorDidTapBack(coordinator: Coordinator) {
+        childCoordinators = childCoordinators.filter { $0 !== coordinator }
+    }
+}
+
+// MARK: - 학생증 재등록을 위한 Coordinator
+
+extension MypageCoordinator: RegisterStudentCardCoordinatorDelegate {
+    public func didFinishRegisterStudentCard(coordinator: Coordinator) {
+        childCoordinators = childCoordinators.filter { $0 !== coordinator }
     }
 }

@@ -8,8 +8,9 @@
 import Combine
 import CoreAppleLogin
 import CoreKakaoLogin
-
 import CoreKeyChain
+
+import AuthInterface
 import Shared
 import Foundation
 
@@ -41,10 +42,10 @@ public class LoginViewModel {
     
     // MARK: - Properties
     
-    var loginUseCase: SocialLoginUseCase
-    var appleServiceLoginUseCase: AppleServiceLoginUseCase
-    var kakaoServiceLoginUseCase: KakaoServiceLoginUseCase
-    private var searchStudentInfoUseCase: SearchStudentInfoUseCase
+    private var loginUseCase: any SocialLoginUseCase
+    private var appleServiceLoginUseCase: any AppleServiceLoginUseCase
+    private var kakaoServiceLoginUseCase: any KakaoServiceLoginUseCase
+    private var searchStudentInfoUseCase: any SearchStudentInfoUseCase
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -67,10 +68,10 @@ public class LoginViewModel {
     // MARK: - Init
     
     public init(
-        loginUseCase: SocialLoginUseCase,
-        appleServiceLoginUseCase: AppleServiceLoginUseCase,
-        kakaoServiceLoginUseCase: KakaoServiceLoginUseCase,
-        searchStudentInfoUseCase: SearchStudentInfoUseCase
+        loginUseCase: any SocialLoginUseCase,
+        appleServiceLoginUseCase: any AppleServiceLoginUseCase,
+        kakaoServiceLoginUseCase: any KakaoServiceLoginUseCase,
+        searchStudentInfoUseCase: any SearchStudentInfoUseCase
     ) {
         self.loginUseCase = loginUseCase
         self.appleServiceLoginUseCase = appleServiceLoginUseCase
@@ -92,8 +93,12 @@ public class LoginViewModel {
                 }
                 
                 return self.appleServiceLoginPublisher()
-                    .flatMap { code, name in
-                        self.appleServerLoginPublisher(code: code, name: name)
+                    .flatMap { code, username in
+                        if username != "" {
+                            MixpanelManager.shared.setupUserName(name: username)
+                        }
+                        
+                        return self.appleServerLoginPublisher(code: code, name: username)
                     }
                     .map { loginResult -> Result<LoginResultModel, LoginError> in
                         return .success(loginResult)
@@ -109,6 +114,7 @@ public class LoginViewModel {
                     KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
                     
                     MixpanelManager.shared.setupUser(userId: loginResult.userId)
+                    MixpanelManager.shared.setupPlatform()
                 }
             })
             .eraseToAnyPublisher()
@@ -121,11 +127,14 @@ public class LoginViewModel {
                 guard let self else {
                     return Just(.failure(.unknown))
                         .eraseToAnyPublisher()
-                 }
-        
+                }
+                
                 return self.kakaoServiceLoginPublisher()
-                    .flatMap { token in
-                        self.kakaoServerLoginPublisher(token: token)
+                    .flatMap { token, username in
+                        if username != "" {
+                            MixpanelManager.shared.setupUserName(name: username)
+                        }
+                        return self.kakaoServerLoginPublisher(token: token)
                     }
                     .map { loginResult -> Result<LoginResultModel, LoginError> in
                         return .success(loginResult)
@@ -141,6 +150,7 @@ public class LoginViewModel {
                     KeychainManager.shared.save(key: .refreshToken, value: loginResult.refreshToken)
                     
                     MixpanelManager.shared.setupUser(userId: loginResult.userId)
+                    MixpanelManager.shared.setupPlatform()
                 }
             })
             .eraseToAnyPublisher()
@@ -235,7 +245,8 @@ private extension LoginViewModel {
             
             Task {
                 do {
-                    let loginResult = try await self.loginUseCase.appleLoginExecute(code: code, name: name)
+                    let entity = try await self.loginUseCase.appleLoginExecute(code: code, name: name)
+                    let loginResult = LoginResultModel(from: entity)
                     promise(.success(loginResult))
                 } catch {
                     promise(.failure(.serverLoginFailed(reason: error.localizedDescription)))
@@ -249,7 +260,7 @@ private extension LoginViewModel {
 // MARK: - Kakao Login Function
 
 private extension LoginViewModel {
-    func kakaoServiceLoginPublisher() -> AnyPublisher<String, LoginError> {
+    func kakaoServiceLoginPublisher() -> AnyPublisher<(token: String, user: String), LoginError> {
         return Future { [weak self] promise in
             guard let self = self else {
                 promise(.failure(.kakaoLoginFailed))
@@ -277,7 +288,8 @@ private extension LoginViewModel {
             
             Task {
                 do {
-                    let loginResult = try await self.loginUseCase.kakaoLoginExecute(token: token)
+                    let entity = try await self.loginUseCase.kakaoLoginExecute(token: token)
+                    let loginResult = LoginResultModel(from: entity)
                     promise(.success(loginResult))
                 } catch {
                     promise(.failure(.serverLoginFailed(reason: error.localizedDescription)))

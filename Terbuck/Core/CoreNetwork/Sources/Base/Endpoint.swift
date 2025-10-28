@@ -48,6 +48,8 @@ public enum BasePath: String {
     case auth = "auth"
     case partnership = "partnership"
     case member = "member"
+    case university = "university"
+    case information = "info"
 }
 
 // Endpoint 구조체 구현

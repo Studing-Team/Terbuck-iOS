@@ -1,7 +1,9 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "RegisterStudentCardFeature",
+    settings: .module,
     targets: [
         .target(
             name: "RegisterStudentCardFeature",
@@ -16,6 +18,7 @@ let project = Project(
                 .external(name: "SnapKit"),
                 .external(name: "Then"),
                 .project(target: "Shared", path: "../../Shared"),
+                .project(target: "RegisterStudentCardInterface", path: "../RegisterStudentCardInterface"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "CoreNetwork", path: "../../Core/CoreNetwork"),
                 .project(target: "CoreKeyChain", path: "../../Core/CoreKeyChain")

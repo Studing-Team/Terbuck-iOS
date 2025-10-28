@@ -8,13 +8,23 @@
 import UIKit
 import MypageInterface
 import NotificationSettingInterface
+import UniversityInfoInterface
+import RegisterStudentCardInterface
 
 public final class MypageTabFactoryImpl: MypageTabFactory {
     
     private let alarmSettingFactory: AlarmSettingFactory
+    private let universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory
+    private let registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     
-    public init(alarmSettingFactory: AlarmSettingFactory) {
+    public init(
+        alarmSettingFactory: AlarmSettingFactory,
+        universityInfoCoordinatorFactory: UniversityInfoCoordinatorFactory,
+        registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
+    ) {
         self.alarmSettingFactory = alarmSettingFactory
+        self.universityInfoCoordinatorFactory = universityInfoCoordinatorFactory
+        self.registerStudentCardFactory = registerStudentCardFactory
     }
     
     public func makeMypageCoordinator(navigationController: UINavigationController) -> MypageCoordinating {
@@ -24,7 +34,9 @@ public final class MypageTabFactoryImpl: MypageTabFactory {
         return MypageCoordinator(
             navigationController: navigationController,
             mypageFactory: mypageFactory,
-            alarmSettingFactory: alarmSettingFactory
+            alarmSettingFactory: alarmSettingFactory,
+            universityInfoCoordinatorFactory: universityInfoCoordinatorFactory,
+            registerStudentCardFactory: registerStudentCardFactory
         )
     }
 }

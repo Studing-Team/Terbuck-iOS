@@ -10,6 +10,10 @@ import UIKit
 import SnapKit
 import Then
 
+private enum Constant {
+    static let displayDuration: TimeInterval = 2.0
+}
+
 public final class ToastManager {
     
     public static let shared = ToastManager()
@@ -45,7 +49,7 @@ public final class ToastManager {
             toastView.transform = .identity
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + Constant.displayDuration) {
             UIView.animate(withDuration: 0.3, animations: {
                 toastView.alpha = 0
                 toastView.transform = CGAffineTransform(translationX: 0, y: 20)

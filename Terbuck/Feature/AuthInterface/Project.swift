@@ -1,7 +1,9 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "AuthInterface",
+    settings: .module,
     targets: [
         .target(
             name: "AuthInterface",
@@ -13,7 +15,8 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
-                .project(target: "Shared", path: "../../Shared")
+                .project(target: "Shared", path: "../../Shared"),
+                .project(target: "DomainInterface", path: "../../DomainInterface"),
             ]
         )
     ]

@@ -39,6 +39,36 @@ public final class UserDefaultsManager {
         AppLogger.log("UserDefaults - \(key.rawValue)에서 String 값 조회", .debug, .manager)
         return value
     }
+    
+    // MARK: - Codable
+    
+    public func set<T: Encodable>(object: T, for key: UserDefaultsKey) {
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(object)
+            defaults.set(data, forKey: key.rawValue)
+            AppLogger.log("UserDefaults - \(key.rawValue)에 Codable 객체 저장", .info, .manager)
+        } catch {
+            AppLogger.log("UserDefaults - \(key.rawValue)에 객체 인코딩 실패: \(error)", .error, .manager)
+        }
+    }
+    
+    public func get<T: Decodable>(objectType: T.Type, for key: UserDefaultsKey) -> T? {
+        guard let data = defaults.data(forKey: key.rawValue) else {
+            AppLogger.log("UserDefaults - \(key.rawValue)에 해당하는 데이터 없음", .debug, .manager)
+            return nil
+        }
+        
+        let decoder = JSONDecoder()
+        do {
+            let object = try decoder.decode(objectType, from: data)
+            AppLogger.log("UserDefaults - \(key.rawValue)에서 Codable 객체 조회", .debug, .manager)
+            return object
+        } catch {
+            AppLogger.log("UserDefaults - \(key.rawValue)에서 객체 디코딩 실패: \(error)", .error, .manager)
+            return nil
+        }
+    }
 
     // MARK: - Remove
     

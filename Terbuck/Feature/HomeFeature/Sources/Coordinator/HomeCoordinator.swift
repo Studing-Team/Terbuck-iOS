@@ -9,17 +9,19 @@ import UIKit
 
 import HomeInterface
 import NotificationSettingInterface
-import RegisterStudentCardFeature
+import RegisterStudentCardInterface
 import DesignSystem
 import Shared
 
-public class HomeCoordinator: HomeCoordinating {
+public class HomeCoordinator: HomeCoordinating, PoppableCoordinator {
     public var childCoordinators: [any Shared.Coordinator] = []
+    public var rootViewController: UIViewController?
     
-    private let navigationController: UINavigationController
+    public var navigationController: UINavigationController
     private let homeFactory: HomeFactory
     private let partnershipFactory: PartnershipFactory
     private let alarmSettingFactory: AlarmSettingFactory
+    private let registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     
     // MARK: - Init
     
@@ -27,12 +29,14 @@ public class HomeCoordinator: HomeCoordinating {
         navigationController: UINavigationController,
         homeFactory: HomeFactory,
         partnershipFactory: PartnershipFactory,
-        alarmSettingFactory: AlarmSettingFactory
+        alarmSettingFactory: AlarmSettingFactory,
+        registerStudentCardFactory: RegisterStudentCardCoordinatorFactory
     ) {
         self.navigationController = navigationController
         self.homeFactory = homeFactory
         self.partnershipFactory = partnershipFactory
         self.alarmSettingFactory = alarmSettingFactory
+        self.registerStudentCardFactory = registerStudentCardFactory
     }
     
     // MARK: - Method
@@ -43,20 +47,8 @@ public class HomeCoordinator: HomeCoordinating {
     
     public func startHome() {
         let homeVC = homeFactory.makeHomeViewController(coordinator: self)
+        self.rootViewController = homeVC
         navigationController.pushViewController(homeVC, animated: true)
-    }
-}
-
-extension HomeCoordinator: StudentIDCardFlowDelegate {
-    public func showOnboardiing(location: CGRect) {
-        let studentIdCardVC = StudentIDCardViewController(
-            authType: .onboarding,
-            location: location,
-            coordinator: self,
-            viewModel: StudentIdCardViewModel()
-        )
-        studentIdCardVC.modalPresentationStyle = .overFullScreen
-        navigationController.present(studentIdCardVC, animated: false)
     }
     
     /// 파트너십 혜택 VC
@@ -66,27 +58,21 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
             partnershipId: partnershipId
         )
         
-        partnershipVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(partnershipVC, animated: true)
     }
     
-    public func showAuthStudentID() {
-        let studentIdCardVC = StudentIDCardViewController(
-            authType: .auth,
-            coordinator: self,
-            viewModel: StudentIdCardViewModel()
+    public func startRegisterStudentCard(for type: AuthStudentType, location: CGRect?) {
+        let registerCoordinator = registerStudentCardFactory.makeRegisterStudentCardCoordinator(
+            navigationController: self.navigationController,
+            initialType: type,
+            initialLocation: location
         )
+
+        registerCoordinator.delegate = self
         
-        studentIdCardVC.modalPresentationStyle = .overFullScreen
-        navigationController.present(studentIdCardVC, animated: false)
-    }
-    
-    public func dismissAuthStudentID() {
-        navigationController.dismiss(animated: false) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                self.registerStudentID()
-            }
-        }
+        childCoordinators.append(registerCoordinator)
+        
+        registerCoordinator.start()
     }
 }
 
@@ -95,23 +81,7 @@ extension HomeCoordinator: StudentIDCardFlowDelegate {
 extension HomeCoordinator: AlarmSettingCoordinating {
     public func showAlarmSetting() {
         let alarmSettingVC = alarmSettingFactory.makeAlarmSettingViewController(coordinator: self)
-        
-        alarmSettingVC.hidesBottomBarWhenPushed = true
         navigationController.pushViewController(alarmSettingVC, animated: true)
-    }
-}
-
-// MARK: - 학생증 등록 Feature
-
-public extension HomeCoordinator {
-    func registerStudentID() {
-        let viewModel = RegisterStudentCardViewModel(
-            registerStudentIDUseCase: RegisterStudentIDUseCaseImpl(repository: RegisterRepositoryImpl())
-        )
-        
-        let registerStudentIDCardVC = RegisterStudentCardViewController(viewModel: viewModel)
-        registerStudentIDCardVC.hidesBottomBarWhenPushed = true
-        navigationController.pushViewController(registerStudentIDCardVC, animated: true)
     }
 }
 
@@ -123,5 +93,13 @@ extension HomeCoordinator: ImagePreviewCoordinating {
         )
         previewImageVC.modalPresentationStyle = .overFullScreen
         navigationController.present(previewImageVC, animated: false)
+    }
+}
+
+// MARK: - 학생증 재등록을 위한 Coordinator
+
+extension HomeCoordinator: RegisterStudentCardCoordinatorDelegate {
+    public func didFinishRegisterStudentCard(coordinator: Coordinator) {
+        childCoordinators = childCoordinators.filter { $0 !== coordinator }
     }
 }

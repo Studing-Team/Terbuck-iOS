@@ -70,6 +70,7 @@ public final class MypageViewController: UIViewController {
         super.viewWillAppear(animated)
         
         viewLifeCycleSubject.send(.viewWillAppear)
+        self.showCustomTabBar()
     }
 }
 
@@ -99,7 +100,7 @@ private extension MypageViewController {
                 guard let self else { return }
                 
                 ToastManager.shared.showToast(from: self, type: type) {
-                    self.coordinator?.registerStudentID()
+                    self.coordinator?.startRegisterStudentCard(for: .register, location: nil)
                 }
             }
             .store(in: &cancellables)
@@ -113,16 +114,16 @@ private extension MypageViewController {
                     
                 case .inquiry:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.askMenuButtonTapped)
-                    self?.moveWebpage("http://pf.kakao.com/_BzmZn")
+                    self?.moveWebpage(WebLinkType.inquiry)
                     break
                     
                 case .privacyPolicy:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.personalMenuButtonTapped)
-                    self?.moveWebpage("https://terbuck.notion.site/11905c1258e08063bba2f82d320de454")
+                    self?.moveWebpage(WebLinkType.userInfo)
                     
                 case .serviceGuide:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.serviceMenuButtonTapped)
-                    self?.moveWebpage("https://terbuck.notion.site/11905c1258e080ee91cecfb7ff633bab")
+                    self?.moveWebpage(WebLinkType.service)
                     
                 case .showLogout:
                     MixpanelManager.shared.track(eventType: TrackEventType.Mypage.logoutMenuButtonTapped)
@@ -202,7 +203,8 @@ private extension MypageViewController {
         }
         
         versionLabel.do {
-            $0.text = "앱 버전  V.1.0.0"
+            let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "정보없음"
+            $0.text = "앱 버전  V.\(appVersion)"
             $0.textColor = DesignSystem.Color.uiColor(.terbuckBlack10)
             $0.font = DesignSystem.Font.uiFont(.textRegular14)
         }
@@ -365,7 +367,7 @@ extension MypageViewController: UICollectionViewDataSource, UICollectionViewDele
             cell.configureCell(forModel: model)
             
             cell.bindingAction(action: { [weak self] in
-                self?.coordinator?.startEditUniversity()
+                self?.coordinator?.showUniversity()
             })
 
             return cell

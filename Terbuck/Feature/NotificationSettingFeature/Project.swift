@@ -1,7 +1,9 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "NotificationSettingFeature",
+    settings: .module,
     targets: [
         .target(
             name: "NotificationSettingFeature",

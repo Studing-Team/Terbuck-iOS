@@ -1,6 +1,6 @@
 //
 //  RegisterStudentCardViewController.swift
-//  DesignSystem
+//  RegisterStudentCardFeature
 //
 //  Created by ParkJunHyuk on 4/25/25.
 //
@@ -15,17 +15,18 @@ import Shared
 
 import SnapKit
 import Then
+import RegisterStudentCardInterface
 
 public final class RegisterStudentCardViewController: UIViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
     private let registerStudentCardViewModel: RegisterStudentCardViewModel
+    weak var coordinator: RegisterStudentCardCoordinating?
     
     // MARK: - Combine Properties
     
     private var registerStudentIdImageSubject = PassthroughSubject<Data, Never>()
-    
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - UI Properties
@@ -42,17 +43,26 @@ public final class RegisterStudentCardViewController: UIViewController, UIGestur
     private let nameTextFieldView = TerbuckTextFieldView(type: .name)
     private let studentIdTextFieldView = TerbuckTextFieldView(type: .studentID)
     
+    private let activityIndicatorView = LottieActivityIndicatorView(isHidden: true)
+    
     // MARK: - Init
     
     public init(
-        viewModel: RegisterStudentCardViewModel
+        viewModel: RegisterStudentCardViewModel,
+        coordinator: RegisterStudentCardCoordinating
     ) {
         self.registerStudentCardViewModel = viewModel
+        self.coordinator = coordinator
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        AppLogger.log("RegisterStudentCardViewController Deinit", .info, .ui)
+        coordinator?.didFinishRegistration()
     }
     
     // MARK: - Life Cycle
@@ -66,6 +76,12 @@ public final class RegisterStudentCardViewController: UIViewController, UIGestur
         setupLayout()
         bindViewModel()
         setupKeyboardHandling()
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.hideCustomTabBar()
     }
     
     public override func viewDidAppear(_ animated: Bool) {
@@ -120,6 +136,13 @@ private extension RegisterStudentCardViewController {
                 NotificationCenter.default.post(name: .userAuthDidUpdate, object: nil)
             }
             .store(in: &cancellables)
+        
+        registerStudentCardViewModel.isPlayIndicatorSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isPlay in
+                self?.activityIndicatorView.setAnimating(isPlay)
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -171,10 +194,12 @@ private extension RegisterStudentCardViewController {
             $0.clipsToBounds = true
             $0.isHidden = true
         }
+        
+        activityIndicatorView.isHidden = true
     }
     
     func setupHierarchy() {
-        self.view.addSubviews(customNavBar, titleLabel, subTitleLabel, containerView, textFieldStackView, bottomButton)
+        self.view.addSubviews(customNavBar, titleLabel, subTitleLabel, containerView, textFieldStackView, bottomButton, activityIndicatorView)
         containerView.addSubviews(registerStudentIDCardButton, studentIdImageView)
     }
     
@@ -215,6 +240,10 @@ private extension RegisterStudentCardViewController {
         bottomButton.snp.makeConstraints {
             $0.top.equalTo(textFieldStackView.snp.bottom).offset(view.convertByHeightRatio(120))
             $0.horizontalEdges.equalToSuperview().inset(20)
+        }
+        
+        activityIndicatorView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
     }
 }

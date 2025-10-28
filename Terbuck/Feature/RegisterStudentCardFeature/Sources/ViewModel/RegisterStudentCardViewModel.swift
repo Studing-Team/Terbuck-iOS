@@ -33,6 +33,10 @@ public final class RegisterStudentCardViewModel {
     private var studentId: String?
     private var studentImageData: Data?
     
+    // MARK: - Public Combine Publishers Properties
+    
+    public let isPlayIndicatorSubject = CurrentValueSubject<Bool, Never>(false)
+    
     // MARK: - Private Combine Publishers Properties
     
     private var cancellables = Set<AnyCancellable>()
@@ -94,21 +98,35 @@ public final class RegisterStudentCardViewModel {
             .store(in: &cancellables)
         
         let registerBottomButtonResult = input.bottomButtonTapped
-            .handleEvents(receiveOutput:  { _ in
-                MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
-            })
-            .flatMap { [weak self] in
+            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: false)
+            .flatMap { [weak self] _ in
                 guard let self else {
                     return Just(false).eraseToAnyPublisher()
                 }
 
-                return self.putStudentCardPublisher()
-                    .handleEvents(receiveOutput: { _ in
-                        guard let imageData = self.studentImageData else { return }
-                        
-                        let _ = FileStorageManager.shared.saveData(data: imageData, type: .studentIdCard)
-                    })
+                self.isPlayIndicatorSubject.send(true)
+                MixpanelManager.shared.track(eventType: TrackEventType.Home.registerButtonTappedInRegisterView)
+
+                let apiResultPublisher = self.putStudentCardPublisher()
                     .catch { _ in Just(false).eraseToAnyPublisher() }
+                    .map { isSuccess -> Bool in
+                        if isSuccess {
+                            UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
+                            FileStorageManager.shared.delete(type: .studentIdCard)
+                        }
+                        return isSuccess
+                    }
+
+                let minDurationPublisher = Just(())
+                    .delay(for: .seconds(1), scheduler: RunLoop.main)
+
+                return Publishers.Zip(apiResultPublisher, minDurationPublisher)
+                    .map { (apiResult, _) -> Bool in
+                        return apiResult
+                    }
+                    .handleEvents(receiveOutput: { [weak self] _ in
+                        self?.isPlayIndicatorSubject.send(false)
+                    })
                     .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()

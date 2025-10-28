@@ -27,6 +27,8 @@ public class TermsOfServiceViewModel {
         let serviceTermsTapped: AnyPublisher<Bool, Never>
         let userInfoTermsTapped: AnyPublisher<Bool, Never>
         let allTermsTapped: AnyPublisher<Void, Never>
+        let serviceArrowTapped: AnyPublisher<Void, Never>
+        let userInfoArrowTapped: AnyPublisher<Void, Never>
     }
     
     // MARK: - Output
@@ -37,15 +39,13 @@ public class TermsOfServiceViewModel {
         let allTermsResult: AnyPublisher<Bool, Never>
         let mergeTermsResult: AnyPublisher<Bool, Never>
         let isBottomButtonEnabled: AnyPublisher<Bool, Never>
+        let serviceArrowResult: AnyPublisher<Void, Never>
+        let userInfoArrowResult: AnyPublisher<Void, Never>
     }
     
     // MARK: - Init
     
-    public init(
-        
-    ) {
-        
-    }
+    public init() { }
     
     // MARK: - Public methods
     
@@ -53,9 +53,7 @@ public class TermsOfServiceViewModel {
         input.serviceTermsTapped
             .sink { [weak self] value in
                 guard let self else { return }
-                
                 self.serviceTermsSubject.send(value)
-                print("isServiceTerms:", self.serviceTermsSubject.value)
             }
             .store(in: &cancellables)
         
@@ -63,8 +61,6 @@ public class TermsOfServiceViewModel {
             .sink { [weak self] value in
                 guard let self else { return }
                 self.userInfoTermsSubject.send(value)
-
-                print("isUserInfoTerms:", self.userInfoTermsSubject.value)
             }
             .store(in: &cancellables)
         
@@ -108,7 +104,9 @@ public class TermsOfServiceViewModel {
             userInfoTermsResult: userInfoTermsSubject.eraseToAnyPublisher(),
             allTermsResult: allTermsCheckSubject.eraseToAnyPublisher(),
             mergeTermsResult: mergeTermsResult,
-            isBottomButtonEnabled: isButtonEnabled
+            isBottomButtonEnabled: isButtonEnabled,
+            serviceArrowResult: input.serviceArrowTapped,
+            userInfoArrowResult: input.userInfoArrowTapped
         )
     }
 }

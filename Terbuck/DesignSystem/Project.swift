@@ -1,7 +1,9 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "DesignSystem",
+    settings: .module,
     targets: [
         .target(
             name: "DesignSystem",
@@ -15,6 +17,7 @@ let project = Project(
             dependencies: [
                 .external(name: "SnapKit"),
                 .external(name: "Then"),
+                .external(name: "Lottie"),
                 .project(target: "CoreNetwork", path: "../Core/CoreNetwork"),
                 .project(target: "CoreKeyChain", path: "../Core/CoreKeyChain"),
                 .project(target: "Resource", path: "../Resource"),

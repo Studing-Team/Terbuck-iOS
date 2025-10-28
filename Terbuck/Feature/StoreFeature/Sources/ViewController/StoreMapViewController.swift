@@ -96,10 +96,10 @@ final class StoreMapViewController: UIViewController {
         
         switch storeMapViewModel.storeMapTypeSubject.value {
         case .search:
-            tabBarController?.tabBar.isHidden = false
+            self.showCustomTabBar()
             searchBarView.configureSearchType(.search)
         case .searchResult:
-            tabBarController?.tabBar.isHidden = true
+            self.hideCustomTabBar()
         }
     }
     
@@ -114,7 +114,7 @@ final class StoreMapViewController: UIViewController {
 
 private extension StoreMapViewController {
     func bindViewModel() {
-        storeMapViewModel.storeListSubject
+        storeMapViewModel.initStoreDataSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] items in
                 guard let self else { return }
@@ -123,6 +123,19 @@ private extension StoreMapViewController {
                 let type = CategoryType.allCases[index]
                 
                 self.initStoreMarkers(with: items)
+                self.filterToCategoryTypeMarker(category: type)
+                self.fitAllMarkers(currentCategoryMarkers, in: mapView, currentIndex: self.storeMapViewModel.currentSnapIndex.value)
+            }
+            .store(in: &cancellables)
+        
+        storeMapViewModel.storeListSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] items in
+                guard let self else { return }
+                
+                let index = storeMapViewModel.storeCategoryPublisher.value
+                let type = CategoryType.allCases[index]
+                
                 self.filterToCategoryTypeMarker(category: type)
                 self.fitAllMarkers(currentCategoryMarkers, in: mapView, currentIndex: self.storeMapViewModel.currentSnapIndex.value)
             }
@@ -160,8 +173,13 @@ private extension StoreMapViewController {
                 guard let self else { return }
                 
                 bottomSheetVC.view.isHidden = type == .search ? false : true
-                tabBarController?.tabBar.isHidden = type == .search ? false : true
                 storeInfoBottomView.isHidden = type == .searchResult ? false : true
+                
+                if type == .search {
+                    self.showCustomTabBar()
+                } else {
+                    self.hideCustomTabBar()
+                }
                 
                 if type == .search {
                     searchBarView.configureSearchType(.search)
@@ -267,7 +285,11 @@ private extension StoreMapViewController {
             return storedStore.id == store.id
         }
         
-        storeMarker?.mapView = mapView
+        if let storeMarker {
+            selectedMarker = storeMarker
+            currentCategoryMarkers.append(storeMarker)
+            makeMakerInMapView()
+        }
     }
 
     func fitAllMarkers(_ markers: [NMFMarker], in mapView: NMFMapView, currentIndex: Int) {
@@ -451,7 +473,12 @@ private extension StoreMapViewController {
     
     func updateSearchLayout(_ store: StoreListModel, isHidden: Bool) {
         bottomSheetVC.view.isHidden = true
-        tabBarController?.tabBar.isHidden = isHidden
+        
+        if !isHidden {
+            self.showCustomTabBar()
+        } else {
+            self.hideCustomTabBar()
+        }
         
         storeInfoBottomView.snp.remakeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(15)
@@ -530,7 +557,7 @@ extension StoreMapViewController: NMFMapViewTouchDelegate {
             self.selectedMarker = nil
             self.bottomSheetVC.view.isHidden = false
             self.storeInfoBottomView.isHidden = true
-            self.tabBarController?.tabBar.isHidden = false
+            self.showCustomTabBar()
         }
     }
 }
@@ -579,14 +606,3 @@ extension StoreMapViewController: StoreBottomSheetDelegate {
         }
     }
 }
-
-// MARK: - Show Preview
-
-//#if canImport(SwiftUI) && DEBUG
-//import SwiftUI
-//
-//#Preview("StoreMapViewController") {
-//    StoreMapViewController()
-//        .showPreview()
-//}
-//#endif

@@ -30,6 +30,7 @@ public enum DesignSystem {
             case terbuckStudentBackground
             case terbuckPartnerBlack
             case terbuckBottomGradient
+            case terbuckIndicatorBackground
             
             var info: UIColor {
                 switch self {
@@ -68,6 +69,9 @@ public enum DesignSystem {
                     return UIColor(asset: ResourceAsset.Color.terbuckPartnerBlack)!
                 case .terbuckBottomGradient:
                     return UIColor(asset: ResourceAsset.Color.terbuckBottomGradient)!
+                case .terbuckIndicatorBackground:
+                    return UIColor(asset: ResourceAsset.Color.terbuckBlack50)!
+                        .withAlphaComponent(0.50)
                 }
             }
             
@@ -86,6 +90,10 @@ public enum DesignSystem {
         
         public static func swiftUIColor(_ name: Name) -> SwiftUI.Color {
             name.swiftUIColor
+        }
+        
+        public static func swiftUIColorToDarken(_ name: Name, darkenValue: CGFloat) -> SwiftUI.Color {
+            SwiftUI.Color(uiColor: name.uiColor.darken(by: darkenValue))
         }
     }
 }

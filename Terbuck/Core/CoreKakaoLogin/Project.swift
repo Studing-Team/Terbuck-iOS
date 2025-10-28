@@ -1,7 +1,9 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "CoreKakaoLogin",
+    settings: .module,
     targets: [
         .target(
             name: "CoreKakaoLogin",

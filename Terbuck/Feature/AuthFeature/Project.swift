@@ -1,7 +1,9 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
 let project = Project(
     name: "AuthFeature",
+    settings: .module,
     targets: [
         .target(
             name: "AuthFeature",
@@ -16,7 +18,8 @@ let project = Project(
                 .external(name: "SnapKit"),
                 .external(name: "Then"),
                 .project(target: "AuthInterface", path: "../AuthInterface"),
-                .project(target: "UniversityInfoFeature", path: "../UniversityInfoFeature"),
+                .project(target: "UniversityInfoInterface", path: "../UniversityInfoInterface"),
+                .project(target: "DomainInterface", path: "../../DomainInterface"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),
                 .project(target: "CoreNetwork", path: "../../Core/CoreNetwork"),
