@@ -21,9 +21,6 @@ final class BannerCollectionViewCell: UICollectionViewCell {
     
     private let bannerImageView = AsyncImageView()
     
-    // MARK: - Delegate
-    
-    var onBannerTapped: ((String) -> Void)?
     
     // MARK: - Init
     
@@ -33,7 +30,6 @@ final class BannerCollectionViewCell: UICollectionViewCell {
         setupStyle()
         setupHierarchy()
         setupLayout()
-        setupGesture()
     }
     
     required init?(coder: NSCoder) {
@@ -66,16 +62,5 @@ private extension BannerCollectionViewCell {
         bannerImageView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-    }
-    
-    func setupGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapBanner))
-        bannerImageView.addGestureRecognizer(tapGesture)
-        bannerImageView.isUserInteractionEnabled = true
-    }
-    
-    @objc func didTapBanner() {
-        guard let linkUrl = bannerItem?.linkUrl else { return }
-        onBannerTapped?(linkUrl)
     }
 }

@@ -614,9 +614,7 @@ extension HomeViewController: UICollectionViewDelegate {
         
         switch item {
         case .banner(let model):
-            let webViewController = WebViewController()
-            webViewController.configure(with: model.linkUrl)
-            self.present(webViewController, animated: true)
+            // TODO: 배너 클릭 시 웹뷰로 이동하는 기능 구현
             
         case .partnership(let model):
             self.coordinator?.showPartnership(partnershipId: model.id)
@@ -644,11 +642,6 @@ extension HomeViewController {
                 ) as! BannerCollectionViewCell
                 
                 cell.configure(with: model)
-                cell.onBannerTapped = { [weak self] linkUrl in
-                    let webViewController = WebViewController()
-                    webViewController.configure(with: linkUrl)
-                    self?.present(webViewController, animated: true)
-                }
                 
                 return cell
                 
