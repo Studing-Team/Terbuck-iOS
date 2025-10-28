@@ -410,10 +410,10 @@ private extension HomeViewController {
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: CustomHeaderCollectionReusableView.className)
         
-        // segmentedTabView를 헤더로 등록
+        // segmentedTabView를 헤더로 등록  
         collectionView.register(SegmentedTabHeaderView.self,
-                                forSupplementaryViewOfKind: "SegmentedTabHeader", 
-                                withReuseIdentifier: "SegmentedTabHeaderView")
+                                forSupplementaryViewOfKind: SegmentedTabHeaderView.elementKind, 
+                                withReuseIdentifier: SegmentedTabHeaderView.className)
     }
     
     func createLayout() -> UICollectionViewLayout {
@@ -478,7 +478,7 @@ private extension HomeViewController {
         
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 15, trailing: 20)
-//        section.interGroupSpacing = 15 // 배너 간 간격
+        
         section.orthogonalScrollingBehavior = .groupPaging // 페이지 단위로 스크롤
         
         return section
@@ -512,7 +512,7 @@ private extension HomeViewController {
             
             let header = NSCollectionLayoutBoundarySupplementaryItem(
                 layoutSize: headerSize,
-                elementKind: "SegmentedTabHeader",
+                elementKind: SegmentedTabHeaderView.elementKind,
                 alignment: .top
             )
             
@@ -731,10 +731,10 @@ extension HomeViewController {
             guard let self = self else { return nil }
             
             // segmentedTabView 헤더 처리
-            if kind == "SegmentedTabHeader" {
+            if kind == SegmentedTabHeaderView.elementKind {
                 let headerView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
-                    withReuseIdentifier: "SegmentedTabHeaderView",
+                    withReuseIdentifier: SegmentedTabHeaderView.className,
                     for: indexPath
                 ) as! SegmentedTabHeaderView
                 

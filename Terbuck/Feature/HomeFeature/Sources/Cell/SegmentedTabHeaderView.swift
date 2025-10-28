@@ -16,6 +16,7 @@ final class SegmentedTabHeaderView: UICollectionReusableView {
     
     // MARK: - Properties
     
+    static let elementKind = "SegmentedTabHeader"
     private var selectedType: StoreFilterType = .restaurent
     private var didInitialLayout = false
     
