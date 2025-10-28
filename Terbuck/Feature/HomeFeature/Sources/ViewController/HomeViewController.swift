@@ -615,7 +615,7 @@ extension HomeViewController: UICollectionViewDelegate {
         switch item {
         case .banner(let model):
             // TODO: 배너 클릭 시 웹뷰로 이동하는 기능 구현
-            
+            break
         case .partnership(let model):
             self.coordinator?.showPartnership(partnershipId: model.id)
             MixpanelManager.shared.track(eventType: TrackEventType.Home.moveDetailPartnership)
