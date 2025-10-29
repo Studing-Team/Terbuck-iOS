@@ -8,8 +8,8 @@
 import Foundation
 import DomainInterface
 
-public struct KakaoServiceLoginUseCaseImpl: DomainInterface.KakaoServiceLoginUseCase {
-    private let repository: DomainInterface.AuthRepository
+public struct KakaoServiceLoginUseCaseImpl: KakaoServiceLoginUseCase {
+    private let repository: AuthRepository
 
     public init(repository: DomainInterface.AuthRepository) {
         self.repository = repository

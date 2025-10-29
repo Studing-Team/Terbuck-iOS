@@ -8,10 +8,10 @@
 import Foundation
 import DomainInterface
 
-public struct AppleServiceLoginUseCaseImpl: DomainInterface.AppleServiceLoginUseCase {
-    private let repository: DomainInterface.AuthRepository
+public struct AppleServiceLoginUseCaseImpl: AppleServiceLoginUseCase {
+    private let repository: AuthRepository
 
-    public init(repository: DomainInterface.AuthRepository) {
+    public init(repository: AuthRepository) {
         self.repository = repository
     }
 
