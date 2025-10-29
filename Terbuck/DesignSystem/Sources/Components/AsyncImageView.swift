@@ -140,6 +140,7 @@ public enum ImageType {
     case storeDetailImage
     case partnershipImage
     case studentIdImage
+    case bannerImage
     
     public var imageSize: CGSize {
         switch self {
@@ -153,12 +154,14 @@ public enum ImageType {
             return CGSize(width: SizeLiterals.Screen.screenWidth * 320 / 375, height: SizeLiterals.Screen.screenHeight * 320 / 812)
         case .studentIdImage:
             return CGSize(width: SizeLiterals.Screen.screenWidth * 265 / 375, height: SizeLiterals.Screen.screenHeight * 424 / 812)
+        case .bannerImage:
+            return CGSize(width: SizeLiterals.Screen.screenWidth * 335 / 375, height: 120)
         }
     }
     
     var mode: UIView.ContentMode {
         switch self{
-        case .storeListImage, .storeInfoImage:
+        case .storeListImage, .storeInfoImage, .bannerImage:
             return .scaleAspectFill
         default:
             return .scaleAspectFit

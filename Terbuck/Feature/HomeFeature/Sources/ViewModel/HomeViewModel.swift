@@ -35,6 +35,7 @@ public final class HomeViewModel {
     private let requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCase
     private let fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCase
     private let fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCase
+    private let fetchAdvertisementBannerUseCase: FetchAdvertisementBannerUseCase
     
     // MARK: - Properties
     
@@ -44,6 +45,7 @@ public final class HomeViewModel {
     
     private let isAuthStudentSubject = CurrentValueSubject<Bool?, Never>(nil)
     private(set) var selectedFilterSubject = CurrentValueSubject<StoreFilterType, Never>(.restaurent)
+    private(set) var bannerListSubject = CurrentValueSubject<[BannerItemModel], Never>([])
     private let homeErrorSubject = PassthroughSubject<HomeError, Never>()
     
     private var cancellables = Set<AnyCancellable>()
@@ -79,7 +81,8 @@ public final class HomeViewModel {
         fetchPartnershipDisclosureStatusUseCase: FetchPartnershipDisclosureStatusUseCase,
         requestPartnershipDisclosureUseCase: RequestPartnershipDisclosureUseCase,
         fetchDisclosureRequestStatusUseCase: FetchDisclosureRequestStatusUseCase,
-        fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCase
+        fetchApprovedStudentIdStatusUseCase: FetchApprovedStudentIdStatusUseCase,
+        fetchAdvertisementBannerUseCase: FetchAdvertisementBannerUseCase
     ) {
         self.searchStoreUseCase = searchStoreUseCase
         self.searchPartnershipUseCase = searchPartnershipUseCase
@@ -87,6 +90,7 @@ public final class HomeViewModel {
         self.requestPartnershipDisclosureUseCase = requestPartnershipDisclosureUseCase
         self.fetchDisclosureRequestStatusUseCase = fetchDisclosureRequestStatusUseCase
         self.fetchApprovedStudentIdStatusUseCase = fetchApprovedStudentIdStatusUseCase
+        self.fetchAdvertisementBannerUseCase = fetchAdvertisementBannerUseCase
     }
     
     // MARK: - Public methods
@@ -193,7 +197,14 @@ public final class HomeViewModel {
             .sink { [weak self] items in
                 guard let self else { return }
                 
-                var sectionData: [HomeSection: [HomeItem]] = [:]
+                // 기존 배너 데이터 유지
+                var sectionData = self.sectionDataSubject.value
+                
+                // 기존 필터 관련 섹션 제거
+                sectionData.removeValue(forKey: .restaurant)
+                sectionData.removeValue(forKey: .convenient)
+                sectionData.removeValue(forKey: .newBenefit)
+                sectionData.removeValue(forKey: .general)
                 
                 for item in items {
                     switch item {
@@ -211,6 +222,8 @@ public final class HomeViewModel {
                         if !model.isNewPartner {
                             sectionData[.general, default: []].append(item)
                         }
+                    default:
+                        break
                     }
                 }
                 
@@ -233,6 +246,29 @@ public final class HomeViewModel {
             }
             .store(in: &cancellables)
         
+        homeDataStateSubject
+            .filter { state in
+                return state == .existData
+            }
+            .flatMap { [weak self] _ -> AnyPublisher<[BannerItemModel], Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                
+                return self.fetchAdvertisementBannerPublishser()
+                    .catch { _ in Just([]) }
+                    .eraseToAnyPublisher()
+            }
+            .sink { [weak self] result in
+                self?.bannerListSubject.send(result)
+                
+                // 배너 데이터를 sectionDataSubject에도 추가 (기존 데이터 유지)
+                guard let self = self else { return }
+                var currentSectionData = self.sectionDataSubject.value
+                let bannerItems = result.map { HomeItem.banner($0) }
+                currentSectionData[.banner] = bannerItems
+                self.sectionDataSubject.send(currentSectionData)
+            }
+            .store(in: &cancellables)
+            
         return Output(
             studentIDCardButtonResult: studentIDCardButtonResult,
             authStudentResult: isAuthStudentSubject.eraseToAnyPublisher(),
@@ -467,6 +503,27 @@ private extension HomeViewModel {
             Task {
                 do {
                     let result = try await self.fetchApprovedStudentIdStatusUseCase.execute()
+                    promise(.success(result))
+                } catch {
+                    promise(.failure(.serverFailed))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    /// `FetchAdvertisementBannerUseCase`를 사용하여  요청 실행 여부를 요청합니다.
+    /// /// - Returns: API 응답으로 받은  BannerItemModel 유형의 배열값을 방출하거나, 실패 시 `HomeError`를 방출하는 `AnyPublisher`를 반환합니다.
+    func fetchAdvertisementBannerPublishser() -> AnyPublisher<[BannerItemModel], HomeError> {
+        return Future { [weak self] promise in
+            guard let self else {
+                promise(.failure(.unknown))
+                return
+            }
+            
+            Task {
+                do {
+                    let result = try await self.fetchAdvertisementBannerUseCase.execute()
                     promise(.success(result))
                 } catch {
                     promise(.failure(.serverFailed))

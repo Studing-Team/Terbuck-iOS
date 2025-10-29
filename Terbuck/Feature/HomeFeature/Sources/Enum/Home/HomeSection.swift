@@ -8,6 +8,7 @@
 import Foundation
 
 public enum HomeSection: CaseIterable, Hashable {
+    case banner     // 배너 섹션
     case restaurant
     case convenient
     case newBenefit // 파트너십 필터의 새로운 혜택 섹션

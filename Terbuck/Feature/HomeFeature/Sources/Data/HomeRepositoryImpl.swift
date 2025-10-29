@@ -17,6 +17,7 @@ public protocol HomeRepository {
     func postPartnershipDisclosureRequest(universityName: String) async throws
     func getDisclosureRequestStatus(universityName: String) async throws -> Bool
     func getApprovedStudentIdStatus() async throws -> Bool
+    func getAdvertisementBannerList() async throws -> [AdvertismentBannerListEntity]
 }
 
 struct HomeRepositoryImpl: HomeRepository {
@@ -71,5 +72,10 @@ struct HomeRepositoryImpl: HomeRepository {
     func getApprovedStudentIdStatus() async throws -> Bool {
         let dto: ApprovedStudentIdStatusResponseDTO = try await networkManager.request(MemberAPIEndpoint.getApprovedStudentIdStatus)
         return dto.isPending
+    }
+    
+    func getAdvertisementBannerList() async throws -> [AdvertismentBannerListEntity] {
+        let dto: [AdvertisementBannerListResponseDTO] = try await networkManager.request(AdvertisementAPIEndpoint.getAdvertisementBannerInfoList)
+        return  dto.map { $0.toEntity() }
     }
 }
