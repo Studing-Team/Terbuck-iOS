@@ -15,8 +15,26 @@ public struct MemberRepositoryImpl: MemberRepository {
     
     public init() {}
     
+    /// 회언의 학생증을 조회하는 API 를 호출합니다.
     public func getStudentInfo() async throws -> SearchStudentInfoEntity {
         let dto: SearchStudentInfoResponseDTO = try await networkManager.request(MemberAPIEndpoint.getStudentId)
         return dto.toEntity()
+    }
+    
+    /// 회원의 계정을 탈퇴하는 API 를 호출합니다.
+    public func deleteMember() async throws -> Void {
+        let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.deleteMemeber)
+    }
+    
+    /// 회원의 학생증 이미지를 등록하는 API 를 호출합니다.
+    public func putRegisterStudentId(idCardImage: Data, name: String, studentNumber: String) async throws -> Void {
+        let requestDTO = RegisterStudentIDRequestDTO(image: idCardImage, name: name, studentNumber: studentNumber)
+        
+        let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.putRegisterStudentId(requestDTO))
+    }
+    
+    /// 회원의 학생증을 삭제하는 API 를 호출합니다.
+    public func deleteStudentId() async throws -> Void {
+        let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.deleteStudentId)
     }
 }

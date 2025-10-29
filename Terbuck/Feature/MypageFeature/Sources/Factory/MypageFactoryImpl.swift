@@ -13,12 +13,22 @@ public protocol MypageFactory {
 }
 
 public final class MypageFactoryImpl: MypageFactory {
+    
+    private let searchStudentInfoUseCaseFactory: any SearchStudentInfoUseCaseFactory
+    private let deleteMemberUseCaseFactory: any DeleteMemberUseCaseFactory
 
-    public init() {}
+    public init(
+        searchStudentInfoUseCaseFactory: any SearchStudentInfoUseCaseFactory,
+        deleteMemberUseCaseFactory: any DeleteMemberUseCaseFactory
+    ) {
+        self.searchStudentInfoUseCaseFactory = searchStudentInfoUseCaseFactory
+        self.deleteMemberUseCaseFactory = deleteMemberUseCaseFactory
+    }
 
     public func makeMypageViewController(coordinator: MypageCoordinator) -> UIViewController {
         let viewModel = MypageViewModel(
-            searchStudentInfoUseCase: SearchStudentInfoUseCaseImpl(repository: MemberRepositoryImpl()), deleteMemberUseCase: DeleteMemberUseCaseImpl(repository: MemberRepositoryImpl())
+            searchStudentInfoUseCase: searchStudentInfoUseCaseFactory.makeSearchStudentInfoUseCase(),
+            deleteMemberUseCase: deleteMemberUseCaseFactory.makeDeleteMemberUseCase()
         )
         
         return MypageViewController(

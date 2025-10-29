@@ -11,6 +11,7 @@ import Combine
 import CoreKeyChain
 import Shared
 import DesignSystem
+import MypageInterface
 
 enum MypageError: LocalizedError, Equatable {
     case studentInfoFailed
@@ -30,8 +31,8 @@ public final class MypageViewModel {
     
     // MARK: - Properties
     
-    private var searchStudentInfoUseCase: SearchStudentInfoUseCase
-    private var deleteMemberUseCase: DeleteMemberUseCase
+    private var searchStudentInfoUseCase: any SearchStudentInfoUseCase
+    private var deleteMemberUseCase: any DeleteMemberUseCase
     
     // MARK: - Private Combine Publishers Properties
     
@@ -72,8 +73,8 @@ public final class MypageViewModel {
     // MARK: - Init
     
     public init(
-        searchStudentInfoUseCase: SearchStudentInfoUseCase,
-        deleteMemberUseCase: DeleteMemberUseCase
+        searchStudentInfoUseCase: any SearchStudentInfoUseCase,
+        deleteMemberUseCase: any DeleteMemberUseCase
     ) {
         self.searchStudentInfoUseCase = searchStudentInfoUseCase
         self.deleteMemberUseCase = deleteMemberUseCase
@@ -147,15 +148,16 @@ private extension MypageViewModel {
             
             Task {
                 do {
-                    let result = try await self.searchStudentInfoUseCase.execute()
-                    UserDefaultsManager.shared.set(result.isAuthenticated, for: .isStudentIDAuthenticated)
-                    UserDefaultsManager.shared.set(result.university, for: .university)
+                    let entity = try await self.searchStudentInfoUseCase.execute()
+                    let userInfoResult = UserInfoModel(from: entity)
+                    UserDefaultsManager.shared.set(userInfoResult.isAuthenticated, for: .isStudentIDAuthenticated)
+                    UserDefaultsManager.shared.set(userInfoResult.university, for: .university)
                     
-                    if result.imageUrl != "" {
-                        UserDefaultsManager.shared.set(result.imageUrl, for: .studentIdCardImageURL)
+                    if let url = userInfoResult.imageUrl {
+                        UserDefaultsManager.shared.set(url, for: .studentIdCardImageURL)
                     }
                     
-                    promise(.success(result))
+                    promise(.success(userInfoResult))
                 } catch {
                     promise(.failure(.studentInfoFailed))
                 }

@@ -7,13 +7,15 @@
 
 import Foundation
 import DomainInterface
-import Data
 
 public struct SearchStudentInfoUseCaseFactoryImpl: SearchStudentInfoUseCaseFactory {
-    public init() {}
+    private let memberRepository: any MemberRepository
+    
+    public init(memberRepository: any MemberRepository) {
+        self.memberRepository = memberRepository
+    }
     
     public func makeSearchStudentInfoUseCase() -> any SearchStudentInfoUseCase {
-        let memberRepository = MemberRepositoryImpl()
         return SearchStudentInfoUseCaseImpl(memberRepository: memberRepository)
     }
 }

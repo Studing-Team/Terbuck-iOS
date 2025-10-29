@@ -1,18 +1,19 @@
 //
-//  RegisterStudentIdUseCase.swift
-//  MypageFeature
+//  RegisterStudentIdUseCaseImpl.swift
+//  Domain
 //
 //  Created by ParkJunHyuk on 5/27/25.
 //
 
 import Foundation
-
-public protocol RegisterStudentIdUseCase {
-    func execute(idCardImage: Data, name: String, studentNumber: String) async throws -> Void
-}
+import DomainInterface
 
 public struct RegisterStudentIdUseCaseImpl: RegisterStudentIdUseCase {
-    let repository: MemberRepository
+    private let repository: any MemberRepository
+    
+    public init(repository: any MemberRepository) {
+        self.repository = repository
+    }
     
     public func execute(
         idCardImage: Data,

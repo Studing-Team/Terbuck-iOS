@@ -9,4 +9,7 @@ import Foundation
 
 public protocol MemberRepository {
     func getStudentInfo() async throws -> SearchStudentInfoEntity
+    func deleteMember() async throws -> Void
+    func putRegisterStudentId(idCardImage: Data, name: String, studentNumber: String) async throws -> Void
+    func deleteStudentId() async throws -> Void
 }
