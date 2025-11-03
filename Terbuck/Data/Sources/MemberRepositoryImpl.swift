@@ -23,7 +23,7 @@ public struct MemberRepositoryImpl: MemberRepository {
     
     /// 회원의 계정을 탈퇴하는 API 를 호출합니다.
     public func deleteMember() async throws -> Void {
-        let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.deleteMemeber)
+        let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.deleteMember)
     }
     
     /// 회원의 학생증 이미지를 등록하는 API 를 호출합니다.

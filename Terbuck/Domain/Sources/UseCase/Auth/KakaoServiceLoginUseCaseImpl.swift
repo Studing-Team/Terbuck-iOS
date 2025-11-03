@@ -11,7 +11,7 @@ import DomainInterface
 public struct KakaoServiceLoginUseCaseImpl: KakaoServiceLoginUseCase {
     private let repository: AuthRepository
 
-    public init(repository: DomainInterface.AuthRepository) {
+    public init(repository: AuthRepository) {
         self.repository = repository
     }
 
