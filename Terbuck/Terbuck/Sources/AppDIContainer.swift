@@ -26,14 +26,23 @@ import RegisterStudentCardInterface
 import RegisterStudentCardFeature
 import Domain
 import DomainInterface
+import Data
 
 public final class AppDIContainer {
+    
+    // MARK: - Repository
+    
+    lazy var memberRepository: any MemberRepository = {
+        return MemberRepositoryImpl()
+    }()
+    
+    // MARK: - UseCase Factories
     lazy var socialLoginFactory: SocialLoginUseCaseFactory = {
       return SocialLoginUseCaseFactoryImpl()
     }()
 
     lazy var searchStudentFactory: SearchStudentInfoUseCaseFactory = {
-      return SearchStudentInfoUseCaseFactoryImpl()
+      return SearchStudentInfoUseCaseFactoryImpl(memberRepository: memberRepository)
     }()
 
     lazy var appleServiceFactory: AppleServiceLoginUseCaseFactory = {
@@ -42,6 +51,18 @@ public final class AppDIContainer {
 
     lazy var kakaoServiceFactory: KakaoServiceLoginUseCaseFactory = {
       return KakaoServiceLoginUseCaseFactoryImpl()
+    }()
+    
+    lazy var deleteMemberUseCaseFactory: DeleteMemberUseCaseFactory = {
+        return DeleteMemberUseCaseFactoryImpl(memberRepository: memberRepository)
+    }()
+    
+    lazy var registerStudentIdUseCaseFactory: RegisterStudentIdUseCaseFactory = {
+        return RegisterStudentIdUseCaseFactoryImpl(memberRepository: memberRepository)
+    }()
+    
+    lazy var deleteStudentIdUseCaseFactory: DeleteStudentIdUseCaseFactory = {
+        return DeleteStudentIdUseCaseFactoryImpl(memberRepository: memberRepository)
     }()
     
     
@@ -76,7 +97,9 @@ public final class AppDIContainer {
         return MypageTabFactoryImpl(
             alarmSettingFactory: makeAlarmSettingFactory(),
             universityInfoCoordinatorFactory: universityInfoCoordinatorFactory(),
-            registerStudentCardFactory: registerStudentCardFactory()
+            registerStudentCardFactory: registerStudentCardFactory(),
+            searchStudentInfoUseCaseFactory: searchStudentFactory,
+            deleteMemberUseCaseFactory: deleteMemberUseCaseFactory,
         )
     }
     

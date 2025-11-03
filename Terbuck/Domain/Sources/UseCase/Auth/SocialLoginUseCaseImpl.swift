@@ -8,19 +8,19 @@
 import Foundation
 import DomainInterface
 
-public struct SocialLoginUseCaseImpl: DomainInterface.SocialLoginUseCase {
-    let authRepository: DomainInterface.AuthRepository
-    let notificationRepository: DomainInterface.NotificationRepository
+public struct SocialLoginUseCaseImpl: SocialLoginUseCase {
+    let authRepository: AuthRepository
+    let notificationRepository: NotificationRepository
     
-    public init(authRepository: DomainInterface.AuthRepository, notificationRepository: DomainInterface.NotificationRepository) {
+    public init(authRepository: AuthRepository, notificationRepository: NotificationRepository) {
         self.authRepository = authRepository
         self.notificationRepository = notificationRepository
     }
     
-    public func appleLoginExecute(code: String, name: String) async throws -> DomainInterface.LoginResultEntity {
+    public func appleLoginExecute(code: String, name: String) async throws -> LoginResultEntity {
         let entity = try await authRepository.serverLoginWithApple(code: code, name: name)
         
-        return DomainInterface.LoginResultEntity(
+        return LoginResultEntity(
             showSignup: entity.showSignup,
             userId: entity.id,
             accessToken: entity.accessToken,
@@ -28,10 +28,10 @@ public struct SocialLoginUseCaseImpl: DomainInterface.SocialLoginUseCase {
         )
     }
     
-    public func kakaoLoginExecute(token: String) async throws -> DomainInterface.LoginResultEntity {
+    public func kakaoLoginExecute(token: String) async throws -> LoginResultEntity {
         let entity = try await authRepository.serverLoginWithKakao(token: token)
         
-        return DomainInterface.LoginResultEntity(
+        return LoginResultEntity(
             showSignup: entity.showSignup,
             userId: entity.id,
             accessToken: entity.accessToken,

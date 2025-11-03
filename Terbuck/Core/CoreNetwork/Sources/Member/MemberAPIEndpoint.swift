@@ -9,7 +9,7 @@ import Foundation
 
 public enum MemberAPIEndpoint {
     case postSignin(SigninRequestDTO)
-    case deleteMemeber
+    case deleteMember
     case patchUniversity(ChangeUniversityRequestDTO)
     case getStudentId
     case putRegisterStudentId(RegisterStudentIDRequestDTO)
@@ -26,7 +26,7 @@ extension MemberAPIEndpoint: EndpointProtocol {
         switch self {
         case .postSignin:
             return basePath.rawValue + "/signin/v2"
-        case .deleteMemeber:
+        case .deleteMember:
             return basePath.rawValue
         case .patchUniversity:
             return basePath.rawValue + "/univ/v2"
@@ -47,7 +47,7 @@ extension MemberAPIEndpoint: EndpointProtocol {
             return .get
         case .putRegisterStudentId:
             return .put
-        case .deleteMemeber, .deleteStudentId:
+        case .deleteMember, .deleteStudentId:
             return .delete
         }
     }

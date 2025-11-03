@@ -8,5 +8,5 @@
 import Foundation
 
 public protocol SearchStudentInfoUseCase {
-    func execute() async throws -> String
+    func execute() async throws -> SearchStudentInfoEntity
 }

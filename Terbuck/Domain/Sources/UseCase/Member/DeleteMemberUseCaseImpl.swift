@@ -1,18 +1,19 @@
 //
-//  DeleteMemberUseCase.swift
-//  MypageFeature
+//  DeleteMemberUseCaseImpl.swift
+//  Domain
 //
 //  Created by ParkJunHyuk on 6/19/25.
 //
 
 import Foundation
-
-public protocol DeleteMemberUseCase {
-    func execute() async throws -> Void
-}
+import DomainInterface
 
 public struct DeleteMemberUseCaseImpl: DeleteMemberUseCase {
-    let repository: MemberRepository
+    private let repository: any MemberRepository
+    
+    public init(repository: any MemberRepository) {
+        self.repository = repository
+    }
     
     public func execute() async throws -> Void {
         try await repository.deleteMember()

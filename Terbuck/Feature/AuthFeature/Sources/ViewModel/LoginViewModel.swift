@@ -199,7 +199,7 @@ private extension LoginViewModel {
 
                     if !showSignup {
                         let studentInfo = try await self.searchStudentInfoUseCase.execute()
-                        UserDefaultsManager.shared.set(studentInfo, for: .university)
+                        UserDefaultsManager.shared.set(studentInfo.universityName, for: .university)
                     } else {
                         AppLogger.log("회원가입 상태이므로 StudentInfo 가져오기 생략", .debug, .viewModel)
                     }

@@ -20,6 +20,7 @@ let project = Project(
                 .project(target: "MypageInterface", path: "../MypageInterface"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),
+                .project(target: "DomainInterface", path: "../../DomainInterface"),
                 .project(target: "UniversityInfoInterface", path: "../UniversityInfoInterface"),
                 .project(target: "NotificationSettingInterface", path: "../NotificationSettingInterface"),
             ]
