@@ -9,6 +9,7 @@ import Foundation
 import Combine
 
 import Shared
+import UniversityInfoInterface
 
 public enum CollegesError: LocalizedError, Equatable {
     case fetchFailed
@@ -47,9 +48,9 @@ public class CollegeInfoViewModel {
     
     // MARK: - Properties
     
-    private var fetchCollegesInfoListUseCase: FetchCollegesInfoListUseCase
-    private var signupUseCase: SignupUseCase?
-    private var editUniversityUseCase: EditUniversityUseCase?
+    private var getCollegesInfoListUseCase: any GetCollegesInfoListUseCase
+    private var signupUseCase: (any SignupUseCase)?
+    private var updateUniversityUseCase: (any UpdateUniversityUseCase)?
     
     // MARK: - Public Combine Publishers Properties
     
@@ -91,14 +92,14 @@ public class CollegeInfoViewModel {
     
     public init(
         selectedUniversityName: String,
-        fetchCollegesInfoListUseCase: FetchCollegesInfoListUseCase,
-        signupUseCase: SignupUseCase? = nil,
-        editUniversityUseCase: EditUniversityUseCase? = nil,
+        getCollegesInfoListUseCase: any GetCollegesInfoListUseCase,
+        signupUseCase: (any SignupUseCase)? = nil,
+        updateUniversityUseCase: (any UpdateUniversityUseCase)? = nil,
     ) {
         self.selectedUniversityNameSubject.send(selectedUniversityName)
-        self.fetchCollegesInfoListUseCase = fetchCollegesInfoListUseCase
+        self.getCollegesInfoListUseCase = getCollegesInfoListUseCase
         self.signupUseCase = signupUseCase
-        self.editUniversityUseCase = editUniversityUseCase
+        self.updateUniversityUseCase = updateUniversityUseCase
     }
     
     // MARK: - Public methods
@@ -160,7 +161,7 @@ public class CollegeInfoViewModel {
                             return Just(false)
                         }
                         .eraseToAnyPublisher()
-                } else if let _ = self.editUniversityUseCase {
+                } else if let _ = self.updateUniversityUseCase {
                     apiResultPublisher = self.editUniversityPublisher(universityName, selectCollege.id)
                         .map { _ in
                             UserDefaultsManager.shared.set(false, for: .isStudentIDAuthenticated)
@@ -225,8 +226,9 @@ private extension CollegeInfoViewModel {
                 
             Task {
                 do {
-                    let result = try await self.fetchCollegesInfoListUseCase.execute(universityName: university)
-                    promise(.success(result))
+                    let entities = try await self.getCollegesInfoListUseCase.execute(university: university)
+                    let models = self.convertToModel(entities)
+                    promise(.success(models))
                 } catch {
                     promise(.failure(.signupFailed))
                 }
@@ -256,7 +258,7 @@ private extension CollegeInfoViewModel {
     
     func editUniversityPublisher(_ university: String, _ collegeId: Int) -> AnyPublisher<Void, CollegesError> {
         return Future { [weak self] promise in
-            guard let self, let editUniversityUseCase else {
+            guard let self, let updateUniversityUseCase else {
                 promise(.failure(.unknown))
                 return
             }
@@ -268,7 +270,7 @@ private extension CollegeInfoViewModel {
             
             Task {
                 do {
-                    let _ = try await editUniversityUseCase.execute(university: university, collegeId: collegeId)
+                    let _ = try await updateUniversityUseCase.execute(university: university, collegeId: collegeId)
                     promise(.success(()))
                 } catch {
                     promise(.failure(.editUniversityFailed))
@@ -276,5 +278,14 @@ private extension CollegeInfoViewModel {
             }
         }
         .eraseToAnyPublisher()
+    }
+    
+    func convertToModel(_ entities: [CollegesInfoEntity]) -> [CollegesInfoModel] {
+        return entities.map {
+            CollegesInfoModel(
+                id: $0.id,
+                collegesName: $0.collegeName
+            )
+        }
     }
 }

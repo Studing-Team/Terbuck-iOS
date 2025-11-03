@@ -36,7 +36,12 @@ public final class AppDIContainer {
         return MemberRepositoryImpl()
     }()
     
+    lazy var universityRepository: any UniversityRepository = {
+        return UniversityRepositoryImpl()
+    }()
+    
     // MARK: - UseCase Factories
+    
     lazy var socialLoginFactory: SocialLoginUseCaseFactory = {
       return SocialLoginUseCaseFactoryImpl()
     }()
@@ -65,6 +70,23 @@ public final class AppDIContainer {
         return DeleteStudentIdUseCaseFactoryImpl(memberRepository: memberRepository)
     }()
     
+    // MARK: - University UseCase Factories
+    
+    lazy var signupUseCaseFactory: SignupUseCaseFactory = {
+        return SignupUseCaseFactoryImpl(memberRepository: memberRepository)
+    }()
+    
+    lazy var updateUniversityUseCaseFactory: UpdateUniversityUseCaseFactory = {
+        return UpdateUniversityUseCaseFactoryImpl(memberRepository: memberRepository)
+    }()
+    
+    lazy var getUniversityInfoListUseCaseFactory: GetUniversityInfoListUseCaseFactory = {
+        return GetUniversityInfoListUseCaseFactoryImpl(universityRepository: universityRepository)
+    }()
+    
+    lazy var getCollegesInfoListUseCaseFactory: GetCollegesInfoListUseCaseFactory = {
+        return GetCollegesInfoListUseCaseFactoryImpl(universityRepository: universityRepository)
+    }()
     
     func makeSplashFactory() -> SplashFactory {
         return SplashFactoryImpl()
@@ -108,11 +130,17 @@ public final class AppDIContainer {
     }
     
     func makeUniversityInfoFactory() -> UniversityInfoFactory {
-        return UniversityInfoFactoryImpl()
+        return UniversityInfoFactoryImpl(
+            getUniversityInfoListUseCaseFactory: getUniversityInfoListUseCaseFactory
+        )
     }
     
     func makeCollegeInfoFactory() -> CollegeInfoFactory {
-        return CollegeInfoFactoryImpl()
+        return CollegeInfoFactoryImpl(
+            getCollegesInfoListUseCaseFactory: getCollegesInfoListUseCaseFactory,
+            signupUseCaseFactory: signupUseCaseFactory,
+            updateUniversityUseCaseFactory: updateUniversityUseCaseFactory
+        )
     }
     
     func registerStudentCardFactory() -> RegisterStudentCardCoordinatorFactory {
