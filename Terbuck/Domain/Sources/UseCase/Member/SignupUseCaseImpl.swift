@@ -16,6 +16,6 @@ public struct SignupUseCaseImpl: SignupUseCase {
     }
     
     public func execute(university: String, collegeId: Int) async throws -> Void {
-        try await memberRepository.postSignupMember(university: university, collegeId: collegeId)
+        try await memberRepository.postSignup(university: university, collegeId: collegeId)
     }
 }

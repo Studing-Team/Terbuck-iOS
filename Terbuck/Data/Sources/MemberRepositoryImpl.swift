@@ -39,8 +39,8 @@ public struct MemberRepositoryImpl: MemberRepository {
     }
     
     /// 회원가입을 위해 대학교 정보를 등록하는 API 를 호출합니다.
-    public func postSignupMember(university: String, collegeId: Int) async throws -> Void {
-        let requestDTO = SigninRequestDTO(university: university, collegeId: collegeId)
+    public func postSignup(university: String, collegeId: Int) async throws -> Void {
+        let requestDTO = SignupRequestDTO(university: university, collegeId: collegeId)
         let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.postSignin(requestDTO))
     }
     
