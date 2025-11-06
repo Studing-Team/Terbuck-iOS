@@ -8,7 +8,7 @@
 import Foundation
 
 public enum MemberAPIEndpoint {
-    case postSignin(SigninRequestDTO)
+    case postSignin(SignupRequestDTO)
     case deleteMember
     case patchUniversity(ChangeUniversityRequestDTO)
     case getStudentId

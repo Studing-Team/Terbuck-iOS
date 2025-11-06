@@ -10,7 +10,11 @@ import UniversityInfoInterface
 
 public final class UniversityInfoFactoryImpl: UniversityInfoFactory {
     
-    public init() {}
+    private let getUniversityInfoListUseCaseFactory: any GetUniversityInfoListUseCaseFactory
+    
+    public init(getUniversityInfoListUseCaseFactory: any GetUniversityInfoListUseCaseFactory) {
+        self.getUniversityInfoListUseCaseFactory = getUniversityInfoListUseCaseFactory
+    }
 
     public func makeUniversityInfoViewController(
         type: UniversityType,
@@ -18,7 +22,7 @@ public final class UniversityInfoFactoryImpl: UniversityInfoFactory {
     ) -> UIViewController {
         
         let viewModel = UniversityViewModel(
-            fetchUniversityInfoListUseCase: FetchUniversityInfoListUseCaseImpl(repository: UniversityRepositoryImpl())
+            getUniversityInfoListUseCase: getUniversityInfoListUseCaseFactory.makeGetUniversityInfoListUseCase()
         )
 
         return UniversityViewController(

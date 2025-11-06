@@ -37,4 +37,16 @@ public struct MemberRepositoryImpl: MemberRepository {
     public func deleteStudentId() async throws -> Void {
         let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.deleteStudentId)
     }
+    
+    /// 회원가입을 위해 대학교 정보를 등록하는 API 를 호출합니다.
+    public func postSignup(university: String, collegeId: Int) async throws -> Void {
+        let requestDTO = SignupRequestDTO(university: university, collegeId: collegeId)
+        let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.postSignin(requestDTO))
+    }
+    
+    /// 회원의 대학교 정보를 변경하는 API 를 호출합니다.
+    public func patchUniversityInfo(university: String, collegeId: Int) async throws -> Void {
+        let requestDTO = ChangeUniversityRequestDTO(university: university, collegeId: collegeId)
+        let _: EmptyResponseDTO = try await networkManager.request(MemberAPIEndpoint.patchUniversity(requestDTO))
+    }
 }

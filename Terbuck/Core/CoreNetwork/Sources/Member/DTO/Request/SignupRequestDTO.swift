@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SigninRequestDTO: Encodable {
+public struct SignupRequestDTO: Encodable {
     let university: String
     let collegeId: Int
     

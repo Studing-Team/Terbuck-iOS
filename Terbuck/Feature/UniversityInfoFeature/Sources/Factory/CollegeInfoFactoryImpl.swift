@@ -10,7 +10,19 @@ import UniversityInfoInterface
 
 public final class CollegeInfoFactoryImpl: CollegeInfoFactory {
     
-    public init() {}
+    private let getCollegesInfoListUseCaseFactory: any GetCollegesInfoListUseCaseFactory
+    private let signupUseCaseFactory: any SignupUseCaseFactory
+    private let updateUniversityUseCaseFactory: any UpdateUniversityUseCaseFactory
+    
+    public init(
+        getCollegesInfoListUseCaseFactory: any GetCollegesInfoListUseCaseFactory,
+        signupUseCaseFactory: any SignupUseCaseFactory,
+        updateUniversityUseCaseFactory: any UpdateUniversityUseCaseFactory
+    ) {
+        self.getCollegesInfoListUseCaseFactory = getCollegesInfoListUseCaseFactory
+        self.signupUseCaseFactory = signupUseCaseFactory
+        self.updateUniversityUseCaseFactory = updateUniversityUseCaseFactory
+    }
     
     public func makeCollegeInfoViewController(
         type: UniversityType,
@@ -24,15 +36,15 @@ public final class CollegeInfoFactoryImpl: CollegeInfoFactory {
         case .edit:
             viewModel = CollegeInfoViewModel(
                 selectedUniversityName: universityName,
-                fetchCollegesInfoListUseCase: FetchCollegesInfoListUseCaseImpl(repository: UniversityRepositoryImpl()),
-                editUniversityUseCase: EditUniversityUseCaseImpl(repository: UniversityRepositoryImpl())
+                getCollegesInfoListUseCase: getCollegesInfoListUseCaseFactory.makeGetCollegesInfoListUseCase(),
+                updateUniversityUseCase: updateUniversityUseCaseFactory.makeUpdateUniversityUseCase()
             )
             
         case .register:
             viewModel = CollegeInfoViewModel(
                 selectedUniversityName: universityName,
-                fetchCollegesInfoListUseCase: FetchCollegesInfoListUseCaseImpl(repository: UniversityRepositoryImpl()),
-                signupUseCase: SignupUseCaseImpl(repository: UniversityRepositoryImpl())
+                getCollegesInfoListUseCase: getCollegesInfoListUseCaseFactory.makeGetCollegesInfoListUseCase(),
+                signupUseCase: signupUseCaseFactory.makeSignupUseCase()
             )
         }
         

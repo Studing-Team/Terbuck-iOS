@@ -10,6 +10,7 @@ import Combine
 import Observation
 
 import Shared
+import UniversityInfoInterface
 
 enum UniversityError: LocalizedError, Equatable {
     case fetchFailed
@@ -30,7 +31,7 @@ public class UniversityViewModel {
     
     // MARK: - Properties
     
-    private var fetchUniversityInfoListUseCase: FetchUniversityInfoListUseCase
+    private var getUniversityInfoListUseCase: any GetUniversityInfoListUseCase
     
     // MARK: - Private Combine Publishers Properties
     
@@ -62,9 +63,9 @@ public class UniversityViewModel {
     // MARK: - Init
     
     public init(
-        fetchUniversityInfoListUseCase: FetchUniversityInfoListUseCase
+        getUniversityInfoListUseCase: any GetUniversityInfoListUseCase
     ) {
-        self.fetchUniversityInfoListUseCase = fetchUniversityInfoListUseCase
+        self.getUniversityInfoListUseCase = getUniversityInfoListUseCase
     }
     
     // MARK: - Public methods
@@ -124,6 +125,21 @@ public extension UniversityViewModel {
     }
 }
 
+
+// MARK: - Private methods
+
+private extension UniversityViewModel {
+    func convertToModel(_ entities: [UniversityInfoEntity]) -> [UniversityInfoModel] {
+        return entities.map {
+            UniversityInfoModel(
+                id: $0.id,
+                title: $0.regionName,
+                items: $0.universityNames
+            )
+        }
+    }
+}
+
 // MARK: - Private API methods
 
 private extension UniversityViewModel {
@@ -136,8 +152,9 @@ private extension UniversityViewModel {
             
             Task {
                 do {
-                    let result = try await self.fetchUniversityInfoListUseCase.execute()
-                    promise(.success(result))
+                    let entities = try await self.getUniversityInfoListUseCase.execute()
+                    let models = self.convertToModel(entities)
+                    promise(.success(models))
                 } catch {
                     promise(.failure(.fetchFailed))
                 }
