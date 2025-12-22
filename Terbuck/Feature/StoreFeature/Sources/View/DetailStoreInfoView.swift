@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
 
 import DesignSystem
 import Shared
@@ -13,6 +14,7 @@ import Shared
 struct DetailStoreInfoView: View {
     
     @State var viewModel: DetailStoreInfoViewModel
+    @State private var bannerAdHeight: CGFloat = 80 // Default height
     
     // MARK: - Property
     
@@ -29,6 +31,14 @@ struct DetailStoreInfoView: View {
                 
                 ScrollView(.vertical, showsIndicators: true) {
                     imagesSection(geometry)
+                    
+                    BannerViewRepresentable(
+                        bannerWidth: geometry.size.width,
+                        adHeight: $bannerAdHeight
+                    )
+                    .frame(height: bannerAdHeight)
+                    .padding(.top, 22)
+                    .padding(.bottom, 27)
     
                     benefitsSection()
                         .padding(.horizontal, 20)
