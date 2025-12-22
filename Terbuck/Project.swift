@@ -4,8 +4,8 @@ import ProjectDescription
 
 let projectSettings: Settings = .settings(
     base: [
-        "MARKETING_VERSION": "1.0.3",
-        "CURRENT_PROJECT_VERSION": "3",
+        "MARKETING_VERSION": "1.0.4",
+        "CURRENT_PROJECT_VERSION": "1",
         "DEVELOPMENT_TEAM": "N3H27N59VG",
         "CODE_SIGN_STYLE": "Automatic",
         "OTHER_LDFLAGS": ["-all_load"],
@@ -49,6 +49,9 @@ let appInfoPlist: [String: Plist.Value] = [
     "UIDeviceFamily": [1],
     "APP_ID": "6747154359",
     "CFBundleDisplayName": "터벅",
+    "GADApplicationIdentifier": "$(GOOGLE_ADMOB_MOBILE_APP_KEY)",
+    "GADBannerAdUnitID": "$(GOOGLE_ADMOB_BANNER_AD_UNIT_ID)",
+    "NSUserTrackingUsageDescription": "맞춤형 광고 제공을 위해 사용됩니다.",
     "UISupportedInterfaceOrientations": [
         "UIInterfaceOrientationPortrait"
     ],

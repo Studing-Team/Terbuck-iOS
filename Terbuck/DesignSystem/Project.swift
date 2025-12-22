@@ -15,6 +15,7 @@ let project = Project(
             sources: ["Sources/**"],
             resources: [],
             dependencies: [
+                .external(name: "GoogleMobileAds"),
                 .external(name: "SnapKit"),
                 .external(name: "Then"),
                 .external(name: "Lottie"),
