@@ -245,29 +245,6 @@ public final class HomeViewModel {
                 }
             }
             .store(in: &cancellables)
-        
-        homeDataStateSubject
-            .filter { state in
-                return state == .existData
-            }
-            .flatMap { [weak self] _ -> AnyPublisher<[BannerItemModel], Never> in
-                guard let self else { return Empty().eraseToAnyPublisher() }
-                
-                return self.fetchAdvertisementBannerPublishser()
-                    .catch { _ in Just([]) }
-                    .eraseToAnyPublisher()
-            }
-            .sink { [weak self] result in
-                self?.bannerListSubject.send(result)
-                
-                // 배너 데이터를 sectionDataSubject에도 추가 (기존 데이터 유지)
-                guard let self = self else { return }
-                var currentSectionData = self.sectionDataSubject.value
-                let bannerItems = result.map { HomeItem.banner($0) }
-                currentSectionData[.banner] = bannerItems
-                self.sectionDataSubject.send(currentSectionData)
-            }
-            .store(in: &cancellables)
             
         return Output(
             studentIDCardButtonResult: studentIDCardButtonResult,

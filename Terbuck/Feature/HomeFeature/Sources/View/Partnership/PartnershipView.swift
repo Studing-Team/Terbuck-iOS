@@ -15,6 +15,7 @@ struct PartnershipView: View {
     @State private var showToast: Bool = false
     @State private var toastOpacity: Double = 0
     @State private var toastYOffset: CGFloat = 20 // 시작할 때 아래쪽에 위치
+    @State private var bannerAdHeight: CGFloat = 80 // Default height
     
     let onBackButtonTapped: () -> Void
     let onImageTapped: (Int) -> Void
@@ -43,11 +44,19 @@ struct PartnershipView: View {
                             .frame(height: 335 * (geometry.size.width / 375))
                         }
                         
+                        BannerViewRepresentable(
+                            bannerWidth: geometry.size.width, adHeight: $bannerAdHeight
+                        )
+                        .frame(height: bannerAdHeight)
+                        .padding(.vertical, 18)
+                        .onChange(of: bannerAdHeight) { _, newValue in
+                            print("tㅐ로운 값 : ", newValue)
+                        }
+                        
                         if let contentItem = viewModel.sectionData[.content], case .benefit(let model) = contentItem {
                             ContentSectionView(model: model)
                                 .frame(minHeight: 100)
                                 .padding(.horizontal, 20)
-                                .padding(.top, 15)
                                 .padding(.bottom, 30)
                         }
                         

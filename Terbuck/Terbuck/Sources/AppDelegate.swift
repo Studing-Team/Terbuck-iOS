@@ -6,6 +6,7 @@
 //  Copyright © 2025 Fouryears. All rights reserved.
 //
 
+import GoogleMobileAds
 import UIKit
 
 import CoreKeyChain
@@ -34,6 +35,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // 사용자 분석 툴 초기화 (Mixpanel)
         MixpanelManager.shared.initialize(token: Config.mixpanelKey)
+        
+        // Google Mobile Ads SDK 초기화
+        GADMobileAds.sharedInstance().start(completionHandler: nil)
         
         // MARK: - 카카오 로그인 설정
         

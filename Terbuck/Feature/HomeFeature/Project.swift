@@ -17,6 +17,7 @@ let project = Project(
             dependencies: [
                 .external(name: "SnapKit"),
                 .external(name: "Then"),
+                .external(name: "GoogleMobileAds"),
                 .project(target: "HomeInterface", path: "../HomeInterface"),
                 .project(target: "DesignSystem", path: "../../DesignSystem"),
                 .project(target: "Shared", path: "../../Shared"),

@@ -38,7 +38,7 @@ final class HomeViewController: UIViewController {
     
     private let titleLogo = TerbuckLogoLabel(type: .medium)
     private let studentIDCardButton = DesignSystem.Button.studentIDCardButton()
-    private var segmentedTabHeaderView: SegmentedTabHeaderView?
+    private lazy var segmentedTabView = SegmentedTabView()
     private lazy var refreshControl = UIRefreshControl()
     private let activityIndicator = LottieAnimationView(name: "LoadingIndicator", bundle: ResourceResources.bundle).then {
         $0.loopMode = .loop
@@ -165,7 +165,12 @@ private extension HomeViewController {
             }
             .store(in: &cancellables)
         
-        // segmentedTabHeaderView는 supplementaryViewProvider에서 바인딩됨
+        segmentedTabView
+            .selectedFilterPublisher
+            .sink { [weak self] filterType in
+                self?.homeViewModel.selectedFilterSubject.send(filterType)
+            }
+            .store(in: &cancellables)
         
         homeViewModel.currentMyUniversitySubject
             .filter { !$0.isEmpty }
@@ -175,8 +180,6 @@ private extension HomeViewController {
                 self?.viewLifeCycleSubject.send(.reloadData)
             }
             .store(in: &cancellables)
-        
-        // 배너 데이터는 이제 CollectionView 섹션으로 처리됨
         
     }
 }
@@ -190,15 +193,14 @@ private extension HomeViewController {
         
         studentIDCardButton.setImage(isAuth ? .authIdCard : .notAuthIdCard, for: .normal)
         
-        [collectionView, emptyStateView, emptyStateBottomButton].forEach {
+        [segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton].forEach {
             $0.isHidden = true
         }
     }
     
     func setupHierarchy() {
         view.addLayoutGuide(contentLayoutGuide)
-        
-        self.view.addSubviews(titleLogo, studentIDCardButton, collectionView, emptyStateView, emptyStateBottomButton, activityIndicator)
+        self.view.addSubviews(titleLogo, studentIDCardButton, segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton, activityIndicator)
     }
     
     func setupLayout() {
@@ -217,9 +219,15 @@ private extension HomeViewController {
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
+        
+        segmentedTabView.snp.makeConstraints {
+            $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(35))
+            $0.horizontalEdges.equalToSuperview().inset(20)
+            $0.height.equalTo(48)
+        }
 
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(titleLogo.snp.bottom).offset(view.convertByHeightRatio(20))
+            $0.top.equalTo(segmentedTabView.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
@@ -285,12 +293,12 @@ private extension HomeViewController {
         switch state {
         case .loading:
             viewsToShow = [activityIndicator]
-            viewsToHide = [collectionView, emptyStateView, emptyStateBottomButton]
+            viewsToHide = [segmentedTabView, collectionView, emptyStateView, emptyStateBottomButton]
             activityIndicator.play()
             
         case .noData:
             viewsToShow = [emptyStateView, emptyStateBottomButton]
-            viewsToHide = [activityIndicator, collectionView]
+            viewsToHide = [activityIndicator, segmentedTabView, collectionView]
             
             emptyStateView.changeState(.notRequest)
             emptyStateView.snp.remakeConstraints {
@@ -304,7 +312,7 @@ private extension HomeViewController {
             
         case .requestPartner:
             viewsToShow = [emptyStateView]
-            viewsToHide = [activityIndicator, collectionView, emptyStateBottomButton]
+            viewsToHide = [activityIndicator, segmentedTabView, collectionView, emptyStateBottomButton]
             
             emptyStateView.changeState(.completeRequest)
             emptyStateView.snp.remakeConstraints {
@@ -313,7 +321,7 @@ private extension HomeViewController {
             }
             
         case .existData:
-            viewsToShow = [collectionView]
+            viewsToShow = [segmentedTabView, collectionView]
             viewsToHide = [activityIndicator, emptyStateView, emptyStateBottomButton]
         }
         
@@ -345,14 +353,6 @@ private extension HomeViewController {
     
     @objc private func emptyStateBottomButtonTapped() {
         homeViewModel.emptyStateButtonTapSubject.send()
-    }
-    
-    func bindSegmentedTabHeader(_ headerView: SegmentedTabHeaderView) {
-        headerView.selectedFilterPublisher
-            .sink { [weak self] filterType in
-                self?.homeViewModel.selectedFilterSubject.send(filterType)
-            }
-            .store(in: &cancellables)
     }
 }
 
@@ -401,7 +401,6 @@ private extension HomeViewController {
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         
         // Cell 등록
-        collectionView.register(BannerCollectionViewCell.self, forCellWithReuseIdentifier: BannerCollectionViewCell.className)
         collectionView.register(StoreCollectionViewCell.self, forCellWithReuseIdentifier: StoreCollectionViewCell.className)
         collectionView.register(PartnershipCollectionViewCell.self, forCellWithReuseIdentifier: PartnershipCollectionViewCell.className)
         
@@ -409,11 +408,6 @@ private extension HomeViewController {
         collectionView.register(CustomHeaderCollectionReusableView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                 withReuseIdentifier: CustomHeaderCollectionReusableView.className)
-        
-        // segmentedTabView를 헤더로 등록  
-        collectionView.register(SegmentedTabHeaderView.self,
-                                forSupplementaryViewOfKind: SegmentedTabHeaderView.elementKind, 
-                                withReuseIdentifier: SegmentedTabHeaderView.className)
     }
     
     func createLayout() -> UICollectionViewLayout {
@@ -422,36 +416,31 @@ private extension HomeViewController {
             
             let currentSectionData = homeViewModel.sectionDataSubject.value
 
-            // sectionIndex 0은 항상 배너
-            if sectionIndex == 0 {
-                return self.createBannerSection()
-            }
             
-            // sectionIndex 1부터는 선택된 필터에 따른 데이터
             switch self.homeViewModel.selectedFilterSubject.value {
             case .restaurent, .convenient:
-                if sectionIndex == 1 {
-                    return self.createStoreSection(withStickyHeader: true)
-                }
+                return self.createStoreSection()
                 
             case .partnership:
                 let hasNew = currentSectionData[.newBenefit]?.isEmpty == false
                 let hasGeneral = currentSectionData[.general]?.isEmpty == false
 
                 if hasNew && hasGeneral {
-                    if sectionIndex == 1 {
+                    if sectionIndex == 0 {
                         return self.createPartnershipNewSection()
-                    } else if sectionIndex == 2 {
+                    } else if sectionIndex == 1 {
                         return self.createPartnershipGeneralSection()
+                    } else {
+                        return nil
                     }
-                } else if hasNew && sectionIndex == 1 {
+                } else if hasNew {
                     return self.createPartnershipNewSection()
-                } else if hasGeneral && sectionIndex == 1 {
+                } else if hasGeneral {
                     return self.createPartnershipGeneralSection()
+                } else {
+                    return nil
                 }
             }
-            
-            return nil
         }
         
         // 배경 뷰 등록
@@ -461,30 +450,7 @@ private extension HomeViewController {
         return layout
     }
     
-    func createBannerSection() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(120)
-        )
-        
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(UIScreen.main.bounds.width - 40), // 좌우 20pt씩 여백
-            heightDimension: .absolute(120)
-        )
-        
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 20, bottom: 15, trailing: 20)
-        
-        section.orthogonalScrollingBehavior = .groupPaging // 페이지 단위로 스크롤
-        
-        return section
-    }
-    
-    func createStoreSection(withStickyHeader: Bool = false) -> NSCollectionLayoutSection {
+    func createStoreSection() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .estimated(400)
@@ -503,28 +469,9 @@ private extension HomeViewController {
         section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 0, bottom: 15, trailing: 0)
         section.interGroupSpacing = 15
         
-        // segmentedTabView를 Sticky Header로 추가
-        if withStickyHeader {
-            let headerSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .absolute(58) // 48 + 10(하단)
-            )
-            
-            let header = NSCollectionLayoutBoundarySupplementaryItem(
-                layoutSize: headerSize,
-                elementKind: SegmentedTabHeaderView.elementKind,
-                alignment: .top
-            )
-            
-            header.pinToVisibleBounds = true
-            header.zIndex = 1000
-            section.boundarySupplementaryItems = [header]
-        }
-        
         return section
     }
     
-    /// 파트너쉽 섹션 중 추가된 새로운 데이터를 표기하기 위한 레이아웃
     func createPartnershipNewSection() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
@@ -571,7 +518,6 @@ private extension HomeViewController {
         return section
     }
     
-    /// 파트너쉽 섹션 중 기존 데이터를 표기하기 위한 레이아웃
     func createPartnershipGeneralSection() -> NSCollectionLayoutSection {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
@@ -613,9 +559,6 @@ extension HomeViewController: UICollectionViewDelegate {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
         
         switch item {
-        case .banner(let model):
-            // TODO: 배너 클릭 시 웹뷰로 이동하는 기능 구현
-            break
         case .partnership(let model):
             self.coordinator?.showPartnership(partnershipId: model.id)
             MixpanelManager.shared.track(eventType: TrackEventType.Home.moveDetailPartnership)
@@ -635,16 +578,6 @@ extension HomeViewController {
             guard let self = self else { return nil }
             
             switch item {
-            case .banner(let model):
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: BannerCollectionViewCell.className,
-                    for: indexPath
-                ) as! BannerCollectionViewCell
-                
-                cell.configure(with: model)
-                
-                return cell
-                
             case .restaurant(let model), .convenient(let model):
                 let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: StoreCollectionViewCell.className,
@@ -685,12 +618,6 @@ extension HomeViewController {
     func applySnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<HomeSection, HomeItem>()
         
-        // 항상 배너 섹션을 먼저 추가
-        if let bannerItems = homeViewModel.sectionDataSubject.value[.banner], !bannerItems.isEmpty {
-            snapshot.appendSections([.banner])
-            snapshot.appendItems(bannerItems, toSection: .banner)
-        }
-        
         switch homeViewModel.selectedFilterSubject.value {
         case .restaurent:
             guard let items = homeViewModel.sectionDataSubject.value[.restaurant] else { return }
@@ -721,44 +648,27 @@ extension HomeViewController {
     
     func configureSupplementaryViews() {
         dataSource.supplementaryViewProvider = { [weak self] (collectionView, kind, indexPath) -> UICollectionReusableView? in
-            guard let self = self else { return nil }
-            
-            // segmentedTabView 헤더 처리
-            if kind == SegmentedTabHeaderView.elementKind {
-                let headerView = collectionView.dequeueReusableSupplementaryView(
-                    ofKind: kind,
-                    withReuseIdentifier: SegmentedTabHeaderView.className,
-                    for: indexPath
-                ) as! SegmentedTabHeaderView
-                
-                // 처음 생성될 때만 바인딩 설정
-                if self.segmentedTabHeaderView == nil {
-                    self.segmentedTabHeaderView = headerView
-                    self.bindSegmentedTabHeader(headerView)
-                }
-                
-                return headerView
+            guard let self = self,
+                  kind == UICollectionView.elementKindSectionHeader else {
+                return nil
             }
             
-            // 기존 커스텀 헤더 처리
-            if kind == UICollectionView.elementKindSectionHeader {
-                // 현재 섹션이 newBenefit 일 때만 헤더 생성
-                let sectionIdentifiers = self.dataSource.snapshot().sectionIdentifiers
-                if indexPath.section < sectionIdentifiers.count {
-                    let section = sectionIdentifiers[indexPath.section]
-                    switch section {
-                    case .newBenefit:
-                        let headerView = collectionView.dequeueReusableSupplementaryView(
-                            ofKind: kind,
-                            withReuseIdentifier: CustomHeaderCollectionReusableView.className,
-                            for: indexPath
-                        ) as! CustomHeaderCollectionReusableView
+            // 현재 섹션이 newBenefit 일 때만 헤더 생성
+            let sectionIdentifiers = self.dataSource.snapshot().sectionIdentifiers
+            if indexPath.section < sectionIdentifiers.count {
+                let section = sectionIdentifiers[indexPath.section]
+                switch section {
+                case .newBenefit:
+                    let headerView = collectionView.dequeueReusableSupplementaryView(
+                        ofKind: kind,
+                        withReuseIdentifier: CustomHeaderCollectionReusableView.className,
+                        for: indexPath
+                    ) as! CustomHeaderCollectionReusableView
 
-                        return headerView
+                    return headerView
 
-                    default:
-                        return nil
-                    }
+                default:
+                    return nil
                 }
             }
             
